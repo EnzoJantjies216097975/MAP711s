@@ -2,6 +2,7 @@ package com.map711s.namibiahockey.data.repository
 
 import com.map711s.namibiahockey.data.local.PreferencesManager
 import com.map711s.namibiahockey.data.local.dao.TeamDao
+import com.map711s.namibiahockey.data.models.Team
 import com.map711s.namibiahockey.data.models.TeamMatchResult
 import com.map711s.namibiahockey.data.models.TeamPlayer
 import com.map711s.namibiahockey.data.models.TeamRequest
@@ -40,7 +41,7 @@ class TeamRepository @Inject constructor(
                 teamDao.insertTeams(teams)
             },
             shouldFetch = { teams ->
-                teams.isNullOrEmpty() || isDataStale()
+                teams.isEmpty() || isDataStale()
             }
         ).asFlow()
     }
@@ -62,7 +63,7 @@ class TeamRepository @Inject constructor(
                 teamDao.insertTeamsWithUserRelation(teams, userId)
             },
             shouldFetch = { teams ->
-                teams.isNullOrEmpty() || isDataStale()
+                teams.isEmpty() || isDataStale()
             }
         ).asFlow()
     }
@@ -71,7 +72,13 @@ class TeamRepository @Inject constructor(
     fun getTeamWithPlayers(teamId: String): Flow<Resource<TeamWithPlayers>> {
         return NetworkBoundResource(
             query = {
-                teamDao.getTeamWithPlayers(teamId)
+                teamDao.getTeamWithPlayers(teamId) ?: TeamWithPlayers(
+                    team = Team(
+                        id = "",
+                        name = "",
+                        division = ""
+                    )
+                )
             },
             fetch = {
                 teamService.getTeamWithPlayers(teamId)
@@ -80,7 +87,7 @@ class TeamRepository @Inject constructor(
                 teamDao.insertTeamWithPlayers(teamWithPlayers)
             },
             shouldFetch = { team ->
-                team == null || isDataStale()
+                team.team.id.isEmpty() || isDataStale()
             }
         ).asFlow()
     }
@@ -89,7 +96,10 @@ class TeamRepository @Inject constructor(
     fun getTeamStats(teamId: String, season: String): Flow<Resource<TeamStats>> {
         return NetworkBoundResource(
             query = {
-                teamDao.getTeamStats(teamId, season)
+                teamDao.getTeamStats(teamId, season) ?: TeamStats(
+                    teamId = teamId,
+                    season = season
+                )
             },
             fetch = {
                 teamService.getTeamStats(teamId, season)
@@ -98,7 +108,7 @@ class TeamRepository @Inject constructor(
                 teamDao.insertTeamStats(stats)
             },
             shouldFetch = { stats ->
-                stats == null || isDataStale()
+                stats.matchesPlayed == 0 || isDataStale()
             }
         ).asFlow()
     }
@@ -116,7 +126,7 @@ class TeamRepository @Inject constructor(
                 teamDao.insertTeamMatchResults(results)
             },
             shouldFetch = { results ->
-                results.isNullOrEmpty() || isDataStale()
+                results.isEmpty() || isDataStale()
             }
         ).asFlow()
     }
@@ -131,14 +141,16 @@ class TeamRepository @Inject constructor(
             val team = teamService.createTeam(teamRequest)
 
             // If logo is provided, upload it
-            if (logoFile != null) {
+            val finalTeam = if (logoFile != null) {
                 val updatedTeam = teamService.uploadTeamLogo(team.id, logoFile)
                 teamDao.insertTeam(updatedTeam)
-                Resource.Success(updatedTeam)
+                updatedTeam
             } else {
                 teamDao.insertTeam(team)
-                Resource.Success(team)
+                team
             }
+
+            Resource.Success(finalTeam)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to register team")
         }
@@ -155,14 +167,16 @@ class TeamRepository @Inject constructor(
             val team = teamService.updateTeam(teamId, teamRequest)
 
             // If logo is provided, upload it
-            if (logoFile != null) {
+            val finalTeam = if (logoFile != null) {
                 val updatedTeam = teamService.uploadTeamLogo(teamId, logoFile)
                 teamDao.updateTeam(updatedTeam)
-                Resource.Success(updatedTeam)
+                updatedTeam
             } else {
                 teamDao.updateTeam(team)
-                Resource.Success(team)
+                team
             }
+
+            Resource.Success(finalTeam)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to update team")
         }
@@ -254,9 +268,8 @@ class TeamRepository @Inject constructor(
     }
 
     suspend fun getTeamPlayer(teamId: String, playerId: String): TeamPlayer {
-        // Implement this to fetch the TeamPlayer record for a specific player in a team
-        // You might need to add a corresponding DAO method
-        return teamDao.getTeamPlayer(teamId, playerId) ?: throw Exception("Team player record not found")
+        return teamDao.getTeamPlayer(teamId, playerId)
+            ?: throw Exception("Team player record not found")
     }
 
     // Search teams

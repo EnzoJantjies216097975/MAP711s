@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.*
 import java.util.concurrent.TimeUnit
 
 class EnhancedNetworkBoundResource<ResultType, RequestType>(
-    private val query: () -> Flow<ResultType?>,
+    private val query: suspend () -> ResultType,
     private val fetch: suspend () -> RequestType,
     private val saveFetchResult: suspend (RequestType) -> Unit,
     private val shouldFetch: (ResultType?) -> Boolean = { true },
@@ -16,7 +16,7 @@ class EnhancedNetworkBoundResource<ResultType, RequestType>(
 ) {
     fun asFlow(): Flow<Resource<ResultType>> = flow {
         // First, emit loading with data from database
-        val dbData = query().first()
+        val dbData = query()
         emit(Resource.Loading(dbData))
 
         // Check if data is stale
@@ -38,33 +38,17 @@ class EnhancedNetworkBoundResource<ResultType, RequestType>(
                 onFetchSuccess(networkResult)
 
                 // Re-emit data from database after save
-                query().collect { newData ->
-                    if (newData != null) {
-                        emit(Resource.Success(newData))
-                    }
-                }
+                emit(Resource.Success(query()))
             } catch (throwable: Throwable) {
                 // Handle network error but don't let it crash the flow
                 onFetchError(throwable, dbData)
 
                 // Emit error with data from database
-                query().collect { newData ->
-                    if (newData != null) {
-                        emit(Resource.Error(throwable.message ?: "Network error", newData))
-                    } else {
-                        emit(Resource.Error(throwable.message ?: "Network error"))
-                    }
-                }
+                emit(Resource.Error(throwable.message ?: "Network error", dbData))
             }
         } else {
             // Not fetching from network, just emit data from database
-            query().collect { newData ->
-                if (newData != null) {
-                    emit(Resource.Success(newData))
-                } else {
-                    emit(Resource.Error("No data available"))
-                }
-            }
+            emit(Resource.Success(dbData))
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.map711s.namibiahockey.data.repository
 
-import com.google.android.play.integrity.internal.u
 import com.map711s.namibiahockey.data.local.PreferencesManager
 import com.map711s.namibiahockey.data.local.dao.UserDao
 import com.map711s.namibiahockey.data.models.*
@@ -97,23 +96,30 @@ class UserRepository @Inject constructor(
     }
 
     // User profile
-//    fun getCurrentUserProfile(): Flow<Resource<UserProfile>> {
-//        return NetworkBoundResource(
-//            query = {
-//                val userId = preferencesManager.userId.value
-//                userDao.getUserProfileFlow(userId ?: "")
-//            },
-//            fetch = {
-//                userService.getUserProfile()
-//            },
-//            saveFetchResult = { profile ->
-//                userDao.updateUserProfile(profile)
-//            },
-//            shouldFetch = { profile ->
-//                profile == null
-//            }
-//        ).asFlow()
-//    }
+    fun getCurrentUserProfile(): Flow<Resource<UserProfile>> {
+        val userId = preferencesManager.userId.value ?: return flow {
+            emit(Resource.Error("User not logged in"))
+        }
+
+        return NetworkBoundResource(
+            query = {
+                userDao.getUserProfileFlow(userId).first() ?: UserProfile(
+                    id = userId,
+                    name = preferencesManager.userName.value ?: "",
+                    email = preferencesManager.userEmail.value ?: ""
+                )
+            },
+            fetch = {
+                userService.getUserProfile()
+            },
+            saveFetchResult = { profile ->
+                userDao.updateUserProfile(profile)
+            },
+            shouldFetch = { profile ->
+                profile.id.isEmpty()
+            }
+        ).asFlow()
+    }
 
     suspend fun updateUserProfile(name: String, phone: String?, photoUrl: String?): Resource<User> {
         return try {

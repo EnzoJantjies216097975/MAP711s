@@ -1,6 +1,5 @@
 package com.map711s.namibiahockey.util
 
-import com.map711s.namibiahockey.data.models.TeamSummary
 import kotlinx.coroutines.flow.*
 
 /**
@@ -30,15 +29,15 @@ sealed class Resource<T> {
  * @param <RequestType> Type for the API response
  */
 class NetworkBoundResource<ResultType, RequestType>(
-    private val query: () -> List<TeamSummary>,
+    private val query: suspend () -> ResultType,
     private val fetch: suspend () -> RequestType,
     private val saveFetchResult: suspend (RequestType) -> Unit,
     private val shouldFetch: (ResultType?) -> Boolean = { true },
-    private val onFetchError: (Throwable) -> Unit = { }
+    private val onFetchError: (Throwable, ResultType?) -> Unit = { _, _ -> }
 ) {
     fun asFlow(): Flow<Resource<ResultType>> = flow {
         // First, emit loading with data from database
-        val dbData = query().first()
+        val dbData = query()
         emit(Resource.Loading(dbData))
 
         // Decide whether to fetch from network
@@ -53,32 +52,16 @@ class NetworkBoundResource<ResultType, RequestType>(
                 saveFetchResult(networkResult)
 
                 // Re-emit data from database after save
-                query().collect { newData ->
-                    if (newData != null) {
-                        emit(Resource.Success(newData))
-                    }
-                }
+                emit(Resource.Success(query()))
             } catch (throwable: Throwable) {
-                onFetchError(throwable)
+                onFetchError(throwable, dbData)
 
                 // Emit error with data from database
-                query().collect { newData ->
-                    if (newData != null) {
-                        emit(Resource.Error(throwable.message ?: "Network error", newData))
-                    } else {
-                        emit(Resource.Error(throwable.message ?: "Network error"))
-                    }
-                }
+                emit(Resource.Error(throwable.message ?: "Network error", dbData))
             }
         } else {
             // Not fetching from network, just emit data from database
-            query().collect { newData ->
-                if (newData != null) {
-                    emit(Resource.Success(newData))
-                } else {
-                    emit(Resource.Error("No data available"))
-                }
-            }
+            emit(Resource.Success(dbData))
         }
     }
 }

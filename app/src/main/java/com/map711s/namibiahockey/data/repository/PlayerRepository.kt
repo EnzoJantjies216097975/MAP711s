@@ -27,193 +27,7 @@ class PlayerRepository @Inject constructor(
         return NetworkBoundResource(
             query = {
                 playerDao.getAllPlayerListItems()
-            },
-            fetch = {
-                playerService.getAllPlayers()
-            },
-            saveFetchResult = { players ->
-                playerDao.insertPlayerListItems(players)
-            },
-            shouldFetch = { players ->
-                players.isNullOrEmpty() || isDataStale()
             }
-        ).asFlow()
-    }
-
-    // Get team players
-    fun getTeamPlayers(teamId: String): Flow<Resource<List<PlayerListItem>>> {
-        return NetworkBoundResource(
-            query = {
-                playerDao.getTeamPlayerListItems(teamId)
-            },
-            fetch = {
-                playerService.getTeamPlayers(teamId)
-            },
-            saveFetchResult = { players ->
-                playerDao.insertPlayerListItems(players)
-            },
-            shouldFetch = { players ->
-                players.isNullOrEmpty() || isDataStale()
-            }
-        ).asFlow()
-    }
-
-    // Get player with details
-    fun getPlayerWithDetails(playerId: String): Flow<Resource<PlayerWithDetails>> {
-        return NetworkBoundResource(
-            query = {
-                playerDao.getPlayerWithDetails(playerId)
-            },
-            fetch = {
-                playerService.getPlayerWithDetails(playerId)
-            },
-            saveFetchResult = { playerWithDetails ->
-                playerDao.insertPlayerWithDetails(playerWithDetails)
-            },
-            shouldFetch = { player ->
-                player == null || isDataStale()
-            }
-        ).asFlow()
-    }
-
-    // Get player stats
-    fun getPlayerStats(playerId: String, season: String): Flow<Resource<PlayerStats>> {
-        return NetworkBoundResource(
-            query = {
-                playerDao.getPlayerStats(playerId, season)
-            },
-            fetch = {
-                playerService.getPlayerStats(playerId, season)
-            },
-            saveFetchResult = { stats ->
-                playerDao.insertPlayerStats(stats)
-            },
-            shouldFetch = { stats ->
-                stats == null || isDataStale()
-            }
-        ).asFlow()
-    }
-
-    // Get player match performances
-    fun getPlayerMatchPerformances(playerId: String): Flow<Resource<List<PlayerMatchPerformance>>> {
-        return NetworkBoundResource(
-            query = {
-                playerDao.getPlayerMatchPerformances(playerId)
-            },
-            fetch = {
-                playerService.getPlayerMatchPerformances(playerId)
-            },
-            saveFetchResult = { performances ->
-                playerDao.insertPlayerMatchPerformances(performances)
-            },
-            shouldFetch = { performances ->
-                performances.isNullOrEmpty() || isDataStale()
-            }
-        ).asFlow()
-    }
-
-    // Register a new player
-    suspend fun registerPlayer(
-        playerRequest: PlayerRequest,
-        teamId: String? = null,
-        jerseyNumber: Int? = null,
-        position: String? = null,
-        photoFile: File? = null
-    ): Resource<Player> {
-        return try {
-            // First, create the player
-            val player = playerService.createPlayer(playerRequest)
-
-            // If photo is provided, upload it
-            val playerWithPhoto = if (photoFile != null) {
-                val updatedPlayer = playerService.uploadPlayerPhoto(player.id, photoFile)
-                playerDao.insertPlayer(updatedPlayer)
-                updatedPlayer
-            } else {
-                playerDao.insertPlayer(player)
-                player
-            }
-
-            // If team is provided, add player to team
-            if (teamId != null) {
-                val result = teamRepository.addPlayerToTeam(
-                    teamId = teamId,
-                    playerId = player.id,
-                    jerseyNumber = jerseyNumber,
-                    position = position
-                )
-
-                if (result is Resource.Error) {
-                    return Resource.Error("Player created but failed to add to team: ${result.message}")
-                }
-            }
-
-            Resource.Success(playerWithPhoto)
-        } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to register player")
-        }
-    }
-
-    // Update player
-    suspend fun updatePlayer(
-        playerId: String,
-        playerRequest: PlayerRequest,
-        photoFile: File? = null
-    ): Resource<Player> {
-        return try {
-            // Update player info
-            val player = playerService.updatePlayer(playerId, playerRequest)
-
-            // If photo is provided, upload it
-            if (photoFile != null) {
-                val updatedPlayer = playerService.uploadPlayerPhoto(playerId, photoFile)
-                playerDao.updatePlayer(updatedPlayer)
-                Resource.Success(updatedPlayer)
-            } else {
-                playerDao.updatePlayer(player)
-                Resource.Success(player)
-            }
-        } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to update player")
-        }
-    }
-
-    // Link player to user account
-    suspend fun linkPlayerToUser(playerId: String, userId: String): Resource<Unit> {
-        return try {
-            playerService.linkPlayerToUser(playerId, userId)
-            val player = playerDao.getPlayer(playerId)
-            player?.let {
-                playerDao.updatePlayer(it.copy(userId = userId))
-            }
-            Resource.Success(Unit)
-        } catch (e: Exception) {
-            Resource.Error(e.message ?: "Failed to link player to user")
-        }
-    }
-
-    // Filter players by position
-    fun getPlayersByPosition(position: String): Flow<Resource<List<PlayerListItem>>> {
-        return flow {
-            emit(Resource.Loading())
-
-            try {
-                // Get from local database first
-                val localPlayers = playerDao.getPlayersByPosition(position)
-                emit(Resource.Success(localPlayers))
-
-                // Try to fetch from network
-                try {
-                    val remotePlayers = playerService.getPlayersByPosition(position)
-                    playerDao.insertPlayerListItems(remotePlayers)
-                    emit(Resource.Success(remotePlayers))
-                } catch (e: Exception) {
-                    // Network error, but we already emitted local data
-                }
-            } catch (e: Exception) {
-                emit(Resource.Error(e.message ?: "Failed to get players by position"))
-            }
-        }
     }
 
     // Search players
@@ -277,14 +91,207 @@ class PlayerRepository @Inject constructor(
         return (currentTime - lastSync) > oneHourInMillis
     }
 
-    suspend fun syncAllPlayers() = viewModelScope.launch {
+    // Added function for DataSyncWorker
+    suspend fun syncAllPlayers() {
         try {
-            val events = eventService.getAllEvents()
-            eventDao.insertEventListItems(events)
+            val players = playerService.getAllPlayers()
+            playerDao.insertPlayerListItems(players)
             preferencesManager.updateLastSyncTimestamp()
         } catch (e: Exception) {
-            // Handle error
+            // Handle error - log or notify as appropriate
         }
+    },
+    fetch = {
+        playerService.getAllPlayers()
+    },
+    saveFetchResult = { players ->
+        playerDao.insertPlayerListItems(players)
+    },
+    shouldFetch = { players ->
+        players.isEmpty() || isDataStale()
+    }
+    ).asFlow()
+}
+
+// Get team players
+fun getTeamPlayers(teamId: String): Flow<Resource<List<PlayerListItem>>> {
+    return NetworkBoundResource(
+        query = {
+            playerDao.getTeamPlayerListItems(teamId)
+        },
+        fetch = {
+            playerService.getTeamPlayers(teamId)
+        },
+        saveFetchResult = { players ->
+            playerDao.insertPlayerListItems(players)
+        },
+        shouldFetch = { players ->
+            players.isEmpty() || isDataStale()
+        }
+    ).asFlow()
+}
+
+// Get player with details
+fun getPlayerWithDetails(playerId: String): Flow<Resource<PlayerWithDetails>> {
+    return NetworkBoundResource(
+        query = {
+            playerDao.getPlayerWithDetails(playerId) ?: PlayerWithDetails(
+                player = Player(
+                    id = "",
+                    name = ""
+                )
+            )
+        },
+        fetch = {
+            playerService.getPlayerWithDetails(playerId)
+        },
+        saveFetchResult = { playerWithDetails ->
+            playerDao.insertPlayerWithDetails(playerWithDetails)
+        },
+        shouldFetch = { player ->
+            player.player.id.isEmpty() || isDataStale()
+        }
+    ).asFlow()
+}
+
+// Get player stats
+fun getPlayerStats(playerId: String, season: String): Flow<Resource<PlayerStats>> {
+    return NetworkBoundResource(
+        query = {
+            playerDao.getPlayerStats(playerId, season) ?: PlayerStats(
+                playerId = playerId,
+                season = season
+            )
+        },
+        fetch = {
+            playerService.getPlayerStats(playerId, season)
+        },
+        saveFetchResult = { stats ->
+            playerDao.insertPlayerStats(stats)
+        },
+        shouldFetch = { stats ->
+            stats == null || stats.matchesPlayed == 0 || isDataStale()
+        }
+    ).asFlow()
+}
+
+// Get player match performances
+fun getPlayerMatchPerformances(playerId: String): Flow<Resource<List<PlayerMatchPerformance>>> {
+    return NetworkBoundResource(
+        query = {
+            playerDao.getPlayerMatchPerformances(playerId)
+        },
+        fetch = {
+            playerService.getPlayerMatchPerformances(playerId)
+        },
+        saveFetchResult = { performances ->
+            playerDao.insertPlayerMatchPerformances(performances)
+        },
+        shouldFetch = { performances ->
+            performances.isEmpty() || isDataStale()
+        }
+    ).asFlow()
+}
+
+// Register a new player
+suspend fun registerPlayer(
+    playerRequest: PlayerRequest,
+    teamId: String? = null,
+    jerseyNumber: Int? = null,
+    position: String? = null,
+    photoFile: File? = null
+): Resource<Player> {
+    return try {
+        // First, create the player
+        val player = playerService.createPlayer(playerRequest)
+
+        // If photo is provided, upload it
+        val playerWithPhoto = if (photoFile != null) {
+            val updatedPlayer = playerService.uploadPlayerPhoto(player.id, photoFile)
+            playerDao.insertPlayer(updatedPlayer)
+            updatedPlayer
+        } else {
+            playerDao.insertPlayer(player)
+            player
+        }
+
+        // If team is provided, add player to team
+        if (teamId != null) {
+            val result = teamRepository.addPlayerToTeam(
+                teamId = teamId,
+                playerId = player.id,
+                jerseyNumber = jerseyNumber,
+                position = position
+            )
+
+            if (result is Resource.Error) {
+                return Resource.Error("Player created but failed to add to team: ${result.message}")
+            }
+        }
+
+        Resource.Success(playerWithPhoto)
+    } catch (e: Exception) {
+        Resource.Error(e.message ?: "Failed to register player")
     }
 }
 
+// Update player
+suspend fun updatePlayer(
+    playerId: String,
+    playerRequest: PlayerRequest,
+    photoFile: File? = null
+): Resource<Player> {
+    return try {
+        // Update player info
+        val player = playerService.updatePlayer(playerId, playerRequest)
+
+        // If photo is provided, upload it
+        if (photoFile != null) {
+            val updatedPlayer = playerService.uploadPlayerPhoto(playerId, photoFile)
+            playerDao.updatePlayer(updatedPlayer)
+            Resource.Success(updatedPlayer)
+        } else {
+            playerDao.updatePlayer(player)
+            Resource.Success(player)
+        }
+    } catch (e: Exception) {
+        Resource.Error(e.message ?: "Failed to update player")
+    }
+}
+
+// Link player to user account
+suspend fun linkPlayerToUser(playerId: String, userId: String): Resource<Unit> {
+    return try {
+        playerService.linkPlayerToUser(playerId, userId)
+        val player = playerDao.getPlayer(playerId)
+        if (player != null) {
+            playerDao.updatePlayer(player.copy(userId = userId))
+        }
+        Resource.Success(Unit)
+    } catch (e: Exception) {
+        Resource.Error(e.message ?: "Failed to link player to user")
+    }
+}
+
+// Filter players by position
+fun getPlayersByPosition(position: String): Flow<Resource<List<PlayerListItem>>> {
+    return flow {
+        emit(Resource.Loading())
+
+        try {
+            // Get from local database first
+            val localPlayers = playerDao.getPlayersByPosition(position)
+            emit(Resource.Success(localPlayers))
+
+            // Try to fetch from network
+            try {
+                val remotePlayers = playerService.getPlayersByPosition(position)
+                playerDao.insertPlayerListItems(remotePlayers)
+                emit(Resource.Success(remotePlayers))
+            } catch (e: Exception) {
+                // Network error, but we already emitted local data
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error(e.message ?: "Failed to get players by position"))
+        }
+    }

@@ -34,14 +34,14 @@ class DataSyncWorker @AssistedInject constructor(
 
             // Sync data
             try {
-                // Sync events
-                eventRepository.getAllEvents().collect { _ -> }
+                // Sync events directly
+                eventRepository.syncAllEvents()
 
-                // Sync teams
-                teamRepository.getAllTeams().collect { _ -> }
+                // Sync teams directly
+                teamRepository.syncAllTeams()
 
-                // Sync players
-                playerRepository.getAllPlayers().collect { _ -> }
+                // Sync players directly
+                playerRepository.syncAllPlayers()
 
                 // Update last sync timestamp
                 preferencesManager.updateLastSyncTimestamp()
