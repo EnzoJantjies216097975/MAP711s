@@ -32,6 +32,7 @@ data class Event(
     val imageUrl: String? = null,
     val isPublic: Boolean = true,
     val isRegistrationOpen: Boolean = true,
+    val isRegistered: Boolean = true,
     val status: EventStatus = EventStatus.UPCOMING,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()

@@ -40,6 +40,7 @@ fun TeamListScreen(
         topBar = {
             if (showSearch) {
                 SearchBar(
+                    modifier = Modifier.fillMaxWidth(),
                     query = searchQuery,
                     onQueryChange = { searchQuery = it },
                     onSearch = { showSearch = false },
@@ -47,8 +48,7 @@ fun TeamListScreen(
                         showSearch = false
                         searchQuery = ""
                     },
-                    placeholder = { Text("Search teams...") },
-                    modifier = Modifier.fillMaxWidth()
+                    placeholder = { Text("Search teams...") }
                 ) {
                     // Search suggestions could go here
                 }
