@@ -70,6 +70,8 @@ dependencies {
 
     // Dependency Injection - Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")
+    implementation(libs.androidx.hilt.work)
+    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     implementation(libs.androidx.navigation.runtime.android)
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
@@ -108,6 +110,15 @@ dependencies {
     implementation("com.maxkeppeler.sheets-compose-dialogs:core:1.2.0")
     implementation("com.maxkeppeler.sheets-compose-dialogs:calendar:1.2.0")
     implementation("com.maxkeppeler.sheets-compose-dialogs:clock:1.2.0")
+
+    //Android WorkManager
+
+    /*
+    The WorkManager API makes it easy to schedule deferrable, asynchronous tasks that must
+    be run reliably. These APIs let you create a task and hand it off to WorkManager to run when
+    the work constraints are met
+     */
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 
     // Testing
     testImplementation(libs.junit)
