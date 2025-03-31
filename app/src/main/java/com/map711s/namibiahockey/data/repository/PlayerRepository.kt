@@ -276,4 +276,15 @@ class PlayerRepository @Inject constructor(
 
         return (currentTime - lastSync) > oneHourInMillis
     }
+
+    suspend fun syncAllPlayers() = viewModelScope.launch {
+        try {
+            val events = eventService.getAllEvents()
+            eventDao.insertEventListItems(events)
+            preferencesManager.updateLastSyncTimestamp()
+        } catch (e: Exception) {
+            // Handle error
+        }
+    }
 }
+

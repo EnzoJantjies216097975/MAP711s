@@ -3,6 +3,7 @@ package com.map711s.namibiahockey
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.google.firebase.FirebaseApp
 import com.map711s.namibiahockey.services.DataSyncWorker
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -15,6 +16,9 @@ class NamibiaHockeyApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+
+        // Initialize Firebase
+        FirebaseApp.initializeApp(this)
 
         // Schedule periodic background data syncing
         DataSyncWorker.schedulePeriodic(this)

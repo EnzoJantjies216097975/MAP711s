@@ -192,4 +192,7 @@ interface TeamDao {
         // 1. Insert or update team players
         // 2. Insert team statistics if provided
     }
+
+    @Query("SELECT * FROM team_players WHERE teamId = :teamId AND playerId = :playerId")
+    suspend fun getTeamPlayer(teamId: String, playerId: String): TeamPlayer?
 }

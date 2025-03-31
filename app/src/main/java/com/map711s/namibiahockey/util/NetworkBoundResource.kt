@@ -1,5 +1,6 @@
 package com.map711s.namibiahockey.util
 
+import com.map711s.namibiahockey.data.local.PreferencesManager
 import kotlinx.coroutines.flow.*
 import java.util.concurrent.TimeUnit
 
@@ -10,7 +11,8 @@ class EnhancedNetworkBoundResource<ResultType, RequestType>(
     private val shouldFetch: (ResultType?) -> Boolean = { true },
     private val onFetchError: (Throwable, ResultType?) -> Unit = { _, _ -> },
     private val onFetchSuccess: (RequestType) -> Unit = { },
-    private val staleDuration: Long = TimeUnit.HOURS.toMillis(1)
+    private val staleDuration: Long = TimeUnit.HOURS.toMillis(1),
+    private val preferencesManager: PreferencesManager
 ) {
     fun asFlow(): Flow<Resource<ResultType>> = flow {
         // First, emit loading with data from database

@@ -26,26 +26,30 @@ class DataSyncWorker @AssistedInject constructor(
         try {
             // Only sync if we're on Wi-Fi or mobile data is allowed
             val shouldSync = !inputData.getBoolean(KEY_REQUIRE_WIFI_ONLY, false) ||
-                    preferencesManager.syncOnMobileData.value
+                    true // For now, always allow syncing since we don't have the mobile data preference
 
             if (!shouldSync) {
                 return@coroutineScope Result.retry()
             }
 
             // Sync data
-            val syncJobs = listOf(
-                eventRepository.syncAllEvents(),
-                teamRepository.syncAllTeams(),
-                playerRepository.syncAllPlayers()
-            )
+            try {
+                // Sync events
+                eventRepository.getAllEvents().collect { _ -> }
 
-            // Wait for all sync jobs to complete
-            syncJobs.forEach { it.join() }
+                // Sync teams
+                teamRepository.getAllTeams().collect { _ -> }
 
-            // Update last sync timestamp
-            preferencesManager.updateLastSyncTimestamp()
+                // Sync players
+                playerRepository.getAllPlayers().collect { _ -> }
 
-            Result.success()
+                // Update last sync timestamp
+                preferencesManager.updateLastSyncTimestamp()
+
+                Result.success()
+            } catch (e: Exception) {
+                Result.retry()
+            }
         } catch (e: Exception) {
             // If sync fails, we want to retry
             Result.retry()

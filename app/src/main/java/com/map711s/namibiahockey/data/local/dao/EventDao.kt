@@ -3,7 +3,6 @@ package com.map711s.namibiahockey.data.local.dao
 import androidx.room.*
 import com.map711s.namibiahockey.data.models.*
 import kotlinx.coroutines.flow.Flow
-import com.map711s.namibiahockey.util.*
 
 /**
  * Data Access Object for Event-related operations in the database.
@@ -189,7 +188,7 @@ interface EventDao {
      * @param eventId The event ID.
      * @param userId The user ID.
      */
-    @Query("UPDATE events SET isRegistrationOpen isRegistered = 1 WHERE id = :eventId")
+    @Query("UPDATE events SET isRegistered = 1 WHERE id = :eventId")
     suspend fun markEventAsRegistered(eventId: String, userId: String)
 
     /**
@@ -197,8 +196,6 @@ interface EventDao {
      * @param eventId The event ID.
      * @param userId The user ID.
      */
-
-
     @Query("UPDATE events SET isRegistered = 0 WHERE id = :eventId")
     suspend fun markEventAsUnregistered(eventId: String, userId: String)
 

@@ -5,6 +5,7 @@ import com.map711s.namibiahockey.data.local.dao.EventDao
 import com.map711s.namibiahockey.data.models.*
 import com.map711s.namibiahockey.data.remote.EventService
 import com.map711s.namibiahockey.data.remote.FirebaseManager
+import com.map711s.namibiahockey.services.HockeyMessagingService
 import com.map711s.namibiahockey.util.NetworkBoundResource
 import com.map711s.namibiahockey.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -376,4 +377,15 @@ class EventRepository @Inject constructor(
             emit(Resource.Error("Failed to load events: ${e.message}"))
         }
     }
+
+    suspend fun syncAllEvents() = viewModelScope.launch {
+        try {
+            val events = eventService.getAllEvents()
+            eventDao.insertEventListItems(events)
+            preferencesManager.updateLastSyncTimestamp()
+        } catch (e: Exception) {
+            // Handle error
+        }
+    }
 }
+

@@ -20,13 +20,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.map711s.namibiahockey.R
+import com.map711s.namibiahockey.util.Resource
+import com.map711s.namibiahockey.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeamRegistrationScreen(
     onNavigateBack: () -> Unit,
-    onTeamRegistered: () -> Unit
+    onTeamRegistered: () -> Unit,
+    teamId: String? = null,
+    teamViewModel: TeamViewModel = hiltViewModel()
 ) {
     var teamName by remember { mutableStateOf("") }
     var coachName by remember { mutableStateOf("") }
@@ -36,6 +41,66 @@ fun TeamRegistrationScreen(
     var teamInfo by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isEditMode by remember { mutableStateOf(false) }
+
+    val teamOperationState by teamViewModel.teamOperationState.collectAsState()
+
+    LaunchedEffect(teamOperationState) {
+        when (teamOperationState) {
+            is Resource.Success -> {
+                // Clear the state before navigating
+                teamViewModel.clearOperationState()
+                onTeamRegistered()
+            }
+            is Resource.Error -> {
+                errorMessage = (teamOperationState as Resource.Error<*>).message
+                isLoading = false
+            }
+            is Resource.Loading -> {
+                isLoading = true
+                errorMessage = null
+            }
+            null -> {
+                // Initial state, do nothing
+            }
+        }
+    }
+
+// Similarly in PlayerRegistrationScreen
+    val playerOperationState by playerViewModel.playerOperationState.collectAsState()
+
+    LaunchedEffect(playerOperationState) {
+        // Similar handling as above
+    }
+
+    // Load team data from the ViewModel
+    teamViewModel.getTeamDetails(teamId).collect { result ->
+        when (result) {
+            is Resource.Success -> {
+                val team = result.data
+                teamName = team.name
+                coachName = team.coachId ?: ""
+                contactEmail = team.contactEmail ?: ""
+                contactPhone = team.contactPhone ?: ""
+                selectedDivision = team.division
+                teamInfo = team.description ?: ""
+                isLoading = false
+            }
+            is Resource.Error -> {
+                errorMessage = result.message
+                isLoading = false
+            }
+            is Resource.Loading -> {
+                isLoading = true
+            }
+        }
+    }
+
+    // Screen title based on mode
+    val screenTitle = if (isEditMode) "Edit Team" else "Register Team"
+
+    // Action button text based on mode
+    val actionButtonText = if (isEditMode) "Update Team" else "Register Team"
 
     val scrollState = rememberScrollState()
 

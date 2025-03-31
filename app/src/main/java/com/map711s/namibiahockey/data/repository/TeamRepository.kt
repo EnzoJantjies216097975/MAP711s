@@ -1,6 +1,6 @@
 package com.map711s.namibiahockey.data.repository
 
-import com.map711s.namibiahockey.ata.local.PreferencesManager
+import com.map711s.namibiahockey.data.local.PreferencesManager  // Fixed import path
 import com.map711s.namibiahockey.data.local.dao.TeamDao
 import com.map711s.namibiahockey.data.models.*
 import com.map711s.namibiahockey.data.remote.TeamService
@@ -8,6 +8,8 @@ import com.map711s.namibiahockey.util.NetworkBoundResource
 import com.map711s.namibiahockey.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.viewModelScope
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -247,6 +249,12 @@ class TeamRepository @Inject constructor(
         }
     }
 
+    suspend fun getTeamPlayer(teamId: String, playerId: String): TeamPlayer {
+        // Implement this to fetch the TeamPlayer record for a specific player in a team
+        // You might need to add a corresponding DAO method
+        return teamDao.getTeamPlayer(teamId, playerId) ?: throw Exception("Team player record not found")
+    }
+
     // Search teams
     fun searchTeams(query: String): Flow<Resource<List<TeamSummary>>> {
         return flow {
@@ -278,5 +286,16 @@ class TeamRepository @Inject constructor(
         val oneHourInMillis = 60 * 60 * 1000
 
         return (currentTime - lastSync) > oneHourInMillis
+    }
+
+    // Added function for DataSyncWorker
+    suspend fun syncAllTeams() {
+        try {
+            val teams = teamService.getAllTeams()
+            teamDao.insertTeams(teams)
+            preferencesManager.updateLastSyncTimestamp()
+        } catch (e: Exception) {
+            // Handle error - log or notify as appropriate
+        }
     }
 }

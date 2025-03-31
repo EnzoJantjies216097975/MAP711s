@@ -29,10 +29,10 @@ import com.map711s.namibiahockey.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity(){
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent{
+        setContent {
             NamibiaHockeyApp()
         }
     }
@@ -42,15 +42,15 @@ class MainActivity : ComponentActivity(){
 @Composable
 fun NamibiaHockeyApp(
     authViewModel: AuthViewModel = hiltViewModel()
-){
+) {
     val navController = rememberNavController()
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState(initial = false)
 
     NamibiaHockeyTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             if (isLoggedIn) {
-                MainScreenWithBottomNav(navController)
-            }else{
+                MainScreenWithBottomNav(navController, authViewModel)
+            } else {
                 AppNavigation(navController, authViewModel)
             }
         }
@@ -59,32 +59,35 @@ fun NamibiaHockeyApp(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreenWithBottomNav(navController: NavController){
+fun MainScreenWithBottomNav(
+    navController: NavController,
+    authViewModel: AuthViewModel = hiltViewModel()
+) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val showBottomBar = remember(currentRoute){
-        //Only show bottom bar on main screens
+    val showBottomBar = remember(currentRoute) {
+        // Only show bottom bar on main screens
         currentRoute in bottomNavItems.map { it.route } ||
                 currentRoute == Constants.Routes.DASHBOARD
     }
 
     Scaffold(
         bottomBar = {
-            if (showBottomBar){
+            if (showBottomBar) {
                 NavigationBar {
                     bottomNavItems.forEach { item ->
                         val selected = currentRoute == item.route
 
                         NavigationBarItem(
-                            icon =  { Icon(item.icon, contentDescription = item.title) },
+                            icon = { Icon(item.icon, contentDescription = item.title) },
                             label = { Text(item.title) },
                             selected = selected,
                             onClick = {
-                                navController.navigate(item.route){
+                                navController.navigate(item.route) {
                                     // Pop up to the start destination of the graph to
                                     // avoid building up a large stack of destinations
-                                    popUpTo(Constants.Routes.DASHBOARD){
+                                    popUpTo(Constants.Routes.DASHBOARD) {
                                         saveState = true
                                     }
                                     // Avoid multiple copies of the same destination when
@@ -95,7 +98,6 @@ fun MainScreenWithBottomNav(navController: NavController){
                                 }
                             }
                         )
-
                     }
                 }
             }
@@ -103,6 +105,7 @@ fun MainScreenWithBottomNav(navController: NavController){
     ) { innerPadding ->
         AppNavigation(
             navController = navController,
+            authViewModel = authViewModel,
             modifier = Modifier.padding(innerPadding)
         )
     }

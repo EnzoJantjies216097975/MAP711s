@@ -135,3 +135,5 @@ dependencies {
 kapt {
     correctErrorTypes = true
 }
+
+apply(plugin = "com.google.gms.google-services")
