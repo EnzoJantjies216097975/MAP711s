@@ -1,5 +1,6 @@
 package com.map711s.namibiahockey.util
 
+import com.map711s.namibiahockey.data.models.TeamSummary
 import kotlinx.coroutines.flow.*
 
 /**
@@ -29,7 +30,7 @@ sealed class Resource<T> {
  * @param <RequestType> Type for the API response
  */
 class NetworkBoundResource<ResultType, RequestType>(
-    private val query: () -> Flow<ResultType?>,
+    private val query: () -> List<TeamSummary>,
     private val fetch: suspend () -> RequestType,
     private val saveFetchResult: suspend (RequestType) -> Unit,
     private val shouldFetch: (ResultType?) -> Boolean = { true },

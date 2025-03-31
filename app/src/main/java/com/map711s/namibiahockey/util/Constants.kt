@@ -36,8 +36,8 @@ object Constants {
 
     // Database
     object Database {
-        const val DB_NAME = "namibia_hockey_db"
-        const val DB_VERSION = 1
+        val DB_NAME = "namibia_hockey_db"
+        val DB_VERSION = 1
 
         // Table names
         const val TABLE_USERS = "users"

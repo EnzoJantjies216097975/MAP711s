@@ -10,7 +10,7 @@ import com.map711s.namibiahockey.data.local.dao.PlayerDao
 import com.map711s.namibiahockey.data.local.dao.TeamDao
 import com.map711s.namibiahockey.data.local.dao.UserDao
 import com.map711s.namibiahockey.data.models.*
-import com.map711s.namibiahockey.util.Constants.Database
+import com.map711s.namibiahockey.util.Constants
 
 /**
  * Main database class for the Namibia Hockey app.
@@ -31,7 +31,8 @@ import com.map711s.namibiahockey.util.Constants.Database
         EventRegistration::class,
         Match::class
     ],
-    version = Database.DB_VERSION,
+
+    version = 1,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -64,7 +65,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    Database.DB_NAME
+                    Constants.Database.DB_NAME
                 )
                     // Allow destructive migration for simplified development
                     // In production, you should provide proper migration strategies

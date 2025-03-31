@@ -129,6 +129,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
+
+
 }
 
 // Allow references to generated code

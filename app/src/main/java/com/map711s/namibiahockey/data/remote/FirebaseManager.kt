@@ -39,18 +39,67 @@ class FirebaseManager @Inject constructor() {
         awaitClose { listenerRegistration.remove() }
     }
 
-    // Similar methods for teams and players
+    // Get teams in real time
     fun getTeamsRealtime(): Flow<List<Team>> = callbackFlow {
-        // Implementation similar to events
+        val listenerRegistration = firestore.collection("teams")
+            .orderBy("name", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    // Handle error
+                    return@addSnapshotListener
+                }
+
+                val teams = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(Team::class.java)?.copy(id = doc.id)
+                } ?: emptyList()
+
+                trySend(teams)
+            }
+
+        listenerRegistrations.add(listenerRegistration)
+
+        awaitClose { listenerRegistration.remove() }
     }
 
+    // Get players in real time
     fun getPlayersRealtime(): Flow<List<Player>> = callbackFlow {
-        // Implementation similar to events
+        val listenerRegistration = firestore.collection("players")
+            .orderBy("name", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    // Handle error
+                    return@addSnapshotListener
+                }
+
+                val players = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(Player::class.java)?.copy(id = doc.id)
+                } ?: emptyList()
+
+                trySend(players)
+            }
+
+        listenerRegistrations.add(listenerRegistration)
+
+        awaitClose { listenerRegistration.remove() }
     }
 
     // Listen for specific event updates
     fun getEventUpdatesRealtime(eventId: String): Flow<Event?> = callbackFlow {
-        // Implementation for single event
+        val listenerRegistration = firestore.collection("events")
+            .document(eventId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    // Handle error
+                    return@addSnapshotListener
+                }
+
+                val event = snapshot?.toObject(Event::class.java)?.copy(id = snapshot.id)
+                trySend(event)
+            }
+
+        listenerRegistrations.add(listenerRegistration)
+
+        awaitClose { listenerRegistration.remove() }
     }
 
     // Cleanup method

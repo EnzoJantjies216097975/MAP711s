@@ -1,14 +1,27 @@
 package com.map711s.namibiahockey.data.remote
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.map711s.namibiahockey.data.models.Match
-import com.map711s.namibiahockey.data.models.MatchUpdate
+//import com.map711s.namibiahockey.data.models.MatchUpdate
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
+
+data class MatchUpdate(
+    val id: String = "",
+    val matchId: String = "",
+    val type: String = "", // GOAL, CARD, SUBSTITUTION
+    val playerId: String = "",
+    val playerName: String = "",
+    val teamId: String = "",
+    val timestamp: Long = 0,
+    val description: String = "",
+    val minute: Int = 0
+)
 
 @Singleton
 class LiveMatchManager @Inject constructor() {
