@@ -23,7 +23,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.map711s.namibiahockey.navigation.AppNavigation
 import com.map711s.namibiahockey.navigation.bottomNavItems
-import com.map711s.namibiahockey.ui.theme.NamibiaHockeyTheme
+import com.map711s.namibiahockey.theme.NamibiaHockeyTheme
 import com.map711s.namibiahockey.util.Constants
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint

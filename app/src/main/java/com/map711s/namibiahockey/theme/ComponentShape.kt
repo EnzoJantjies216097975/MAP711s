@@ -1,4 +1,4 @@
-package com.map711s.namibiahockey.ui.theme
+package com.map711s.namibiahockey.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes

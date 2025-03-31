@@ -1,4 +1,4 @@
-package com.map711s.namibiahockey.ui.theme
+package com.map711s.namibiahockey.theme
 
 import android.app.Activity
 import android.os.Build
