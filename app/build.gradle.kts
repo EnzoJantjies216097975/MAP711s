@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")  // For Hilt dependency injection
+    id("com.google.gms.google-services") version "4.4.2" apply false
 }
 
 android {
@@ -91,11 +92,12 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
 
     // Import the BoM for the Firebase platform
-    implementation("com.google.firebase:firebase-bom:33.11.0")
+    implementation(platform("com.google.firebase:firebase-bom:33.11.0"))
     // For example, declare the dependencies for Firebase Authentication and Cloud Firestore
-    implementation("com.google.firebase:firebase-auth-ktx:23.2.0")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-auth:23.2.0")
+    implementation("com.google.firebase:firebase-firestore:25.1.3")
+    implementation("com.google.firebase:firebase-storage:21.0.1")
+    implementation("com.google.firebase:firebase-messaging:23.3.1")
 
     // Accompanist (Compose utilities)
     implementation("com.google.accompanist:accompanist-permissions:0.32.0")

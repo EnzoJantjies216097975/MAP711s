@@ -4,6 +4,7 @@ import com.map711s.namibiahockey.data.local.PreferencesManager
 import com.map711s.namibiahockey.data.local.dao.EventDao
 import com.map711s.namibiahockey.data.models.*
 import com.map711s.namibiahockey.data.remote.EventService
+import com.map711s.namibiahockey.data.remote.FirebaseManager
 import com.map711s.namibiahockey.util.NetworkBoundResource
 import com.map711s.namibiahockey.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +20,7 @@ import javax.inject.Singleton
 class EventRepository @Inject constructor(
     private val eventDao: EventDao,
     private val eventService: EventService,
+    private val firebaseManager: FirebaseManager,
     private val preferencesManager: PreferencesManager
 ) {
     // Get all events
@@ -332,5 +334,46 @@ class EventRepository @Inject constructor(
         val oneHourInMillis = 60 * 60 * 1000
 
         return (currentTime - lastSync) > oneHourInMillis
+    }
+
+    // Add real-time events flow
+    fun getEventsRealtime(): Flow<Resource<List<EventListItem>>> = flow {
+        emit(Resource.Loading())
+
+        try {
+            // Emit from database first
+            val localData = eventDao.getAllEventListItems().first()
+            emit(Resource.Loading(localData))
+
+            // Start listening for real-time updates
+            firebaseManager.getEventsRealtime().collect { events ->
+                // Convert to UI model
+                val eventItems = events.map { event ->
+                    // Convert Event to EventListItem
+                    EventListItem(
+                        id = event.id,
+                        title = event.title,
+                        description = event.description,
+                        type = event.type,
+                        startDate = event.startDate,
+                        endDate = event.endDate,
+                        location = event.location,
+                        isRegistrationOpen = event.isRegistrationOpen,
+                        teamCount = 0, // Calculate if needed
+                        imageUrl = event.imageUrl,
+                        status = event.status,
+                        isUserRegistered = false // Update based on user data
+                    )
+                }
+
+                // Save to database for offline access
+                eventDao.insertEventListItems(eventItems)
+
+                // Emit the updated data
+                emit(Resource.Success(eventItems))
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error("Failed to load events: ${e.message}"))
+        }
     }
 }
