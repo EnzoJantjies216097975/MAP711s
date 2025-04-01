@@ -1,9 +1,11 @@
+import org.apache.tools.ant.util.JavaEnvUtils.VERSION_11
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
-    id("com.google.dagger.hilt.android")  // For Hilt dependency injection
+    id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services") version "4.4.2" apply false
 }
 
@@ -40,6 +42,7 @@ android {
     buildFeatures {
         compose = true
     }
+    buildToolsVersion = "34.0.0"
 }
 
 dependencies {
@@ -70,12 +73,14 @@ dependencies {
 
     // Dependency Injection - Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")
-    implementation(libs.androidx.hilt.work)
+    implementation(libs.androidx.foundation.layout.android)
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+    implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.navigation.runtime.android)
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
-    //implementation("androidx.hilt:hilt-navigation-fragment:1.0.0")
+    implementation("androidx.hilt:hilt-navigation-fragment:1.0.0")
+    implementation("androidx.hilt:hilt-work:1.0.0")
+    kapt("androidx.hilt:hilt-compiler:1.0.0")
 
     // Room Database
     implementation("androidx.room:room-runtime:2.6.1")
@@ -94,8 +99,10 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
 
     // Import the BoM for the Firebase platform
-    implementation(platform("com.google.firebase:firebase-bom:33.11.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
+
     // For example, declare the dependencies for Firebase Authentication and Cloud Firestore
+    implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth:23.2.0")
     implementation("com.google.firebase:firebase-firestore:25.1.3")
     implementation("com.google.firebase:firebase-storage:21.0.1")
@@ -138,5 +145,6 @@ dependencies {
 kapt {
     correctErrorTypes = true
 }
+
 
 apply(plugin = "com.google.gms.google-services")
