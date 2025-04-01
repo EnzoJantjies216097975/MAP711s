@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
-    id("com.google.gms.google-services") version "4.4.2" apply false
+    id("com.google.gms.google-services") version "4.4.2" // apply false
 }
 
 android {
@@ -145,6 +145,5 @@ dependencies {
 kapt {
     correctErrorTypes = true
 }
-
 
 apply(plugin = "com.google.gms.google-services")
