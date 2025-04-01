@@ -267,11 +267,11 @@ fun LoginScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewLoginScreen() {
-    LoginScreen(
-        onNavigateToHome = {},
-        onNavigateToRegister = {},
-    )
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewLoginScreen() {
+//    LoginScreen(
+//        onNavigateToHome = {},
+//        onNavigateToRegister = {},
+//    )
+//}

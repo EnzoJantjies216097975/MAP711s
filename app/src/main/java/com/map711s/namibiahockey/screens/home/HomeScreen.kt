@@ -88,7 +88,8 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Namibia Hockey Union") },
+                title = { Text(text = "Namibia Hockey Union")
+                        },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
@@ -105,7 +106,8 @@ fun HomeScreen(
                         Icon(
                             imageVector = Icons.Default.AccountCircle,
                             contentDescription = "Profile",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(60.dp)
                         )
                     }
                 }
@@ -192,7 +194,7 @@ fun HomeScreen(
                 val newsItem = listOf(
                     NewsItem(
                         id = "1",
-                        title = "National Team Selectoin Announced",
+                        title = "National Team Selection Announced",
                         summary = "The Namibia Hockey Union has announced the selection for the upcoming international tournament.",
                         date = "Mar 28, 2025"
                     ),
@@ -219,6 +221,8 @@ fun HomeScreen(
 
 @Composable
 fun WelcomeSection(userName: String) {
+    val firstName = userName.trim().split(" ").firstOrNull() ?: "Hockey Enthusiast"
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -238,7 +242,7 @@ fun WelcomeSection(userName: String) {
 
         // Welcome message
         Text(
-            text = "Welcome, $userName!",
+            text = "Welcome, $firstName!",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
@@ -266,7 +270,8 @@ fun FeatureCardRow(
             FeatureCard(
                 icon = Icons.Default.Groups,
                 title = "Team Registration",
-                onClick = onTeamRegistrationClick
+                onClick = onTeamRegistrationClick,
+
             )
         }
 
@@ -282,7 +287,7 @@ fun FeatureCardRow(
             FeatureCard(
                 icon = Icons.Default.Person,
                 title = "Player Management",
-                onClick = onPlayerManagmentClick
+                onClick = onPlayerManagmentClick,
             )
         }
 
@@ -334,16 +339,17 @@ fun FeatureCard(
                 modifier = Modifier.size(32.dp)
                 )
             }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
+            )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
 
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center
-        )
     }
 }
 

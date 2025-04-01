@@ -37,7 +37,7 @@ class AuthViewModel @Inject constructor(
 
     // User profile state
     private val _userProfileState = MutableStateFlow(UserProfileState())
-    val userProfileState: StateFlow<UserProfileState> = _userProfileState.asStateFlow()
+    open val userProfileState: StateFlow<UserProfileState> = _userProfileState.asStateFlow()
 
     init {
         // Check if user is already logged in
