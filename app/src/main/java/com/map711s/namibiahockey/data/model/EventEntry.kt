@@ -10,4 +10,19 @@ data class EventEntry(
     val registrationDeadline: String,
     val isRegistered: Boolean,
     val registeredTeams: Int
-)
+)  {
+    // Extension function to convert EventEntry to HashMap
+    fun toHashMap(): HashMap<String, Any> {
+        return hashMapOf(
+            "id" to id,
+            "title" to title,
+            "description" to description,
+            "startDate" to startDate,
+            "endDate" to endDate,
+            "location" to location,
+            "registrationDeadline" to registrationDeadline,
+            "isRegistered" to isRegistered,
+            "registeredTeams" to registeredTeams
+        )
+    }
+}
