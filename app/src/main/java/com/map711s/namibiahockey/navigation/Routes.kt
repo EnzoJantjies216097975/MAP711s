@@ -11,4 +11,5 @@ object Routes {
     const val PLAYER_MANAGEMENT = "player_management"
     const val NEWS_FEED = "news_feed"
     const val PROFILE = "profile"
+    const val ADD_EVENT = "add_event"
 }
