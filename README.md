@@ -3,10 +3,10 @@
 ## Group Members and student numbers ##
 
 
-Enzo Jantjies (216097975)  
-Chantelle van Wyk (212087312)  
-Gerald Kufanga (222046465)  
-Ruvarashe Mtatiwa (222011068)  
+Enzo Jantjies: (216097975)  
+Chantelle van Wyk: (212087312)  
+Gerald Kufanga: (222046465)  
+Ruvarashe Mtatiwa: (222011068)
 
 ## Assignment Information ##
 
