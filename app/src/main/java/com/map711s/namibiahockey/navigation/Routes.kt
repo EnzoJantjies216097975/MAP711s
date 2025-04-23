@@ -12,4 +12,6 @@ object Routes {
     const val NEWS_FEED = "news_feed"
     const val PROFILE = "profile"
     const val ADD_EVENT = "add_event"
+    const val ADD_NEWS = "add_news"
+
 }

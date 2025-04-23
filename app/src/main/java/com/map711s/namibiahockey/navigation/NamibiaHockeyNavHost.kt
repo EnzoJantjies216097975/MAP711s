@@ -1,6 +1,7 @@
 package com.map711s.namibiahockey.navigation
 
 import AddEventScreen
+import AddNewsScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -68,7 +69,10 @@ fun NamibiaHockeyNavHost(
 
         composable(Routes.TEAM_REGISTRATION) {
             TeamRegistrationScreen(
-                onNavigateBack = { navController.navigateUp() }
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToHome = {
+                    navController.navigate(Routes.HOME)
+                }
             )
         }
 
@@ -93,7 +97,14 @@ fun NamibiaHockeyNavHost(
 
         composable(Routes.NEWS_FEED) {
             NewsFeedScreen(
-                onNavigateBack = { navController.navigateUp() }
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToAddNews = {navController.navigate(Routes.ADD_NEWS)}
+            )
+        }
+        composable(Routes.ADD_NEWS){
+            AddNewsScreen(
+                onNavigateBack = {navController.navigateUp()},
+                onNavigateToNews = {navController.navigate(Routes.NEWS_FEED)}
             )
         }
 

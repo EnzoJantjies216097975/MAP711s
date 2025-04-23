@@ -12,4 +12,18 @@ data class Team(
     val players: List<String> = emptyList(), // List of player IDs
     val createdAt: Date = Date(),
     val logoUrl: String = ""
-)
+){
+    fun toHashMap(): HashMap<String, Any> {
+        return hashMapOf(
+            "id" to id,
+            "name" to name,
+            "category" to category,
+            "division" to division,
+            "coach" to coach,
+            "manager" to manager,
+            "players" to players,
+            "createdAt" to createdAt,
+            "logoUrl" to logoUrl
+        )
+    }
+}

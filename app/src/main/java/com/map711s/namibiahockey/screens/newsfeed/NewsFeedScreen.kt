@@ -1,5 +1,6 @@
 package com.map711s.namibiahockey.screens.newsfeed
 
+import NewsPiece
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -39,6 +41,8 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,59 +55,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.map711s.namibiahockey.data.model.NewsCategory
 import com.map711s.namibiahockey.theme.NamibiaHockeyTheme
+import com.map711s.namibiahockey.viewmodel.NewsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsFeedScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToAddNews: () -> Unit,
+    viewModel: NewsViewModel = hiltViewModel()
 ) {
     var seachQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("All", "Tournament", "League", "Team", "Player")
-
+    val newsListState by viewModel.newsListState.collectAsState()
     // Sample news items for demonstration
-    val newsItems = remember {
-        mutableListOf(
-            NewsItem(
-                id = "1",
-                title = "National Team Selection Announced",
-                content = "The Namibia Hockey Union has announced the selection for the upcoming international tournament. The team includes players from various clubs across the country who have shown exceptional skills throughout the season.",
-                authorName = "Hockey Admin",
-                publishDate = "Mar 28, 2025",
-                category = NewsCategory.TEAM,
-                isBookmarked = false
-            ),
-            NewsItem(
-                id = "2",
-                title = "New Training Facilities Unveiled",
-                content = "State-of-the-art training facilities for hockey players have been unveiled in Windhoek. The facilities include synthetic turf fields, modern gym equipment, and video analysis rooms to help players improve their skills.",
-                authorName = "Namibia Hockey Union",
-                publishDate = "Mar 25, 2025",
-                category = NewsCategory.GENERAL,
-                isBookmarked = true
-            ),
-            NewsItem(
-                id = "3",
-                title = "Premier League Schedule Released",
-                content = "The schedule for the upcoming Premier League season has been released. The season will begin on May 1st and conclude with the championship match on August 30th. All matches will be played at designated venues across Namibia.",
-                authorName = "League Manager",
-                publishDate = "Mar 20, 2025",
-                category = NewsCategory.LEAGUE,
-                isBookmarked = false
-            ),
-            NewsItem(
-                id = "4",
-                title = "Junior Development Program Expansion",
-                content = "The Namibia Hockey Union is expanding its junior development program to include more schools across the country. The program aims to identify and nurture young talent from an early age to build a strong future for hockey in Namibia.",
-                authorName = "Youth Development Officer",
-                publishDate = "Mar 18, 2025",
-                category = NewsCategory.GENERAL,
-                isBookmarked = false
-            )
-        )
+    val newsItems = newsListState.newsPieces.toMutableList()
+    LaunchedEffect(key1 = true) {
+        viewModel.loadAllNewsPieces()
     }
+    var isLoading =  newsListState.isLoading
 
     // Filtered news based on search and tab
     val filteredNews = if (seachQuery.isBlank()) {
@@ -139,7 +112,7 @@ fun NewsFeedScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Create new news/announcement */},
+                onClick = onNavigateToAddNews,
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(
@@ -185,9 +158,15 @@ fun NewsFeedScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(25.dp)
             )
-
+            if (isLoading) { // Show loading indicator
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator() // Use a CircularProgressIndicator
+                }}
             // News list
-            if (filteredNews.isEmpty()) {
+            else if (filteredNews.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -234,7 +213,7 @@ fun NewsFeedScreen(
 
 @Composable
 fun NewsCard(
-    news: com.map711s.namibiahockey.screens.newsfeed.NewsItem,
+    news: NewsPiece,
     onNewsClick: (String) -> Unit,
     onBookmarkClick: (String, Boolean) -> Unit,
     onShareClick: (String) -> Unit
@@ -355,15 +334,7 @@ fun NewsCard(
     }
 }
 
-data class NewsItem(
-    val id: String,
-    val title: String,
-    val content: String,
-    val authorName: String,
-    val publishDate: String,
-    val category: NewsCategory,
-    val isBookmarked: Boolean
-)
+
 
 //@Preview(showBackground = true)
 //@Composable
