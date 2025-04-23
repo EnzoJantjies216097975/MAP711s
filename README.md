@@ -1,6 +1,6 @@
 # MAP711S Group Assignment Assignment
 
-## Group Members ##
+## Group Members and student numbers##
 
 Enzo Jantjies (216097975)  
 Chantelle van Wyk (212087312)  
