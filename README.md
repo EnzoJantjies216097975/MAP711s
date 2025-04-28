@@ -1,11 +1,12 @@
 # MAP711S Group Assignment Assignment
 
-## Group Members ##
+## Group Members and student numbers ##
 
-Enzo Jantjies (216097975)  
-Chantelle van Wyk (212087312)  
-Gerald Kufanga (222046465)  
-Ruvarashe Mtatiwa (222011068)  
+
+Enzo Jantjies: (216097975)  
+Chantelle van Wyk: (212087312)  
+Gerald Kufanga: (222046465)  
+Ruvarashe Mtatiwa: (222011068)
 
 ## Assignment Information ##
 
@@ -14,4 +15,4 @@ In this task, students are expected to develop a mobile application for the Nami
 • team registration;
 • event entries;
 • player registration & management;
-• real-time information sharing.
+• real-time information sharing,

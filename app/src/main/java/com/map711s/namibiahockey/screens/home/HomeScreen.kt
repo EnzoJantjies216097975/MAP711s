@@ -66,7 +66,6 @@ import androidx.compose.ui.unit.sp
 import com.map711s.namibiahockey.R
 import com.map711s.namibiahockey.data.model.Event
 import com.map711s.namibiahockey.data.model.EventItem
-import com.map711s.namibiahockey.data.model.News
 import com.map711s.namibiahockey.data.model.NewsItem
 import java.text.SimpleDateFormat
 import java.util.Date
