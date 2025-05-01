@@ -26,7 +26,7 @@ As part of the MAP711S coursework, groups of four or five students were assigned
 
  **User Roles and Access**
  - Role-based access (e.g., Admin, Coach, Player)
- - Customized dashboards per role
+ - Customized dashboards per role(Future implementation)
 
  **Team Management**
  - Team creation and registration
