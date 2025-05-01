@@ -63,4 +63,5 @@ As part of the MAP711S coursework, groups of four or five students were assigned
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo-name.git
+  git clone https://github.com/EnzoJantjies216097975/MAP711s.git
+
