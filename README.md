@@ -19,35 +19,35 @@ As part of the MAP711S coursework, groups of four or five students were assigned
 
 ## Core Features
 
-- **User Authentication**
+ **User Authentication**
  - Login/logout functionality
  - Account creation (registration for players, coaches, and administrators)
  - Password reset
 
-- **User Roles and Access**
+ **User Roles and Access**
  - Role-based access (e.g., Admin, Coach, Player)
  - Customized dashboards per role
 
-- **Team Management**
+ **Team Management**
  - Team creation and registration
  - Add/remove players
  - Assign team roles
 
-- **Player Registration & Profile Management**
+ **Player Registration & Profile Management**
  - Register as a new player
  - Edit and update player profile details
 
-- **Event Management**
+ **Event Management**
  - View upcoming matches, tournaments, and events
  - Register for events
  - Event calendar with filters
 
-- **Real-Time Information Sharing**
+ **Real-Time Information Sharing**
  - Live notifications (match results, updates)
  - News feed
  - Optional chat or messaging module
 
-- **Admin Panel (NHU Officials)**
+ **Admin Panel (NHU Officials)**
  - Approve or reject registrations
  - Manage events and participants
  - Publish official announcements
