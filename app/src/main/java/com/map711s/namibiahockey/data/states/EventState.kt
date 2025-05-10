@@ -15,6 +15,8 @@ data class EventState(
 // State for a list of EventEntry objects
 data class EventListState(
     val isLoading: Boolean = false,
+    val isLoadingMore: Boolean = false,
     val events: List<EventEntry> = emptyList(),
+    val canLoadMore: Boolean = false,
     val error: String? = null
 )

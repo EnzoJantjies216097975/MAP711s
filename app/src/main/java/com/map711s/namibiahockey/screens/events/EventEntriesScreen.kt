@@ -66,8 +66,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 fun EventEntriesScreen(
     onNavigateBack: () -> Unit,
     viewModel: EventViewModel = hiltViewModel(),
-    onNavigateToAddEvent: () -> Unit
+    onNavigateToAddEvent: () -> Unit,
+    // windowSize: WindowSize
 ) {
+    val eventsEntriesState by viewModel.eventListState.collectAsState()
+
+    val isLoadingMore = eventsEntriesState.isLoadingMore
+    val canLoadMore = eventsEntriesState.canLoadMore
+
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -76,8 +82,8 @@ fun EventEntriesScreen(
     val topAppBarState = listOf("Upcoming", "Past", "My Entries")
 
     val eventListState by viewModel.eventListState.collectAsState()
-    val events = eventListState.events
-    val isLoading = eventListState.isLoading // Get loading state
+    val events = eventsEntriesState.events
+    val isLoading = eventsEntriesState.isLoading // Get loading state
 
     // Handle errors with Toast or Snackbar
     LaunchedEffect(eventListState.error) {
@@ -86,9 +92,8 @@ fun EventEntriesScreen(
         }
     }
 
-
     LaunchedEffect(key1 = true) {
-        viewModel.loadAllEvents()
+        viewModel.loadEvents()
     }
 
     // Filtered events based on search and tab
@@ -200,7 +205,10 @@ fun EventEntriesScreen(
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(filteredEvents) { event ->
+                    items(
+                        items = events,
+                        key = { it.id }
+                    ) { event ->
                         EventCard(
                             event = event,
                             onRegisterClick = { viewModel.registerForEvent(it) },
@@ -209,6 +217,27 @@ fun EventEntriesScreen(
                     }
                     // Add some space at the bottom for the FAB
                     item {
+                        if (isLoadingMore) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        } else if (canLoadMore) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                                    .clickable { viewModel.loadMoreEvents() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("Load More")
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(80.dp))
                     }
                 }

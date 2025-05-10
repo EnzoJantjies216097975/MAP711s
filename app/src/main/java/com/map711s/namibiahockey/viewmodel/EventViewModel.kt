@@ -18,17 +18,71 @@ class EventViewModel @Inject constructor(
     private val eventRepository: EventRepository
 ) : ViewModel() {
 
-    // Event creation/update state
-    private val _eventState = MutableStateFlow(EventState())
-    val eventState: StateFlow<EventState> = _eventState.asStateFlow()
+    // Event list state with pagination
+    private val _eventListState = MutableStateFlow(
+        EventListState(
+            isLoading = false,
+            events = emptyList(),
+            canLoadMore = true,
+            error = null
+        )
+    )
 
-    // Event list state
-    private val _eventListState = MutableStateFlow(EventListState())
     val eventListState: StateFlow<EventListState> = _eventListState.asStateFlow()
 
-//    init {
-//        loadAllEvents()
-//    }
+    // Load first page of events
+    fun loadEvents() {
+        if (_eventListState.value.isLoading) return
+
+        _eventListState.update { it.copy(isLoading = true, error = null) }
+        viewModelScope.launch {
+            eventRepository.getEventsFirstPage()
+                .onSuccess { events ->
+                    _eventListState.update {
+                        it.copy(
+                            isLoading = false,
+                            events = events,
+                            canLoadMore = events.size == 10 // If we got a full page, there might be more
+                        )
+                    }
+                }
+                .onFailure { exception ->
+                    _eventListState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = exception.message ?: "Failed to load events"
+                        )
+                    }
+                }
+        }
+    }
+
+    // Load next page of events
+    fun loadMoreEvents() {
+        if (_eventListState.value.isLoading || !_eventListState.value.canLoadMore) return
+
+        _eventListState.update { it.copy(isLoadingMore = true) }
+        viewModelScope.launch {
+            eventRepository.getEventsNextPage()
+                .onSuccess { newEvents ->
+                    _eventListState.update { currentState ->
+                        currentState.copy(
+                            isLoadingMore = false,
+                            events = currentState.events + newEvents,
+                            canLoadMore = newEvents.size == 10
+                        )
+                    }
+                }
+                .onFailure { exception ->
+                    _eventListState.update {
+                        it.copy(
+                            isLoadingMore = false,
+                            error = exception.message ?: "Failed to load more events"
+                        )
+                    }
+                }
+        }
+    }
 
     // Create a new event
     fun createEvent(event: EventEntry) {
