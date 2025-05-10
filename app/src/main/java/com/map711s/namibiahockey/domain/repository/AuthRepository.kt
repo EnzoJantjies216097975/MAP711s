@@ -9,6 +9,17 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
+interface AuthRepository {
+    fun isUserLoggedIn(): Boolean
+    fun getCurrentUserId(): String?
+    suspend fun registerUser(email: String, password: String, name: String, phone: String, role: UserRole): Result<String>
+    suspend fun loginUser(email: String, password: String): Result<String>
+    suspend fun logoutUser(): Result<Unit>
+    suspend fun getUserProfile(userId: String = ""): Result<User>
+    suspend fun updateUserProfile(user: User): Result<Unit>
+    suspend fun resetPassword(email: String): Result<Unit>
+}
+
 @Singleton
 class AuthRepository @Inject constructor(
     private val auth: FirebaseAuth,
