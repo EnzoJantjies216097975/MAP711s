@@ -2,9 +2,15 @@ package com.map711s.namibiahockey.navigation
 
 import AddEventScreen
 import AddNewsScreen
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -50,12 +56,11 @@ fun NamibiaHockeyNavHost(
             enterTransition = { Screen.Login.enterTransition },
             exitTransition = { Screen.Login.exitTransition }
         ) {
-            SplashScreen(
+            LoginScreen(
                 onNavigateToRegister = { navigation.navigateTo(Screen.Register) },
                 onNavigateToHome = { navigation.navigateTo(Screen.Home, Screen.Login, true) }
             )
         }
-
 
         composable(
             route = Screen.Register.route,
@@ -72,11 +77,11 @@ fun NamibiaHockeyNavHost(
         // Main screens
         composable(Screen.HOME) {
             HomeScreen(
-                onNavigateToTeamRegistration = { },
-                onNavigateToEventEntries = { },
-                onNavigateToPlayerManagement = { },
-                onNavigateToNewsFeed = { },
-                onNavigateToProfile = { }
+                onNavigateToTeamRegistration = { navigation.navigateUp(Screen.TeamRegistration) },
+                onNavigateToEventEntries = { navigation.navigateTo(Screen.EventEntries)},
+                onNavigateToPlayerManagement = { navigation.navigateTo(Screen.PlayerManagement)},
+                onNavigateToNewsFeed = {navigation.navigateTo(Screen.NewsFeed) },
+                onNavigateToProfile = { navigation.navigateTo(Screen.Profile) }
             )
         }
 
@@ -138,8 +143,25 @@ fun NamibiaHockeyNavHost(
             val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
             EventDetailsScreen(
                 eventId = eventId,
-                onNavigateBack = { navigation.navigateUp() }
+                onNavigateBack = { navigation.navigateUp(Screen.TeamRegistration) }
             )
+        }
+    }
+}
+
+@Composable
+fun EventDetailsScreen(
+    eventId: String,
+    onNavigateBack: () -> Unit
+) {
+    Surface {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("Event Details for ID: $eventId")
+            Button(onClick = onNavigateBack) {
+                Text("Back")
+            }
         }
     }
 }

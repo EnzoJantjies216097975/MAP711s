@@ -70,43 +70,37 @@ fun EventEntriesScreen(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val eventsEntriesState by viewModel.state.collectAsState()
-
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
     val topAppBarState = listOf("Upcoming", "Past", "My Entries")
-    val eventsEntriesState by viewModel.eventListState.collectAsState()
-    val eventsEntries = eventsEntriesState.events
-    val isLoading = eventsEntriesState.isLoading // Get loading state
 
+    val eventListState by viewModel.eventListState.collectAsState()
+    val events = eventListState.events
+    val isLoading = eventListState.isLoading // Get loading state
 
     // Handle errors with Toast or Snackbar
-    LaunchedEffect(eventsEntriesState) {
-        if (eventsEntriesState is EventsListUiState.Error) {
-            val errorState = eventsEntriesState as EventsListUiState.Error
-            // For important errors, use Snackbar
-            if (errorState.isCritical) {
-                ErrorHandler.showSnackbar(snackbarHostState, errorState.message)
-            } else {
-                // For less critical errors, use Toast
-                ErrorHandler.showToast(context, errorState.message)
-            }
+    LaunchedEffect(eventListState.error) {
+        eventListState.error?.let { errorMessage ->
+            snackbarHostState.showSnackbar(errorMessage)
         }
     }
+
+
     LaunchedEffect(key1 = true) {
         viewModel.loadAllEvents()
     }
+
     // Filtered events based on search and tab
     val filteredEvents = if (searchQuery.isBlank()) {
         when (selectedTabIndex) {
-            0 -> eventsEntries.filter { true } // Upcoming (all for demo)
+            0 -> events.filter { true } // Upcoming (all for demo)
             1 -> emptyList<EventEntry>() // Past events (empty for demo)
-            2 -> eventsEntries.filter { it.isRegistered } //My Entries
+            2 -> events.filter { it.isRegistered } //My Entries
             else -> eventsEntries
         }
     } else {
-        eventsEntries.filter {
+        events.filter {
             it.title.contains(searchQuery, ignoreCase = true) ||
                     it.description.contains(searchQuery, ignoreCase = true) ||
                     it.location.contains(searchQuery, ignoreCase = true)
@@ -209,7 +203,7 @@ fun EventEntriesScreen(
                     items(filteredEvents) { event ->
                         EventCard(
                             event = event,
-                            onRegisterClick = { /* Register for event */ },
+                            onRegisterClick = { viewModel.registerForEvent(it) },
                             onViewDetailsClick = { /* View event details */ }
                         )
                     }

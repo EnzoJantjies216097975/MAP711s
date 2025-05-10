@@ -19,8 +19,8 @@ import kotlinx.coroutines.launch
 sealed class LoginUiState {
     object Initial : LoginUiState()
     object Loading : LoginUiState()
-    data class Success (val userId: String) : LoginUiState()
-    data class Error (val message: String) : LoginUiState()
+    data class Success(val userId: String) : LoginUiState()
+    data class Error(val message: String) : LoginUiState()
 }
 
 @HiltViewModel
