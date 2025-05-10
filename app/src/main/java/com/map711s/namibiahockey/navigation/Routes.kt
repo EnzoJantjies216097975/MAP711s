@@ -1,6 +1,6 @@
 package com.map711s.namibiahockey.navigation
 
-// Define all navigation routes here
+// Define all navigation routes here.
 object Routes {
     const val SPLASH = "splash"
     const val LOGIN = "login"
