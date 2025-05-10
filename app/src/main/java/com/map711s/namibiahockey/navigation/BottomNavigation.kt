@@ -24,27 +24,27 @@ fun BottomNavigationBar(
     val items = listOf(
         BottomNavItem(
             name = "Teams",
-            route = Routes.TEAM_REGISTRATION,
+            route = Screen.TEAM_REGISTRATION,
             icon = Icons.Filled.Groups
         ),
         BottomNavItem(
             name = "Events",
-            route = Routes.EVENT_ENTRIES,
+            route = Screen.EVENT_ENTRIES,
             icon = Icons.Filled.CalendarMonth
         ),
         BottomNavItem(
             name = "Home",
-            route = Routes.HOME,
+            route = Screen.HOME,
             icon = Icons.Filled.Home
         ),
         BottomNavItem(
             name = "News",
-            route = Routes.NEWS_FEED,
+            route = Screen.NEWS_FEED,
             icon = Icons.Filled.Info
         ),
         BottomNavItem(
             name = "Profile",
-            route = Routes.PROFILE,
+            route = Screen.PROFILE,
             icon = Icons.Filled.Person
         )
     )
@@ -64,7 +64,7 @@ fun BottomNavigationBar(
                         navController.navigate(item.route) {
                             // Pop up to the start destination of the graph to
                             // avoid building up a large stack of destinations
-                            popUpTo(Routes.HOME) {
+                            popUpTo(Screen.HOME) {
                                 saveState = true
                             }
                             // Avoid multiple copies of the same destination when

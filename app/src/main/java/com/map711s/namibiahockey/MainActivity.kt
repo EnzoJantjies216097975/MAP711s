@@ -21,7 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.map711s.namibiahockey.navigation.Routes
+import com.map711s.namibiahockey.navigation.Screen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -49,12 +49,12 @@ fun NamibiaHockeyApp() {
 
     // List of routes where bottom navigation should be visible
     val bottomNavRoutes = listOf(
-        Routes.HOME,
-        Routes.TEAM_REGISTRATION,
-        Routes.EVENT_ENTRIES,
-        Routes.NEWS_FEED,
-        Routes.PROFILE,
-        Routes.PLAYER_MANAGEMENT
+        Screen.HOME,
+        Screen.TEAM_REGISTRATION,
+        Screen.EVENT_ENTRIES,
+        Screen.NEWS_FEED,
+        Screen.PROFILE,
+        Screen.PLAYER_MANAGEMENT
     )
 
     // Determine if bottom navigation should be shown
