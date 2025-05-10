@@ -3,6 +3,7 @@ package com.map711s.namibiahockey.navigation
 import AddEventScreen
 import AddNewsScreen
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,11 +20,13 @@ import com.map711s.namibiahockey.screens.team.TeamRegistrationScreen
 @Composable
 fun NamibiaHockeyNavHost(
     navController: NavHostController,
-    startDestination: String = Routes.SPLASH
+    startDestination: String = Routes.SPLASH,
+    modifier: Modifier = Modifier
 ) {
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = startDestination,
+        modifier = modifier
     ) {
         // Splash screen
         composable(Routes.SPLASH) {
@@ -59,11 +62,11 @@ fun NamibiaHockeyNavHost(
         // Main screens
         composable(Routes.HOME) {
             HomeScreen(
-                onNavigateToTeamRegistration = { navController.navigate(Routes.TEAM_REGISTRATION) },
-                onNavigateToEventEntries = { navController.navigate(Routes.EVENT_ENTRIES) },
-                onNavigateToPlayerManagement = { navController.navigate(Routes.PLAYER_MANAGEMENT) },
-                onNavigateToNewsFeed = { navController.navigate(Routes.NEWS_FEED) },
-                onNavigateToProfile = { navController.navigate(Routes.PROFILE) }
+                onNavigateToTeamRegistration = { },
+                onNavigateToEventEntries = { },
+                onNavigateToPlayerManagement = { },
+                onNavigateToNewsFeed = { },
+                onNavigateToProfile = { }
             )
         }
 
@@ -71,7 +74,9 @@ fun NamibiaHockeyNavHost(
             TeamRegistrationScreen(
                 onNavigateBack = { navController.navigateUp() },
                 onNavigateToHome = {
-                    navController.navigate(Routes.HOME)
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) { inclusive = true }
+                    }
                 }
             )
         }

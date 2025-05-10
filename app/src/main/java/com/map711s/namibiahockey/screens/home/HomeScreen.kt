@@ -87,8 +87,7 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Namibia Hockey Union")
-                        },
+                title = { Text(text = "Namibia Hockey Union") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
@@ -135,22 +134,6 @@ fun HomeScreen(
                     val userName = userProfileState.user?.name ?: "Hockey Enthusiast"
                     WelcomeSection(userName = userName)
                 }
-            }
-
-            // Feature cards
-            item {
-                Text(
-                    text = "Quick Access",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-
-                FeatureCardRow(
-                    onTeamRegistrationClick = onNavigateToTeamRegistration,
-                    onEventEntriesClick = onNavigateToEventEntries,
-                    onPlayerManagmentClick = onNavigateToPlayerManagement,
-                    onNewsFeedClick =  onNavigateToNewsFeed
-                )
             }
 
             // Upcoming events
