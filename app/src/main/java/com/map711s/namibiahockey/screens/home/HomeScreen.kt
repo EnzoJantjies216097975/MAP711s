@@ -161,7 +161,9 @@ fun HomeScreen(
                 )
 
                 events.forEach{ event ->
-                    EventCard(event = event)
+                    EventCard(
+                        event = event,
+                        onClick = onNavigateToEventEntries )
                 }
             }
 
@@ -189,7 +191,9 @@ fun HomeScreen(
                 )
 
                 newsItem.forEach { news ->
-                    NewsCard(news = news, onClick = onNavigateToNewsFeed)
+                    NewsCard(
+                        news = news,
+                        onClick = onNavigateToNewsFeed)
                 }
             }
 
@@ -336,7 +340,10 @@ fun FeatureCard(
 }
 
 @Composable
-fun EventCard(event: EventItem){
+fun EventCard(
+    event: EventItem,
+    onClick: () -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -398,7 +405,7 @@ fun EventCard(event: EventItem){
 @Composable
 fun NewsCard(
     news: NewsItem,
-    onClick: () -> Unit
+    onClick: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier

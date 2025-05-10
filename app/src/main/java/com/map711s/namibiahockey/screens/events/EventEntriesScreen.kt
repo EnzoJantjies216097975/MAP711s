@@ -35,6 +35,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -50,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -65,12 +68,32 @@ fun EventEntriesScreen(
     viewModel: EventViewModel = hiltViewModel(),
     onNavigateToAddEvent: () -> Unit
 ) {
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val eventsEntriesState by viewModel.state.collectAsState()
+
+
     var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
     val topAppBarState = listOf("Upcoming", "Past", "My Entries")
     val eventsEntriesState by viewModel.eventListState.collectAsState()
     val eventsEntries = eventsEntriesState.events
     val isLoading = eventsEntriesState.isLoading // Get loading state
+
+
+    // Handle errors with Toast or Snackbar
+    LaunchedEffect(eventsEntriesState) {
+        if (eventsEntriesState is EventsListUiState.Error) {
+            val errorState = eventsEntriesState as EventsListUiState.Error
+            // For important errors, use Snackbar
+            if (errorState.isCritical) {
+                ErrorHandler.showSnackbar(snackbarHostState, errorState.message)
+            } else {
+                // For less critical errors, use Toast
+                ErrorHandler.showToast(context, errorState.message)
+            }
+        }
+    }
     LaunchedEffect(key1 = true) {
         viewModel.loadAllEvents()
     }
@@ -90,6 +113,7 @@ fun EventEntriesScreen(
         }
     }
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Event Entries") },

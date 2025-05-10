@@ -10,34 +10,39 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
-
-
 import androidx.lifecycle.viewModelScope
 import com.map711s.namibiahockey.data.model.User
 import com.map711s.namibiahockey.data.model.UserRole
-
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-
-
+sealed class LoginUiState {
+    object Initial : LoginUiState()
+    object Loading : LoginUiState()
+    data class Success (val userId: String) : LoginUiState()
+    data class Error (val message: String) : LoginUiState()
+}
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository
-) : ViewModel() {
+) : BaseViewModel<LoginUiState>() {
 
-    // Login state
-    private val _loginState = MutableStateFlow(LoginState())
-    val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
+    override fun createInitialState(): LoginUiState = LoginUiState.Initial
 
-    // Registration state
-    private val _registerState = MutableStateFlow(RegisterState())
-    val registerState: StateFlow<RegisterState> = _registerState.asStateFlow()
+//    private val _userProfileState = MutableStateFlow(UserProfileState())
+//
+//    // Login state
+//    private val _loginState = MutableStateFlow(LoginState())
+//    val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
+//
+//    // Registration state
+//    private val _registerState = MutableStateFlow(RegisterState())
+//    val registerState: StateFlow<RegisterState> = _registerState.asStateFlow()
 
     // User profile state
     private val _userProfileState = MutableStateFlow(UserProfileState())
-    open val userProfileState: StateFlow<UserProfileState> = _userProfileState.asStateFlow()
+    val userProfileState: StateFlow<UserProfileState> = _userProfileState.asStateFlow()
 
     init {
         // Check if user is already logged in
@@ -49,36 +54,24 @@ class AuthViewModel @Inject constructor(
     // Login function
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
-            _loginState.update {
-                it.copy(
-                    isLoading = false,
-                    error = "Email and password cannot be empty"
-                )
-            }
+            _state.value = LoginUiState.Error("Email and password cannot be empty")
             return
         }
 
-        _loginState.update { it.copy(isLoading = true, error = null) }
+        _state.value = LoginUiState.Loading
 
         viewModelScope.launch {
             authRepository.loginUser(email, password)
                 .onSuccess { firebaseUser ->
-                    _loginState.update {
-                        it.copy(
-                            isLoading = false,
-                            isLoggedIn = true,
-                            userId = firebaseUser.uid
-                        )
-                    }
+                    _state.value = LoginUiState.Success(firebaseUser.uid)
                     loadUserProfile()
                 }
                 .onFailure { exception ->
-                    _loginState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = exception.message ?: "Login failed"
-                        )
-                    }
+                    _state.value = LoginUiState.Error(
+                        handleError(exception as Exception) {
+                            LoginUiState.Error(it.message ?: "Login failed")
+                        }.message
+                    )
                 }
         }
     }
@@ -94,7 +87,7 @@ class AuthViewModel @Inject constructor(
     ) {
         if (email.isBlank() || password.isBlank() || confirmPassword.isBlank() ||
             name.isBlank() || phone.isBlank()) {
-            _registerState.update {
+            _State.update {
                 it.copy(
                     isLoading = false,
                     error = "Passwords do not match"
