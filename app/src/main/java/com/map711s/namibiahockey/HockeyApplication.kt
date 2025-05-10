@@ -9,6 +9,6 @@ class HockeyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         FirebaseApp.initializeApp(this)
-        // Initialize any app-wide components here
+        // Initialize any app-wide components here.
     }
 }
