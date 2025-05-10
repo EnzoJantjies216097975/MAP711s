@@ -1,4 +1,4 @@
-package com.map711s.namibiahockey.data.repository
+package com.map711s.namibiahockey.domain.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser

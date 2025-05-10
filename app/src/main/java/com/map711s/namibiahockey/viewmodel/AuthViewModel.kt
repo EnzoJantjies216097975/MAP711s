@@ -1,8 +1,7 @@
 package com.map711s.namibiahockey.viewmodel
 
-import androidx.lifecycle.ViewModel
 import com.map711s.namibiahockey.data.states.LoginState
-import com.map711s.namibiahockey.data.repository.AuthRepository
+import com.map711s.namibiahockey.domain.repository.AuthRepository
 import com.map711s.namibiahockey.data.states.RegisterState
 import com.map711s.namibiahockey.data.states.UserProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
-import com.map711s.namibiahockey.data.model.User
 import com.map711s.namibiahockey.data.model.UserRole
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
