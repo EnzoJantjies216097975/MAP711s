@@ -13,6 +13,8 @@ hiltWork = "1.2.0"
 foundationLayoutAndroid = "1.7.4"
 transportRuntime = "3.1.9"
 window = "1.3.0"
+datastoreCoreAndroid = "1.1.6"
+datastorePreferencesCoreJvm = "1.1.6"
 
 
 [libraries]
@@ -35,6 +37,8 @@ androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref 
 androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 transport-runtime = { group = "com.google.android.datatransport", name = "transport-runtime", version.ref = "transportRuntime" }
 androidx-window = { group = "androidx.window", name = "window", version.ref = "window" }
+androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
+androidx-datastore-preferences-core-jvm = { group = "androidx.datastore", name = "datastore-preferences-core-jvm", version.ref = "datastorePreferencesCoreJvm" }
 
 
 [plugins]

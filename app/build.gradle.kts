@@ -79,6 +79,8 @@ dependencies {
     implementation(libs.transport.runtime)
     implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.window)
+    implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.datastore.preferences.core.jvm)
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.navigation.runtime.android)
