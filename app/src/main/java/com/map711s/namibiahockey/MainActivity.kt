@@ -1,5 +1,6 @@
 package com.map711s.namibiahockey
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -31,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -42,7 +44,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.map711s.namibiahockey.navigation.Screen
 import com.map711s.namibiahockey.presentation.common.OfflineStatusBar
 import com.map711s.namibiahockey.theme.NHUSpacing
+import com.map711s.namibiahockey.ui.components.NotificationPermissionHandler
+import com.map711s.namibiahockey.util.DeepLinkHandler
 import com.map711s.namibiahockey.util.NetworkMonitor
+import com.map711s.namibiahockey.util.NotificationManager
 import com.map711s.namibiahockey.util.WindowSize
 import com.map711s.namibiahockey.util.WindowSizeClass
 import com.map711s.namibiahockey.util.rememberContentPadding
@@ -55,12 +60,30 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var networkMonitor: NetworkMonitor
 
+    @Inject
+    lateinit var deepLinkHandler: DeepLinkHandler
+
+    @Inject
+    lateinit var notificationManager: NotificationManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             // Get window size information
             val windowSize = rememberWindowSize()
             val contentPadding = rememberContentPadding(windowSize)
+            val navController = rememberNavController()
+
+            // Handle deep links
+            LaunchedEffect(intent) {
+                deepLinkHandler.handleDeepLink(intent, navController)
+            }
+
+            // Check for notification permission
+            NotificationPermissionHandler(
+                notificationManager = notificationManager
+            )
 
             NamibiaHockeyTheme {
                 // A surface container using the 'background' color from the theme
@@ -70,18 +93,25 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Column {
                         OfflineStatusBar(networkMonitor = networkMonitor)
-                        NamibiaHockeyApp(windowSize = windowSize, contentPadding = contentPadding)
+                        NamibiaHockeyApp(windowSize = windowSize, contentPadding = contentPadding, navController = navController)
                     }
                 }
             }
         }
+    }
+
+    // Handle new intents (e.g., when app is already running)
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
     }
 }
 
 @Composable
 fun NamibiaHockeyApp(
     windowSize: WindowSize,
-    contentPadding: Dp
+    contentPadding: Dp,
+    navController: NavHostController
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
