@@ -44,6 +44,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,20 +98,15 @@ fun EventEntriesScreen(
     }
 
     // Filtered events based on search and tab
-    val filteredEvents = if (searchQuery.isBlank()) {
-        when (selectedTabIndex) {
-            0 -> events.filter { true } // Upcoming (all for demo)
-            1 -> emptyList<EventEntry>() // Past events (empty for demo)
-            2 -> events.filter { it.isRegistered } //My Entries
-            else -> eventsEntries
+    val filteredEvents = remember(events, searchQuery) {
+        derivedStateOf {
+            if (searchQuery.isBlank()) {
+                events
+            } else {
+                events.filter { it.title.contains(searchQuery, ignoreCase = true) }
+            }
         }
-    } else {
-        events.filter {
-            it.title.contains(searchQuery, ignoreCase = true) ||
-                    it.description.contains(searchQuery, ignoreCase = true) ||
-                    it.location.contains(searchQuery, ignoreCase = true)
-        }
-    }
+    }.value
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {

@@ -3,6 +3,7 @@ package com.map711s.namibiahockey
 import android.app.Application
 import coil.Coil
 import com.google.firebase.FirebaseApp
+import com.map711s.namibiahockey.di.AppInitializer
 import com.map711s.namibiahockey.util.ImageManager
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -13,6 +14,9 @@ class HockeyApplication : Application() {
     @Inject
     lateinit var imageManager: ImageManager
 
+    @Inject
+    lateinit var appInitializer: AppInitializer
+
     override fun onCreate() {
         super.onCreate()
         FirebaseApp.initializeApp(this)
@@ -20,6 +24,7 @@ class HockeyApplication : Application() {
 
         // Set the default Coil image loader
         Coil.setImageLoader(imageManager.imageLoader)
+        appInitializer.initialize()
     }
 
     override fun onTrimMemory(level: Int) {
