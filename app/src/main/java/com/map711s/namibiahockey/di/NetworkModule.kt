@@ -1,7 +1,5 @@
 package com.map711s.namibiahockey.di
 
-import com.google.android.datatransport.runtime.dagger.Module
-import com.google.android.datatransport.runtime.dagger.Provides
 import com.google.firebase.BuildConfig
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
@@ -11,6 +9,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import dagger.Module
+import dagger.Provides
+
 
 @Module
 @InstallIn(SingletonComponent::class)

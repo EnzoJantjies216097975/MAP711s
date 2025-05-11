@@ -88,9 +88,46 @@ class AuthRepositoryImpl @Inject constructor(
             // Save user to firestore
             userDataSource.saveUser(user.toData())
 
+            // Save user to Firestore
+            firestore.collection("users")
+                .document(firebaseUser.uid)
+                .set(user)
+                .await()
+
             Result.success(firebaseUser.uid)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
+
+    override suspend fun getUserProfile(userId: String): Result<User> {
+        return try {
+            val user = userDataSource.getUser(userId ?: "")
+                ?: return Result.failure(Exception("User not found"))
+
+            Result.success(user.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateUserProfile(user: User): Result<Unit> {
+        return try {
+            userDataSource.updateUser(user.toData())
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun resetPassword(email: String): Result<Unit> {
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
 }

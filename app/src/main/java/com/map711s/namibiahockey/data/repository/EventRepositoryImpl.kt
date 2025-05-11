@@ -1,15 +1,17 @@
 package com.map711s.namibiahockey.data.repository
 
-import com.google.common.collect.Queues
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.Source
 import com.map711s.namibiahockey.data.local.OfflineOperation
 import com.map711s.namibiahockey.data.local.OfflineOperationQueue
 import com.map711s.namibiahockey.data.local.OfflineOperationType
 import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.domain.repository.EventRepository
 import com.map711s.namibiahockey.util.FirestorePaginator
 import com.map711s.namibiahockey.util.NetworkMonitor
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,7 +31,6 @@ class EventRepositoryImpl @Inject constructor(
             documentSnapshot.toObject(EventEntry::class.java)?.copy(id = documentSnapshot.id)
         }
     }
-
 
     // Add pagination methods
     suspend fun getEventsFirstPage(): Result<List<EventEntry>> {
@@ -77,45 +78,93 @@ class EventRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllEvents(): Result<List<EventEntry>> {
+    override suspend fun getEvent(eventId: String): Result<EventEntry> {
         return try {
+            val documentSnapshot = firestore.collection("events").document(eventId).get().await()
+            if (documentSnapshot.exists()) {
+                val event = documentSnapshot.toObject(EventEntry::class.java)
+                    ?: return Result.failure(Exception("Failed to parse event data"))
+                Result.success(event)
+            } else {
+                Result.failure(Exception("Event not found"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateEvent(event: EventEntry): Result<Unit> {
+        return try {
+            firestore.collection("events").document(event.id).set(event.toHashMap()).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteEvent(eventId: String): Result<Unit> {
+        return try {
+            firestore.collection("events").document(eventId).delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
+    override suspend fun getAllEvents(): Result<List<EventEntry>> {
+        try {
             // Always fetch from cache first for immediate UI response
             val querySnapshot = firestore.collection("events")
-                .get(Source.CACHE)
+                .get() // Use default source which tries cache first
                 .await()
 
-            val eventsFromCache = querySnapshot.documents.mapNotNull { document ->
+            val eventsFromSource = querySnapshot.documents
+
+            if (eventsFromSource.isEmpty()) {
+                return Result.success(emptyList())
+            }
+
+            val mappedEvents: List<EventEntry> = eventsFromSource.mapNotNull { document ->
                 try {
-                    document.toObject(EventEntry::class.java)?.copy(id = document.id)
+                    val event = document.toObject(EventEntry::class.java)
+                    event?.copy(id = document.id)
                 } catch (e: Exception) {
                     null
                 }
             }
 
-            // If online, also fetch from server and update cache
-            if (networkMonitor.isCurrentlyOnline()) {
-                try {
-                    val serverSnapshot = firestore.collection("events")
-                        .get(Source.SERVER)
-                        .await()
+            return Result.success(mappedEvents)
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
+    }
 
-                    val eventsFromServer = serverSnapshot.documents.mapNotNull { document ->
-                        try {
-                            document.toObject(EventEntry::class.java)?.copy(id = document.id)
-                        } catch (e: Exception) {
-                            null
-                        }
-                    }
-
-                    // Return server data if available
-                    return Result.success(eventsFromServer)
-                } catch (e: Exception) {
-                    // If server fetch fails, still return cache data
-                }
+    override suspend fun registerForEvent(eventId: String): Result<Unit> {
+        return try {
+            val eventResult = getEvent(eventId)
+            if (eventResult.isSuccess) {
+                val event = eventResult.getOrThrow()
+                val updatedEvent = event.copy(isRegistered = true, registeredTeams = event.registeredTeams + 1)
+                updateEvent(updatedEvent)
+            } else {
+                Result.failure(eventResult.exceptionOrNull() ?: Exception("Failed to get event"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
-            // Return cache data
-            Result.success(eventsFromCache)
+    override suspend fun unregisterFromEvent(eventId: String): Result<Unit> {
+        return try {
+            val eventResult = getEvent(eventId)
+            if (eventResult.isSuccess) {
+                val event = eventResult.getOrThrow()
+                val updatedEvent = event.copy(isRegistered = false, registeredTeams = event.registeredTeams - 1)
+                updateEvent(updatedEvent)
+            } else {
+                Result.failure(eventResult.exceptionOrNull() ?: Exception("Failed to get event"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
