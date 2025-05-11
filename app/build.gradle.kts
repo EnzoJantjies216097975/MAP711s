@@ -63,9 +63,11 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.3.1")
     implementation("androidx.compose.ui:ui:1.7.8")
     implementation("androidx.compose.material:material:1.8.0-beta01")
+    implementation("androidx.compose.material3:material3-window-size-class")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.9")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
@@ -74,6 +76,8 @@ dependencies {
     // Dependency Injection - Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")
     implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.transport.runtime)
+    implementation(libs.androidx.espresso.core)
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.navigation.runtime.android)
@@ -90,13 +94,20 @@ dependencies {
     // Retrofit for API calls
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
+    // JSON Processing
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3") // For Firebase
 
     // Image loading - Coil
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.coil-kt:coil-gif:2.4.0")
 
     // Import the BoM for the Firebase platform
     implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
@@ -107,6 +118,9 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore:25.1.3")
     implementation("com.google.firebase:firebase-storage:21.0.1")
     implementation("com.google.firebase:firebase-messaging:23.3.1")
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    implementation("com.google.firebase:firebase-config-ktx") // Remote Config
+    implementation("com.google.firebase:firebase-dynamic-links-ktx") // For Deep Linking
 
     // Accompanist (Compose utilities)
     implementation("com.google.accompanist:accompanist-permissions:0.32.0")
@@ -119,13 +133,17 @@ dependencies {
     implementation("com.maxkeppeler.sheets-compose-dialogs:clock:1.2.0")
 
     //Android WorkManager
-
-    /*
-    The WorkManager API makes it easy to schedule deferrable, asynchronous tasks that must
-    be run reliably. These APIs let you create a task and hand it off to WorkManager to run when
-    the work constraints are met
-     */
     implementation("androidx.work:work-runtime-ktx:2.10.0")
+
+    // Maps integration
+    implementation("com.google.maps.android:maps-compose:6.6.0")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+
+    // The compose calendar library for Android
+    implementation("com.kizitonwose.calendar:compose:2.5.0")
+
+    // Pull to refresh
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.32.0")
 
     // Testing
     testImplementation(libs.junit)
@@ -136,9 +154,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    // Security
     implementation("androidx.security:security-crypto-ktx:1.1.0-alpha06")
 
+    // Shimmer effect for loading
+    implementation("com.valentinilk.shimmer:compose-shimmer:1.2.0")
 
+    // For QR code generation/scanning
+    implementation("com.google.zxing:core:3.5.2")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 }
 
 // Allow references to generated code

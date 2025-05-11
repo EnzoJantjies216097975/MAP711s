@@ -3,6 +3,7 @@ package com.map711s.namibiahockey
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -22,9 +23,16 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.map711s.namibiahockey.navigation.Screen
+import com.map711s.namibiahockey.presentation.common.OfflineStatusBar
+import com.map711s.namibiahockey.util.NetworkMonitor
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var networkMonitor: NetworkMonitor
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -34,7 +42,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NamibiaHockeyApp()
+                    Column {
+                        OfflineStatusBar(networkMonitor = networkMonitor)
+                        NamibiaHockeyApp()
+                    }
                 }
             }
         }

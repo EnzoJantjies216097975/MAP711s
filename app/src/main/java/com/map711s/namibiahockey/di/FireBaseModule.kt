@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.map711s.namibiahockey.data.remote.firebase.FirebaseSetup
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,11 +24,16 @@ object FireBaseModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseFirestore(): FirebaseFirestore = Firebase.firestore
+    fun provideFirebaseFirestore(): FirebaseFirestore {
+        val firestore = Firebase.firestore
+        FirebaseSetup.configureCaching(firestore)
+        return firestore
+    }
 
     @Provides
     @Singleton
     fun provideFirebaseAnalytics(@ApplicationContext context: Context): FirebaseAnalytics {
         return FirebaseAnalytics.getInstance(context)
     }
+
 }

@@ -11,6 +11,7 @@ composeBom = "2024.04.01"
 navigationRuntimeAndroid = "2.9.0-alpha09"
 hiltWork = "1.2.0"
 foundationLayoutAndroid = "1.7.4"
+transportRuntime = "3.1.9"
 
 
 [libraries]
@@ -31,6 +32,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-navigation-runtime-android = { group = "androidx.navigation", name = "navigation-runtime-android", version.ref = "navigationRuntimeAndroid" }
 androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWork" }
 androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
+transport-runtime = { group = "com.google.android.datatransport", name = "transport-runtime", version.ref = "transportRuntime" }
 
 
 [plugins]
