@@ -1,7 +1,7 @@
 package com.map711s.namibiahockey.navigation
 
-import AddEventScreen
-import AddNewsScreen
+import com.map711s.namibiahockey.presentation.events.AddEventScreen
+import com.map711s.namibiahockey.presentation.news.AddNewsScreen
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -16,15 +16,15 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.map711s.namibiahockey.screens.auth.LoginScreen
-import com.map711s.namibiahockey.screens.auth.RegisterScreen
-import com.map711s.namibiahockey.screens.events.EventEntriesScreen
-import com.map711s.namibiahockey.screens.home.HomeScreen
-import com.map711s.namibiahockey.screens.newsfeed.NewsFeedScreen
-import com.map711s.namibiahockey.screens.player.PlayerManagementScreen
-import com.map711s.namibiahockey.screens.profile.ProfileScreen
-import com.map711s.namibiahockey.screens.splash.SplashScreen
-import com.map711s.namibiahockey.screens.team.TeamRegistrationScreen
+import com.map711s.namibiahockey.presentation.auth.LoginScreen
+import com.map711s.namibiahockey.presentation.auth.RegisterScreen
+import com.map711s.namibiahockey.presentation.events.EventEntriesScreen
+import com.map711s.namibiahockey.presentation.home.HomeScreen
+import com.map711s.namibiahockey.presentation.news.NewsFeedScreen
+import com.map711s.namibiahockey.presentation.player.PlayerManagementScreen
+import com.map711s.namibiahockey.presentation.profile.ProfileScreen
+import com.map711s.namibiahockey.presentation.splash.SplashScreen
+import com.map711s.namibiahockey.presentation.team.TeamRegistrationScreen
 
 @Composable
 fun NamibiaHockeyNavHost(

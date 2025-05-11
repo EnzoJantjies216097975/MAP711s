@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.map711s.namibiahockey.navigation.BottomNavigationBar
 import com.map711s.namibiahockey.navigation.NamibiaHockeyNavHost
-import com.map711s.namibiahockey.theme.NamibiaHockeyTheme
+import com.map711s.namibiahockey.ui.theme.NamibiaHockeyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -43,8 +43,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.map711s.namibiahockey.navigation.Screen
 import com.map711s.namibiahockey.presentation.common.OfflineStatusBar
-import com.map711s.namibiahockey.theme.NHUSpacing
-import com.map711s.namibiahockey.ui.components.NotificationPermissionHandler
+import com.map711s.namibiahockey.ui.theme.NHUSpacing
+import com.map711s.namibiahockey.ui.components.dialogs.NotificationPermissionHandler
 import com.map711s.namibiahockey.util.DeepLinkHandler
 import com.map711s.namibiahockey.util.NetworkMonitor
 import com.map711s.namibiahockey.util.NotificationManager

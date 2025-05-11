@@ -1,4 +1,4 @@
-import com.map711s.namibiahockey.data.model.NewsCategory
+package com.map711s.namibiahockey.data.model
 
 data class NewsPiece(
     val id: String = "",
