@@ -37,7 +37,7 @@ object ErrorHandler {
             is FirebaseFirestoreException -> mapFirestoreError(error)
             is ConnectException -> "No internet connection"
             is SocketTimeoutException -> "Connection timed out"
-            else -> error.message ?: "An unexpected erroro occured"
+            else -> error.message ?: "An unexpected error occurred"
         }
     }
 

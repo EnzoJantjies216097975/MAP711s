@@ -2,6 +2,7 @@ package com.map711s.namibiahockey.ui.components
 
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
@@ -67,5 +68,10 @@ private fun shareContent(
     }
 
     val shareIntent = Intent.createChooser(sendIntent, "Share via")
-    context.startActivity(shareIntent)
+
+    try {
+        context.startActivity(shareIntent)
+    } catch (e:Exception) {
+        Toast.makeText(context, "No app available to share content.", Toast.LENGTH_SHORT).show()
+    }
 }

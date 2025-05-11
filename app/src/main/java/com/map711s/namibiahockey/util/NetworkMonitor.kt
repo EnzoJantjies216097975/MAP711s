@@ -19,15 +19,15 @@ class NetworkMonitor @Inject constructor(
 ) {
     // Provide network status as a Flow
     val isOnline: Flow<Boolean> = callbackFlow {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE)
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         val callback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
-                trySend(true)
+                trySend(true).isSuccess
             }
 
             override fun onLost(network: Network) {
-                trySend(false)
+                trySend(false).isSuccess
             }
         }
 
@@ -44,7 +44,7 @@ class NetworkMonitor @Inject constructor(
                     ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             } ?: false
 
-        trySend(isConnected)
+        trySend(isConnected).isSuccess
 
         awaitClose {
             connectivityManager.unregisterNetworkCallback(callback)
@@ -59,7 +59,5 @@ class NetworkMonitor @Inject constructor(
                 connectivityManager.getNetworkCapabilities(network)
                     ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             } ?: false
-    }
-}
     }
 }

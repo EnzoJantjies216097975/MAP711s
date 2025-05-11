@@ -37,33 +37,17 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="https"
-                    android:host="namibiahockey.com"
+                    android:host="namibiahockey.org"
                     android:pathPattern="/events/*" />
                 <data
                     android:scheme="https"
-                    android:host="namibiahockey.com"
+                    android:host="namibiahockey.org"
                     android:pathPattern="/news/*" />
                 <data
                     android:scheme="https"
-                    android:host="namibiahockey.com"
+                    android:host="namibiahockey.org"
                     android:pathPattern="/teams/*" />
             </intent-filter>
-
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="namibiahockey"
-                    android:host="events" />
-                <data
-                    android:scheme="namibiahockey"
-                    android:host="news" />
-                <data
-                    android:scheme="namibiahockey"
-                    android:host="teams" />
-            </intent-filter>
-
 
         </activity>
 

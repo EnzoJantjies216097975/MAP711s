@@ -28,15 +28,14 @@ class AuthViewModel @Inject constructor(
 
     override fun createInitialState(): LoginUiState = LoginUiState.Initial
 
-//    private val _userProfileState = MutableStateFlow(UserProfileState())
-//
-//    // Login state
-//    private val _loginState = MutableStateFlow(LoginState())
-//    val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
-//
-//    // Registration state
-//    private val _registerState = MutableStateFlow(RegisterState())
-//    val registerState: StateFlow<RegisterState> = _registerState.asStateFlow()
+
+    // Login state
+    private val _loginState = MutableStateFlow(LoginState())
+    val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
+
+    // Registration state
+    private val _registerState = MutableStateFlow(RegisterState())
+    val registerState: StateFlow<RegisterState> = _registerState.asStateFlow()
 
     // User profile state
     private val _userProfileState = MutableStateFlow(UserProfileState())

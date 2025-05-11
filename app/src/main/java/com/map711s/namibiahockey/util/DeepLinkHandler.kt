@@ -10,6 +10,10 @@ import javax.inject.Singleton
 @Singleton
 class DeepLinkHandler @Inject constructor() {
 
+    // Domain constants
+    private val WEBSITE_DOMAIN = "namibiahockey.org"
+    private val APP_SCHEME = "namibiahockey"
+
     // Process deep links coming from intents
     fun handleDeepLink(intent: Intent?, navController: NavController) {
         intent?.data?.let { uri ->
@@ -22,7 +26,7 @@ class DeepLinkHandler @Inject constructor() {
 
     // Parse URI and convert to navigation route
     private fun parseDeepLink(uri: Uri): String {
-        // Web URL format: https://namibiahockey.com/events/123
+        // Web URL format: https://namibiahockey.org/events/123
         // Custom URI format: namibiahockey://events/123
 
         return when {
@@ -50,15 +54,18 @@ class DeepLinkHandler @Inject constructor() {
     }
 
     private fun isEventDeepLink(uri: Uri): Boolean {
-        return (uri.host == "events" || uri.pathSegments.firstOrNull() == "events")
+        return (uri.host == WEBSITE_DOMAIN && uri.pathSegments.firstOrNull() == "events") ||
+                (uri.scheme == APP_SCHEME && uri.host == "events")
     }
 
     private fun isNewsDeepLink(uri: Uri): Boolean {
-        return (uri.host == "news" || uri.pathSegments.firstOrNull() == "news")
+        return (uri.host == WEBSITE_DOMAIN && uri.pathSegments.firstOrNull() == "news") ||
+                (uri.scheme == APP_SCHEME && uri.host == "news")
     }
 
     private fun isTeamDeepLink(uri: Uri): Boolean {
-        return (uri.host == "teams" || uri.pathSegments.firstOrNull() == "teams")
+        return (uri.host == WEBSITE_DOMAIN && uri.pathSegments.firstOrNull() == "teams") ||
+                (uri.scheme == APP_SCHEME && uri.host == "teams")
     }
 
     private fun extractIdFromPath(uri: Uri): String {
@@ -75,6 +82,6 @@ class DeepLinkHandler @Inject constructor() {
 
     // Generate deep link URLs for sharing
     fun generateDeepLinkUrl(type: String, id: String): String {
-        return "https://namibiahockey.com/$type/$id"
+        return "https://$WEBSITE_DOMAIN/$type/$id"
     }
 }
