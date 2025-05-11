@@ -1,0 +1,12 @@
+package com.map711s.namibiahockey.domain.usecase.news
+
+import com.map711s.namibiahockey.data.model.NewsPiece
+import javax.inject.Inject
+
+class GetAllNewsPiecesUseCase @Inject constructor(
+    private val newsRepository: NewsRepository
+) {
+    suspend operator fun invoke(): Result<List<NewsPiece>> {
+        return newsRepository.getAllNewsPieces()
+    }
+}
