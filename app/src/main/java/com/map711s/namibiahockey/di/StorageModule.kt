@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import com.map711s.namibiahockey.util.SecureStorageManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,6 +15,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object StorageModule {
+
     @Provides
     @Singleton
     fun provideEncryptedSharedPreferences(
@@ -29,4 +31,18 @@ object StorageModule {
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
     }
+
+    @Provides
+    @Singleton
+    fun provideSecureStorageManager(@ApplicationContext context: Context): SecureStorageManager {
+        return SecureStorageManager(context)
+    }
+
+    // For non-sensitive data, use regular SharedPreferences
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences("hockey_prefs", Context.MODE_PRIVATE)
+    }
+
 }

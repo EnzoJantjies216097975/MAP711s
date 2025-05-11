@@ -8,6 +8,7 @@ import com.map711s.namibiahockey.data.remote.firebase.FirebaseUserDataSource
 import com.map711s.namibiahockey.domain.model.User
 import com.map711s.namibiahockey.domain.model.UserRole
 import com.map711s.namibiahockey.domain.repository.AuthRepository
+import com.map711s.namibiahockey.util.SecureStorageManager
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,7 +17,8 @@ import javax.inject.Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
-    private val userDataSource: FirebaseUserDataSource
+    private val userDataSource: FirebaseUserDataSource,
+    private val secureStorageManager: SecureStorageManager
     //private val context: Context
 ) : AuthRepository {
 
@@ -25,8 +27,41 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override fun getCurrentUserId(): String? {
-        return auth.currentUser?.uid
+        return auth.currentUser?.uid ?: secureStorageManager.getUserId()
+    }
 
+    override suspend fun loginUser(email: String, password: String): Result<String> {
+        return try {
+            val authResult = auth.signInWithEmailAndPassword(email, password).await()
+            val firebaseUser = authResult.user
+                ?: return Result.failure(Exception("Login failed: User is null"))
+
+            // Store user ID in secure storage
+            secureStorageManager.storeUserId(firebaseUser.uid)
+
+            // Store refresh token if available
+            firebaseUser.getIdToken(true).await()?.token?.let { token ->
+                secureStorageManager.storeAuthToken(token)
+            }
+
+            Result.success(firebaseUser.uid)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun logoutUser(): Result<Unit> {
+        return try {
+            auth.signOut()
+
+            // Clear secure storage
+            secureStorageManager.clearAuthToken()
+            secureStorageManager.clearUserId()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun registerUser(
