@@ -24,9 +24,9 @@ object FireBaseModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseFirestore(): FirebaseFirestore {
+    fun provideFirebaseFirestore(firebaseSetup: FirebaseSetup): FirebaseFirestore {
         val firestore = Firebase.firestore
-        FirebaseSetup.configureCaching(firestore)
+        firebaseSetup.configureCaching(firestore)
         return firestore
     }
 

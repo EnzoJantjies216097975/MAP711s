@@ -2,8 +2,11 @@ package com.map711s.namibiahockey.data.remote.firebase
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object FirebaseSetup {
+@Singleton
+class FirebaseSetup @Inject constructor() {
     fun configureCaching(firestore: FirebaseFirestore) {
         // Configure Firestore for offline caching
         val settings = FirebaseFirestoreSettings.Builder()
