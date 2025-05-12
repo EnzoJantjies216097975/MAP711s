@@ -14,12 +14,16 @@ import kotlinx.coroutines.tasks.await
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import android.content.Context
 
 @Singleton
 class EventRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val networkMonitor: NetworkMonitor,
-    private val offlineQueues: OfflineOperationQueue
+    private val offlineQueues: OfflineOperationQueue,
+    @ApplicationContext private val context: Context
 ) : EventRepository {
 
     private val paginator by lazy {

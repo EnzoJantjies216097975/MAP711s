@@ -1,6 +1,6 @@
 package com.map711s.namibiahockey.domain.repository
 
-import NewsPiece
+import com.map711s.namibiahockey.data.model.NewsPiece
 import kotlinx.coroutines.flow.Flow
 
 interface NewsRepository {

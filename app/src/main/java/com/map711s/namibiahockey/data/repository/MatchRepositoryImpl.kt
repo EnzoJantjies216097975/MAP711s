@@ -7,16 +7,19 @@ import com.map711s.namibiahockey.data.model.Match
 import com.map711s.namibiahockey.data.model.MatchStatus
 import com.map711s.namibiahockey.data.model.Scorer
 import com.map711s.namibiahockey.domain.repository.MatchRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.tasks.await
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
+import android.content.Context
 
 @Singleton
 class MatchRepositoryImpl @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    @ApplicationContext private val context: Context
 ) : MatchRepository {
 
     private val matchesCollection = firestore.collection("matches")

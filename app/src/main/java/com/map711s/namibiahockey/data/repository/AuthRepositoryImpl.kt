@@ -12,14 +12,16 @@ import com.map711s.namibiahockey.util.SecureStorageManager
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
+import dagger.hilt.android.qualifiers.ApplicationContext
+import android.content.Context
 
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val userDataSource: FirebaseUserDataSource,
-    private val secureStorageManager: SecureStorageManager
-    //private val context: Context
+    private val secureStorageManager: SecureStorageManager,
+    @ApplicationContext private val context: Context
 ) : AuthRepository {
 
     override fun isUserLoggedIn(): Boolean {
