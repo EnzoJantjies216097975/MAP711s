@@ -71,7 +71,7 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    fun registerUser(
+    override fun registerUser(
         email: String,
         password: String,
         name: String,
@@ -82,7 +82,7 @@ class AuthRepositoryImpl @Inject constructor(
             try {
                 val authResult = auth.createUserWithEmailAndPassword(email, password).await()
                 val firebaseUser = authResult.user
-                    ?: return Result.failure(Exception("Registration failed: User is null"))
+                    ?: return@runBlocking Result.failure(Exception("Registration failed: User is null"))
 
                 // Create user profile in Firestore
                 val user = User(

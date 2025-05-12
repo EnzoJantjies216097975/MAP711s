@@ -2,6 +2,7 @@ package com.map711s.namibiahockey.presentation.auth
 
 import androidx.lifecycle.viewModelScope
 import com.map711s.namibiahockey.data.mapper.toData
+import com.map711s.namibiahockey.data.mapper.toDomain
 import com.map711s.namibiahockey.domain.model.UserRole
 import com.map711s.namibiahockey.domain.repository.AuthRepository
 import com.map711s.namibiahockey.presentation.auth.state.LoginState
@@ -55,7 +56,7 @@ class AuthViewModel @Inject constructor(
                 role = convertToDataRole(domainUser.role)
             )
 
-            authRepository.updateUserProfile(dataUser)
+            authRepository.updateUserProfile(dataUser.toDomain())
         }
     }
 
@@ -183,7 +184,7 @@ class AuthViewModel @Inject constructor(
                     _userProfileState.update {
                         it.copy(
                             isLoading = false,
-                            user = user
+                            user = user.toData()
                         )
                     }
                 }
