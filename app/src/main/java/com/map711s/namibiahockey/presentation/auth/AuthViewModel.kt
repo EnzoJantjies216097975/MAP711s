@@ -52,14 +52,14 @@ class AuthViewModel @Inject constructor(
                 email = domainUser.email,
                 name = domainUser.name,
                 phone = domainUser.phone,
-                role = converttoDataRole(domainUser.role)
+                role = convertToDataRole(domainUser.role)
             )
 
             authRepository.updateUserProfile(dataUser)
         }
     }
 
-    private fun converttoDataRole(domainRole: com.map711s.namibiahockey.domain.model.UserRole): com.map711s.namibiahockey.data.model.UserRole {
+    private fun convertToDataRole(domainRole: com.map711s.namibiahockey.domain.model.UserRole): com.map711s.namibiahockey.data.model.UserRole {
         return when(domainRole) {
             com.map711s.namibiahockey.domain.model.UserRole.ADMIN -> com.map711s.namibiahockey.data.model.UserRole.ADMIN
             com.map711s.namibiahockey.domain.model.UserRole.COACH -> com.map711s.namibiahockey.data.model.UserRole.COACH

@@ -64,7 +64,7 @@ private fun shareContent(
     val sendIntent = Intent().apply {
         action = Intent.ACTION_SEND
         putExtra(Intent.EXTRA_TEXT, shareText)
-        type = "text/plain"
+        var type = "text/plain"
     }
 
     val shareIntent = Intent.createChooser(sendIntent, "Share via")

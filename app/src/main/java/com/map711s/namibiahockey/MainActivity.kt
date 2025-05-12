@@ -57,6 +57,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+    private lateinit var navController: NavHostController
 
     @Inject
     lateinit var networkMonitor: NetworkMonitor
@@ -102,9 +103,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Handle new intents (e.g., when app is already running)
-    @Override
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent){
         super.onNewIntent(intent)
+        setIntent(intent)
         intent?.let {
             setIntent(it)
             deepLinkHandler.handleDeepLink(it, navController)

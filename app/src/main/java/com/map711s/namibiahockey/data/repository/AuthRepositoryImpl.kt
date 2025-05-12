@@ -17,6 +17,7 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import com.map711s.namibiahockey.data.remote.model.FirebaseUser as CustomFirebaseUser
 
 @Singleton
@@ -70,53 +71,55 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun registerUser(
+    fun registerUser(
         email: String,
         password: String,
         name: String,
         phone: String,
         role: UserRole
     ): Result<String> {
-        return try {
-            val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-            val firebaseUser = authResult.user
-                ?: return Result.failure(Exception("Registration failed: User is null"))
+        return runBlocking {
+            try {
+                val authResult = auth.createUserWithEmailAndPassword(email, password).await()
+                val firebaseUser = authResult.user
+                    ?: return Result.failure(Exception("Registration failed: User is null"))
 
-            // Create user profile in Firestore
-            val user = User(
-                id = firebaseUser.uid,
-                email = email,
-                name = name,
-                phone = phone,
-                role = role
-            )
+                // Create user profile in Firestore
+                val user = User(
+                    id = firebaseUser.uid,
+                    email = email,
+                    name = name,
+                    phone = phone,
+                    role = role
+                )
 
-            // Save user to firestore (convert to your custom FirebaseUser)
-            val customFirebaseUser = CustomFirebaseUser(
-                id = firebaseUser.uid,
-                email = email,
-                name = name,
-                phone = phone,
-                role = role.name
-            )
+                // Save user to firestore (convert to your custom FirebaseUser)
+                val customFirebaseUser = CustomFirebaseUser(
+                    id = firebaseUser.uid,
+                    email = email,
+                    name = name,
+                    phone = phone,
+                    role = role.name
+                )
 
-            userDataSource.saveUser(customFirebaseUser)
+                userDataSource.saveUser(customFirebaseUser)
 
-            // Save user to Firestore as a generic map
-            firestore.collection("users")
-                .document(firebaseUser.uid)
-                .set(mapOf(
-                    "id" to user.id,
-                    "email" to user.email,
-                    "name" to user.name,
-                    "phone" to user.phone,
-                    "role" to user.role.name
-                ))
-                .await()
+                // Save user to Firestore as a generic map
+                firestore.collection("users")
+                    .document(firebaseUser.uid)
+                    .set(mapOf(
+                        "id" to user.id,
+                        "email" to user.email,
+                        "name" to user.name,
+                        "phone" to user.phone,
+                        "role" to user.role.name
+                    ))
+                    .await()
 
-            Result.success(firebaseUser.uid)
-        } catch (e: Exception) {
-            Result.failure(e)
+                Result.success(firebaseUser.uid)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
 
