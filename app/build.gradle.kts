@@ -173,6 +173,7 @@ dependencies {
     implementation("androidx.window:window:1.3.0")
 
     implementation("io.coil-kt:coil-svg:2.4.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
 }
 
 // Allow references to generated code
