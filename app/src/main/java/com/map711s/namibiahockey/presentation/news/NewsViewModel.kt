@@ -35,7 +35,7 @@ class NewsViewModel @Inject constructor(
         viewModelScope.launch {
             val result = newsRepository.createNewsPiece(newsPiece)
             if (result.isSuccess) {
-                val newsId = result.getOrNull() // or however you access the value
+                val newsId = result.getOrNull() ?: ""
                 _newsState.update { it.copy(isLoading = false, newsPiece = newsPiece.copy(id = newsId)) }
                 loadAllNewsPieces()
             } else {

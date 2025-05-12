@@ -70,7 +70,7 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun registerUser(
+    override fun registerUser(
         email: String,
         password: String,
         name: String,
@@ -99,6 +99,7 @@ class AuthRepositoryImpl @Inject constructor(
                 phone = phone,
                 role = role.name
             )
+
             userDataSource.saveUser(customFirebaseUser)
 
             // Save user to Firestore as a generic map
@@ -154,7 +155,9 @@ class AuthRepositoryImpl @Inject constructor(
                 phone = user.phone,
                 role = user.role.name
             )
-            userDataSource.updateUser(customFirebaseUser)
+
+            userDataSource.updatedUser(customFirebaseUser)
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

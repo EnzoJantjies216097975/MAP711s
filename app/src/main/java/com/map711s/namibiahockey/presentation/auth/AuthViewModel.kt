@@ -1,6 +1,7 @@
 package com.map711s.namibiahockey.presentation.auth
 
 import androidx.lifecycle.viewModelScope
+import com.map711s.namibiahockey.data.mapper.toData
 import com.map711s.namibiahockey.domain.model.UserRole
 import com.map711s.namibiahockey.domain.repository.AuthRepository
 import com.map711s.namibiahockey.presentation.auth.state.LoginState
@@ -40,6 +41,30 @@ class AuthViewModel @Inject constructor(
         // Check if user is already logged in
         if (authRepository.isUserLoggedIn()) {
             loadUserProfile()
+        }
+    }
+
+    private fun updateUserProfile(domainUser: com.map711s.namibiahockey.domain.model.User) {
+        viewModelScope.launch {
+            // Convert domain model to data model
+            val dataUser = com.map711s.namibiahockey.data.model.User(
+                id = domainUser.id,
+                email = domainUser.email,
+                name = domainUser.name,
+                phone = domainUser.phone,
+                role = converttoDataRole(domainUser.role)
+            )
+
+            authRepository.updateUserProfile(dataUser)
+        }
+    }
+
+    private fun converttoDataRole(domainRole: com.map711s.namibiahockey.domain.model.UserRole): com.map711s.namibiahockey.data.model.UserRole {
+        return when(domainRole) {
+            com.map711s.namibiahockey.domain.model.UserRole.ADMIN -> com.map711s.namibiahockey.data.model.UserRole.ADMIN
+            com.map711s.namibiahockey.domain.model.UserRole.COACH -> com.map711s.namibiahockey.data.model.UserRole.COACH
+            com.map711s.namibiahockey.domain.model.UserRole.MANAGER -> com.map711s.namibiahockey.data.model.UserRole.MANAGER
+            com.map711s.namibiahockey.domain.model.UserRole.PLAYER -> com.map711s.namibiahockey.data.model.UserRole.PLAYER
         }
     }
 

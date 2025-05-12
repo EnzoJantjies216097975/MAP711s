@@ -302,7 +302,7 @@ fun RegisterScreen(
                             confirmPassword = confirmPassword,
                             name = name,
                             phone = phone,
-                            role = UserRole.PLAYER
+                            role = com.map711s.namibiahockey.domain.model.UserRole.PLAYER
                         )
                     },
 

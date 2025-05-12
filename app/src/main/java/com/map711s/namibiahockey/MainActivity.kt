@@ -55,7 +55,7 @@ import com.map711s.namibiahockey.util.rememberWindowSize
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var networkMonitor: NetworkMonitor
@@ -101,9 +101,13 @@ class MainActivity : ComponentActivity() {
     }
 
     // Handle new intents (e.g., when app is already running)
+    @Override
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        intent?.let { setIntent(it) }
+        intent?.let {
+            setIntent(it)
+            deepLinkHandler.handleDeepLink(it, navController)
+        }
     }
 }
 

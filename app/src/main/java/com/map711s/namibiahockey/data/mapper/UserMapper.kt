@@ -10,7 +10,7 @@ import com.map711s.namibiahockey.data.model.UserRole as DataRole
 import com.map711s.namibiahockey.domain.model.UserRole as DomainRole
 
 // Domain to Data
-fun User.toData(): FirebaseUser {
+fun User.toFirebaseUser(): FirebaseUser {
     return FirebaseUser(
         id = id,
         email = email,
