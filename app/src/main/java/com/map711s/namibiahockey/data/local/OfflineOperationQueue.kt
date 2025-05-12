@@ -103,7 +103,26 @@ class OfflineOperationQueue @Inject constructor(
                 // Process news creation
                 true
             }
-            // Add other operation types
+
+            OfflineOperationType.DELETE_EVENT -> {
+                true
+            }
+
+            OfflineOperationType.UPDATE_NEWS -> {
+                true
+            }
+
+            OfflineOperationType.DELETE_NEWS -> {
+                true
+            }
+
+            OfflineOperationType.REGISTER_FOR_EVENT -> {
+                true
+            }
+
+            OfflineOperationType.UNREGISTER_FROM_EVENT -> {
+                true
+            }
         }
     }
 }

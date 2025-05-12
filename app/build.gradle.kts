@@ -163,6 +163,10 @@ dependencies {
     // For QR code generation/scanning
     implementation("com.google.zxing:core:3.5.2")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.datastore:datastore-preferences-core:1.0.0")
+    implementation("androidx.datastore:datastore-core:1.0.0")
 }
 
 // Allow references to generated code

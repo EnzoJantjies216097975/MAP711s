@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -25,11 +26,13 @@ import com.map711s.namibiahockey.presentation.player.PlayerManagementScreen
 import com.map711s.namibiahockey.presentation.profile.ProfileScreen
 import com.map711s.namibiahockey.presentation.splash.SplashScreen
 import com.map711s.namibiahockey.presentation.team.TeamRegistrationScreen
+import com.map711s.namibiahockey.util.WindowSize
 
 @Composable
 fun NamibiaHockeyNavHost(
     navController: NavHostController,
     startDestination: Screen = Screen.Splash,
+    windowSize = windowSize,
     modifier: Modifier = Modifier
 ) {
     val navigation = remember { NamibiaHockeyNavigation(navController) }

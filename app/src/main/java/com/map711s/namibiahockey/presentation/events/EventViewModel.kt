@@ -30,6 +30,8 @@ class EventViewModel @Inject constructor(
             error = null
         )
     )
+    private val _eventState = MutableStateFlow(EventState())
+    val eventState: StateFlow<EventState> = _eventState.asStateFlow()
 
     val eventListState: StateFlow<EventListState> = _eventListState.asStateFlow()
 

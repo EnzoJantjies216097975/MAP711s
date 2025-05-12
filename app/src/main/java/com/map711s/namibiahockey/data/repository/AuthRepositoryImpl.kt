@@ -14,6 +14,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
+import com.map711s.namibiahockey.data.remote.model.FirebaseUser as CustomFirebaseUser
 
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
@@ -66,7 +67,7 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun registerUser(
+    override fun registerUser(
         email: String,
         password: String,
         name: String,
