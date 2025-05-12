@@ -27,12 +27,13 @@ import com.map711s.namibiahockey.presentation.profile.ProfileScreen
 import com.map711s.namibiahockey.presentation.splash.SplashScreen
 import com.map711s.namibiahockey.presentation.team.TeamRegistrationScreen
 import com.map711s.namibiahockey.util.WindowSize
+import com.map711s.namibiahockey.util.WindowSizeClass
 
 @Composable
 fun NamibiaHockeyNavHost(
     navController: NavHostController,
     startDestination: Screen = Screen.Splash,
-    windowSize = windowSize,
+    windowSize: WindowSize = WindowSize(WindowSizeClass.COMPACT, WindowSizeClass.COMPACT),
     modifier: Modifier = Modifier
 ) {
     val navigation = remember { NamibiaHockeyNavigation(navController) }
@@ -102,7 +103,8 @@ fun NamibiaHockeyNavHost(
         composable(Screen.EVENT_ENTRIES) {
             EventEntriesScreen(
                 onNavigateBack = { navController.navigateUp() },
-                onNavigateToAddEvent = {navController.navigate(Screen.ADD_EVENT)}
+                onNavigateToAddEvent = {navController.navigate(Screen.ADD_EVENT)},
+                windowSize = windowSize
             )
         }
         composable(Screen.ADD_EVENT){
@@ -146,7 +148,8 @@ fun NamibiaHockeyNavHost(
             val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
             EventDetailsScreen(
                 eventId = eventId,
-                onNavigateBack = { navigation.navigateUp(Screen.TeamRegistration) }
+                onNavigateBack = { navigation.navigateUp(Screen.TeamRegistration) },
+                windowSize = windowSize
             )
         }
     }
@@ -155,7 +158,8 @@ fun NamibiaHockeyNavHost(
 @Composable
 fun EventDetailsScreen(
     eventId: String,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    windowSize: WindowSize
 ) {
     Surface {
         Column(

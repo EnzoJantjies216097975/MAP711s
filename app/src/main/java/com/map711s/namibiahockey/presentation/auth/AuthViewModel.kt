@@ -1,28 +1,20 @@
 package com.map711s.namibiahockey.presentation.auth
 
-import com.map711s.namibiahockey.presentation.auth.state.LoginState
+import androidx.lifecycle.viewModelScope
+import com.map711s.namibiahockey.domain.model.UserRole
 import com.map711s.namibiahockey.domain.repository.AuthRepository
+import com.map711s.namibiahockey.presentation.auth.state.LoginState
+import com.map711s.namibiahockey.presentation.auth.state.LoginUiState
 import com.map711s.namibiahockey.presentation.auth.state.RegisterState
+import com.map711s.namibiahockey.presentation.common.BaseViewModel
 import com.map711s.namibiahockey.presentation.profile.state.UserProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
-import androidx.lifecycle.viewModelScope
-import com.map711s.namibiahockey.data.model.UserRole
-import com.map711s.namibiahockey.presentation.auth.state.LoginUiState
-import com.map711s.namibiahockey.presentation.common.BaseViewModel
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.ktx.storage
+import javax.inject.Inject
 
 
 @HiltViewModel
@@ -63,18 +55,17 @@ class AuthViewModel @Inject constructor(
         _state.value = LoginUiState.Loading
 
         viewModelScope.launch {
-            authRepository.loginUser(email, password)
-                .onSuccess { firebaseUser ->
-                    _state.value = LoginUiState.Success(firebaseUser.uid)
-                    loadUserProfile()
-                }
-                .onFailure { exception ->
-                    _state.value = LoginUiState.Error(
-                        handleError(exception as Exception) {
-                            LoginUiState.Error(it.message ?: "Login failed")
-                        }.message
-                    )
-                }
+            try {
+                val result = authRepository.loginUser(email, password)
+                val userId = result.getOrThrow()
+                _state.value = LoginUiState.Success(userId)
+                loadUserProfile()
+            } catch (exception: Exception) {
+                _state.value = LoginUiState.Error(
+                    message = exception.message ?: "Login failed",
+                    cause = LoginUiState.ErrorCause.UNKNOWN
+                )
+            }
         }
     }
 
@@ -89,7 +80,17 @@ class AuthViewModel @Inject constructor(
     ) {
         if (email.isBlank() || password.isBlank() || confirmPassword.isBlank() ||
             name.isBlank() || phone.isBlank()) {
-            _State.update {
+            _registerState.update {
+                it.copy(
+                    isLoading = false,
+                    error = "All fields are required"
+                )
+            }
+            return
+        }
+
+        if (password != confirmPassword) {
+            _registerState.update {
                 it.copy(
                     isLoading = false,
                     error = "Passwords do not match"
@@ -101,31 +102,35 @@ class AuthViewModel @Inject constructor(
         _registerState.update { it.copy(isLoading = true, error = null) }
 
         viewModelScope.launch {
-            authRepository.registerUser(email, password, name, phone, role)
-                .onSuccess { firebaseUser ->
-                    _registerState.update {
-                        it.copy(
-                            isLoading = false,
-                            isRegistered = true,
-                            userId = firebaseUser.uid
-                        )
-                    }
-                    _loginState.update {
-                        it.copy(
-                            isLoggedIn = true,
-                            userId = firebaseUser.uid
-                        )
-                    }
-                    loadUserProfile()
+            try {
+                val userId = authRepository.registerUser(
+                    email, password, name, phone, role
+                ).getOrThrow()
+
+                _registerState.update {
+                    it.copy(
+                        isLoading = false,
+                        isRegistered = true,
+                        userId = userId
+                    )
                 }
-                .onFailure { exception ->
-                    _registerState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = exception.message ?: "Registration failed"
-                        )
-                    }
+
+                _loginState.update {
+                    it.copy(
+                        isLoggedIn = true,
+                        userId = userId
+                    )
                 }
+
+                loadUserProfile()
+            } catch (exception: Exception) {
+                _registerState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = exception.message ?: "Registration failed"
+                    )
+                }
+            }
         }
     }
 

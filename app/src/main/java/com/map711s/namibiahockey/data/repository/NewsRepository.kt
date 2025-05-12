@@ -1,6 +1,6 @@
 package com.map711s.namibiahockey.data.repository
 
-import NewsPiece
+import com.map711s.namibiahockey.data.model.NewsPiece
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
@@ -11,7 +11,6 @@ import javax.inject.Singleton
 
 @Singleton
 class NewsRepository @Inject constructor(
-    // private val firestore: FirebaseFirestore
 ) {
     private val firestore = Firebase.firestore
 
@@ -104,4 +103,5 @@ class NewsRepository @Inject constructor(
         } finally {
             Log.d("NewsRepository", "getAllNewsPieces() finished")
         }
-    }}
+    }
+}

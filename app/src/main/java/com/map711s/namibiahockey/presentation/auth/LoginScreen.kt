@@ -56,9 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.map711s.namibiahockey.R
-import com.map711s.namibiahockey.viewmodel.AuthViewModel
+import com.map711s.namibiahockey.presentation.auth.AuthViewModel
 import kotlinx.coroutines.launch
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

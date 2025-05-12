@@ -30,9 +30,9 @@ fun DrawingCache(
                 // Cache is rebuilt when invalidationKey changes
                 onDrawWithContent {
                     // Only draw if we have a size
-                    if (size != IntSize.Zero) {
-                        draw { content() }
-                    }
+//                    if (size != IntSize.Zero) {
+//                        draw { content() }
+
                 }
             }
     ) {

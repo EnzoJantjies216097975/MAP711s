@@ -103,7 +103,7 @@ class MainActivity : ComponentActivity() {
     // Handle new intents (e.g., when app is already running)
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        setIntent(intent)
+        intent?.let { setIntent(it) }
     }
 }
 

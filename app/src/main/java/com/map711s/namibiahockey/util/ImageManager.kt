@@ -2,10 +2,10 @@ package com.map711s.namibiahockey.util
 
 import android.content.Context
 import coil.ImageLoader
+import coil.decode.Decoder
 import coil.decode.SvgDecoder
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
-import coil.request.CachePolicy
 import coil.util.DebugLogger
 import com.map711s.namibiahockey.BuildConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -32,7 +32,7 @@ class ImageManager @Inject constructor(
         .respectCacheHeaders(false) // Ignore cache headers for offline support
         .crossfade(true) // Enable crossfade animation
         .components {
-            add(SvgDecoder.Factory()) // Add SVG support
+            add(SvgDecoder.Factory() as Decoder.Factory) // Add SVG support
         }
         .apply {
             // Add debug logger in debug builds

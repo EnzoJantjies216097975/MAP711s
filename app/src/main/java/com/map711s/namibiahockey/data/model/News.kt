@@ -10,6 +10,7 @@ data class NewsPiece(
     val isBookmarked: Boolean = false
 )
 {
+
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf(
             "title" to title,
@@ -19,4 +20,5 @@ data class NewsPiece(
             "category" to category.name, // Store the enum name as a String
             "isBookmarked" to isBookmarked
         )
-    }}
+    }
+}

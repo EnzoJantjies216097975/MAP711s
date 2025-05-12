@@ -41,24 +41,25 @@ class EventViewModel @Inject constructor(
 
         _eventListState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
-            eventRepository.getEventsFirstPage()
-                .onSuccess { events ->
-                    _eventListState.update {
-                        it.copy(
-                            isLoading = false,
-                            events = events,
-                            canLoadMore = events.size == 10 // If we got a full page, there might be more
-                        )
-                    }
+            try {
+                // Use the repository's actual method for getting events
+                val events = eventRepository.getAllEvents().getOrThrow()
+
+                _eventListState.update {
+                    it.copy(
+                        isLoading = false,
+                        events = events,
+                        canLoadMore = events.isNotEmpty() // Simplify the check
+                    )
                 }
-                .onFailure { exception ->
-                    _eventListState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = exception.message ?: "Failed to load events"
-                        )
-                    }
+            } catch (exception: Exception) {
+                _eventListState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = exception.message ?: "Failed to load events"
+                    )
                 }
+            }
         }
     }
 
@@ -68,24 +69,30 @@ class EventViewModel @Inject constructor(
 
         _eventListState.update { it.copy(isLoadingMore = true) }
         viewModelScope.launch {
-            eventRepository.getEventsNextPage()
-                .onSuccess { newEvents ->
-                    _eventListState.update { currentState ->
-                        currentState.copy(
-                            isLoadingMore = false,
-                            events = currentState.events + newEvents,
-                            canLoadMore = newEvents.size == 10
-                        )
-                    }
+            try {
+                // Use the repository's actual method or implement pagination yourself
+                val currentEvents = _eventListState.value.events
+                val lastEventId = currentEvents.lastOrNull()?.id
+
+                // This is a placeholder - adapt it to how your repository actually works
+                val newEvents = eventRepository.getAllEvents().getOrThrow()
+                    .filter { it.id !in currentEvents.map { event -> event.id } }
+
+                _eventListState.update { currentState ->
+                    currentState.copy(
+                        isLoadingMore = false,
+                        events = currentState.events + newEvents,
+                        canLoadMore = newEvents.isNotEmpty()
+                    )
                 }
-                .onFailure { exception ->
-                    _eventListState.update {
-                        it.copy(
-                            isLoadingMore = false,
-                            error = exception.message ?: "Failed to load more events"
-                        )
-                    }
+            } catch (exception: Exception) {
+                _eventListState.update {
+                    it.copy(
+                        isLoadingMore = false,
+                        error = exception.message ?: "Failed to load more events"
+                    )
                 }
+            }
         }
     }
 
@@ -93,25 +100,24 @@ class EventViewModel @Inject constructor(
     fun createEvent(event: EventEntry) {
         _eventState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
-            eventRepository.createEvent(event)
-                .onSuccess { eventId ->
-                    _eventState.update {
-                        it.copy(
-                            isLoading = false,
-                            isSuccess = true,
-                            eventId = eventId
-                        )
-                    }
-                    loadAllEvents()
+            try {
+                val eventId = eventRepository.createEvent(event).getOrThrow()
+                _eventState.update {
+                    it.copy(
+                        isLoading = false,
+                        isSuccess = true,
+                        eventId = eventId
+                    )
                 }
-                .onFailure { exception ->
-                    _eventState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = exception.message ?: "Failed to create event"
-                        )
-                    }
+                loadAllEvents()
+            } catch (exception: Exception) {
+                _eventState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = exception.message ?: "Failed to create event"
+                    )
                 }
+            }
         }
     }
 

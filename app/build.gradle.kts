@@ -78,6 +78,8 @@ dependencies {
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.transport.runtime)
     implementation(libs.androidx.espresso.core)
+    implementation(libs.transport.backend.cct)
+    implementation(libs.transport.backend.cct)
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.navigation.runtime.android)
@@ -167,6 +169,10 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.datastore:datastore-preferences-core:1.0.0")
     implementation("androidx.datastore:datastore-core:1.0.0")
+
+    implementation("androidx.window:window:1.3.0")
+
+    implementation("io.coil-kt:coil-svg:2.4.0")
 }
 
 // Allow references to generated code

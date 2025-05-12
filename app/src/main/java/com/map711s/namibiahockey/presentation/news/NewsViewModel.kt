@@ -1,11 +1,12 @@
 package com.map711s.namibiahockey.presentation.news
 
+
 import com.map711s.namibiahockey.presentation.news.state.NewsListState
+import com.map711s.namibiahockey.data.model.NewsPiece
+import com.map711s.namibiahockey.presentation.news.state.NewsState
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.map711s.namibiahockey.data.model.NewsPiece
-import com.map711s.namibiahockey.presentation.news.state.NewsState
 import com.map711s.namibiahockey.data.repository.NewsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,14 +33,20 @@ class NewsViewModel @Inject constructor(
     fun createNewsPiece(newsPiece: NewsPiece) {
         _newsState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
-            newsRepository.createNewsPiece(newsPiece)
-                .onSuccess { newsId ->
-                    _newsState.update { it.copy(isLoading = false, newsPiece = newsPiece.copy(id = newsId)) }
-                    loadAllNewsPieces() // Refresh the list after creation
+            val result = newsRepository.createNewsPiece(newsPiece)
+            if (result.isSuccess) {
+                val newsId = result.getOrNull() // or however you access the value
+                _newsState.update { it.copy(isLoading = false, newsPiece = newsPiece.copy(id = newsId)) }
+                loadAllNewsPieces()
+            } else {
+                val exception = result.exceptionOrNull() // or however you access the error
+                _newsState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = exception?.message ?: "Failed to create news piece"
+                    )
                 }
-                .onFailure { exception ->
-                    _newsState.update { it.copy(isLoading = false, error = exception.message ?: "Failed to create news piece") }
-                }
+            }
         }
     }
 

@@ -14,6 +14,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.map711s.namibiahockey.data.remote.model.FirebaseUser as CustomFirebaseUser
 
 @Singleton
@@ -67,7 +70,7 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun registerUser(
+    override suspend fun registerUser(
         email: String,
         password: String,
         name: String,
@@ -88,13 +91,26 @@ class AuthRepositoryImpl @Inject constructor(
                 role = role
             )
 
-            // Save user to firestore
-            userDataSource.saveUser(user.toData())
+            // Save user to firestore (convert to your custom FirebaseUser)
+            val customFirebaseUser = CustomFirebaseUser(
+                id = firebaseUser.uid,
+                email = email,
+                name = name,
+                phone = phone,
+                role = role.name
+            )
+            userDataSource.saveUser(customFirebaseUser)
 
-            // Save user to Firestore
+            // Save user to Firestore as a generic map
             firestore.collection("users")
                 .document(firebaseUser.uid)
-                .set(user)
+                .set(mapOf(
+                    "id" to user.id,
+                    "email" to user.email,
+                    "name" to user.name,
+                    "phone" to user.phone,
+                    "role" to user.role.name
+                ))
                 .await()
 
             Result.success(firebaseUser.uid)
@@ -105,10 +121,24 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun getUserProfile(userId: String): Result<User> {
         return try {
-            val user = userDataSource.getUser(userId ?: "")
+            val actualUserId = userId.ifBlank { getCurrentUserId() ?: "" }
+            val customUser = userDataSource.getUser(actualUserId)
                 ?: return Result.failure(Exception("User not found"))
 
-            Result.success(user.toDomain())
+            // Convert from data model to domain model
+            val domainUser = User(
+                id = customUser.id,
+                email = customUser.email,
+                name = customUser.name,
+                phone = customUser.phone,
+                role = try {
+                    UserRole.valueOf(customUser.role)
+                } catch (e: IllegalArgumentException) {
+                    UserRole.PLAYER // Default
+                }
+            )
+
+            Result.success(domainUser)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -116,7 +146,15 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun updateUserProfile(user: User): Result<Unit> {
         return try {
-            userDataSource.updateUser(user.toData())
+            // Convert domain model to data model
+            val customFirebaseUser = CustomFirebaseUser(
+                id = user.id,
+                email = user.email,
+                name = user.name,
+                phone = user.phone,
+                role = user.role.name
+            )
+            userDataSource.updateUser(customFirebaseUser)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -131,6 +169,4 @@ class AuthRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
-
-
 }

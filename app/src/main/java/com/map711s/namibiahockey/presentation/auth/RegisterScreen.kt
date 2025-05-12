@@ -58,7 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.map711s.namibiahockey.data.model.UserRole
-import com.map711s.namibiahockey.viewmodel.AuthViewModel
+import com.map711s.namibiahockey.presentation.auth.AuthViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)

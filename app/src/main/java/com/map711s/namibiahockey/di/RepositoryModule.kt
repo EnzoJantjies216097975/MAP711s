@@ -1,5 +1,6 @@
 package com.map711s.namibiahockey.di
 
+import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.map711s.namibiahockey.data.repository.AuthRepositoryImpl
@@ -17,7 +18,9 @@ import com.map711s.namibiahockey.util.SecureStorageManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.checkerframework.checker.units.qual.A
 import javax.inject.Singleton
 
 @Module
@@ -30,14 +33,15 @@ object RepositoryModule {
         firebaseAuth: FirebaseAuth,
         firebaseFirestore: FirebaseFirestore,
         userDataSource: FirebaseUserDataSource,
-        secureStorageManager: SecureStorageManager
+        secureStorageManager: SecureStorageManager,
+        @ApplicationContext context: Context
     ): AuthRepository {
         return AuthRepositoryImpl(
             firebaseAuth,
             firebaseFirestore,
             userDataSource,
-            secureStorageManager
-
+            secureStorageManager,
+            context
         )
     }
 
@@ -46,29 +50,32 @@ object RepositoryModule {
     fun provideEventRepository(
         firestore: FirebaseFirestore,
         networkMonitor: NetworkMonitor,
-        offlineOperationQueue: OfflineOperationQueue
+        offlineOperationQueue: OfflineOperationQueue,
+        @ApplicationContext context: Context
     ): EventRepository {
         return EventRepositoryImpl(
             firestore,
             networkMonitor,
-            offlineOperationQueue
-
+            offlineOperationQueue,
+            context
         )
     }
 
     @Provides
     @Singleton
     fun provideNewsRepository(
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
+        @ApplicationContext context: Context
     ): NewsRepository {
-        return NewsRepositoryImpl(firestore)
+        return NewsRepositoryImpl(firestore, context)
     }
 
     @Provides
     @Singleton
     fun provideTeamRepository(
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
+        @ApplicationContext context: Context
     ): TeamRepository {
-        return TeamRepositoryImpl(firestore)
+        return TeamRepositoryImpl(firestore, context)
     }
 }
