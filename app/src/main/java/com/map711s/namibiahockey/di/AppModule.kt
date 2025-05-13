@@ -60,18 +60,6 @@ object AppProvidersModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth {
-        return Firebase.auth
-    }
-
-    @Provides
-    @Singleton
-    fun provideFirebaseFirestore(): FirebaseFirestore {
-        return Firebase.firestore
-    }
-
-    @Provides
-    @Singleton
     fun provideFirebaseStorage(): FirebaseStorage {
         return Firebase.storage
     }
