@@ -45,7 +45,7 @@ object RepositoryModule {
 //        )
 //    }
 
-    @Provides
+    //@Provides
     @Singleton
     fun provideEventRepository(
         firestore: FirebaseFirestore,
@@ -61,7 +61,7 @@ object RepositoryModule {
         )
     }
 
-    @Provides
+    //@Provides
     @Singleton
     fun provideNewsRepository(
         firestore: FirebaseFirestore,
@@ -70,7 +70,7 @@ object RepositoryModule {
         return NewsRepositoryImpl(firestore, context)
     }
 
-    @Provides
+    //@Provides
     @Singleton
     fun provideTeamRepository(
         firestore: FirebaseFirestore,

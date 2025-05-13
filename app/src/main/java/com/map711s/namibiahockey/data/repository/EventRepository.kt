@@ -2,6 +2,7 @@ package com.map711s.namibiahockey.data.repository
 
 import android.util.Log
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.map711s.namibiahockey.data.model.EventEntry
 import kotlinx.coroutines.tasks.await
@@ -10,10 +11,8 @@ import javax.inject.Singleton
 
 @Singleton
 class EventRepository @Inject constructor(
-//    private val firestore: Any = Firebase.firestore
+    private val firestore: FirebaseFirestore
 ) {
-    private val firestore = Firebase.firestore
-
     // Create a new event
     suspend fun createEvent(event: EventEntry): Result<String> {
         return try {

@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.androidx.espresso.core)
     implementation(libs.transport.backend.cct)
     implementation(libs.transport.backend.cct)
+    implementation(libs.androidx.runtime.saved.instance.state)
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.navigation.runtime.android)
