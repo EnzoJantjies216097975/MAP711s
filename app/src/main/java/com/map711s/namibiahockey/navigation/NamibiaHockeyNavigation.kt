@@ -22,7 +22,15 @@ class NamibiaHockeyNavigation(private val navController: NavHostController) {
         }
     }
 
-    fun navigateUp(teamRegistration: Screen.TeamRegistration) {
+    fun navigateUpTo(screen: Screen, inclusive: Boolean = false) {
+        navController.navigate(screen.route) {
+            popUpTo(screen.route) {
+                this.inclusive = inclusive
+            }
+        }
+    }
+
+    fun navigateUp(){
         navController.navigateUp()
     }
 

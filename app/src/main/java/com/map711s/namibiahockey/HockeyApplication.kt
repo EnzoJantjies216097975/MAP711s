@@ -2,7 +2,8 @@ package com.map711s.namibiahockey
 
 import android.app.Application
 import coil.Coil
-import com.google.firebase.BuildConfig
+import com.map711s.namibiahockey.BuildConfig
+import android.content.ComponentCallbacks2
 import com.google.firebase.FirebaseApp
 import com.map711s.namibiahockey.di.AppInitializer
 import com.map711s.namibiahockey.util.ImageManager
@@ -42,12 +43,11 @@ class HockeyApplication : Application() {
 
         // Clear memory cache when memory is low
         when (level) {
-            TRIM_MEMORY_RUNNING_MODERATE -> {
-                // Moderate memory pressure
+            ComponentCallbacks2.TRIM_MEMORY_MODERATE -> {
                 imageManager.clearMemoryCache()
             }
-            TRIM_MEMORY_RUNNING_LOW, TRIM_MEMORY_RUNNING_CRITICAL -> {
-                // Critical memory pressure
+            ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW,
+            ComponentCallbacks2.TRIM_MEMORY_COMPLETE -> {
                 imageManager.clearCaches()
             }
         }

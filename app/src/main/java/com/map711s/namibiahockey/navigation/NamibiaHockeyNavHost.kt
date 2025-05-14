@@ -81,7 +81,7 @@ fun NamibiaHockeyNavHost(
         // Main screens
         composable(Screen.HOME) {
             HomeScreen(
-                onNavigateToTeamRegistration = { navigation.navigateUp(Screen.TeamRegistration) },
+                onNavigateToTeamRegistration = { navigation.navigateTo(Screen.TeamRegistration) },
                 onNavigateToEventEntries = { navigation.navigateTo(Screen.EventEntries)},
                 onNavigateToPlayerManagement = { navigation.navigateTo(Screen.PlayerManagement)},
                 onNavigateToNewsFeed = {navigation.navigateTo(Screen.NewsFeed) },
@@ -148,7 +148,7 @@ fun NamibiaHockeyNavHost(
             val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
             EventDetailsScreen(
                 eventId = eventId,
-                onNavigateBack = { navigation.navigateUp(Screen.TeamRegistration) },
+                onNavigateBack = { navigation.navigateTo(Screen.TeamRegistration) },
                 windowSize = windowSize
             )
         }
