@@ -244,8 +244,33 @@ fun NavigationRailItems(navController: NavHostController) {  // Changed paramete
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Rest of the implementation remains the same
-    // ...
+    val items = listOf(
+        NavigationItem("Teams", Screen.TeamRegistration.route, Icons.Default.Groups),
+        NavigationItem("Events", Screen.EventEntries.route, Icons.Default.CalendarMonth),
+        NavigationItem("Home", Screen.Home.route, Icons.Default.Home),
+        NavigationItem("News", Screen.NewsFeed.route, Icons.Default.Info),
+        NavigationItem("Profile", Screen.Profile.route, Icons.Default.Person)
+    )
+
+    items.forEach { item ->
+        NavigationRailItem(
+            icon = { Icon(item.icon, contentDescription = item.name) },
+            label = { Text(item.name) },
+            selected = currentRoute == item.route,
+            onClick = {
+                if (currentRoute != item.route) {
+                    navController.navigate(item.route) {
+                        popUpTo(Screen.Home.route) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            }
+        )
+    }
+
 }
 
 data class NavigationItem(
