@@ -4,6 +4,7 @@ import android.app.Application
 import coil.Coil
 import com.map711s.namibiahockey.BuildConfig
 import android.content.ComponentCallbacks2
+import android.util.Log
 import com.google.firebase.FirebaseApp
 import com.map711s.namibiahockey.di.AppInitializer
 import com.map711s.namibiahockey.util.ImageManager
@@ -24,18 +25,24 @@ class HockeyApplication : Application() {
     lateinit var appInitializer: AppInitializer
 
     override fun onCreate() {
-        super.onCreate()
-        FirebaseApp.initializeApp(this)
-        // Initialize any app-wide components here.
+        try {
+            super.onCreate()
+            FirebaseApp.initializeApp(this)
+            // Initialize any app-wide components here.
 
-        // Start memory monitoring in debug builds
-        if (BuildConfig.DEBUG) {
-            memoryWatcher.startMonitoring()
+            // Start memory monitoring in debug builds
+            if (BuildConfig.DEBUG) {
+                memoryWatcher.startMonitoring()
+            }
+
+            // Set the default Coil image loader
+            Coil.setImageLoader(imageManager.imageLoader)
+            appInitializer.initialize()
+
+            Log.d("HockeyApp", "Application initialized successfully")
+        } catch (e: Exception) {
+            Log.e("HockeyApp", "Error initializing application: ${e.message}", e)
         }
-
-        // Set the default Coil image loader
-        Coil.setImageLoader(imageManager.imageLoader)
-        appInitializer.initialize()
     }
 
     override fun onTrimMemory(level: Int) {

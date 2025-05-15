@@ -27,23 +27,23 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
 
-//    @Provides
-//    @Singleton
-//    fun provideAuthRepository(
-//        firebaseAuth: FirebaseAuth,
-//        firebaseFirestore: FirebaseFirestore,
-//        userDataSource: FirebaseUserDataSource,
-//        secureStorageManager: SecureStorageManager,
-//        @ApplicationContext context: Context
-//    ): AuthRepository {
-//        return AuthRepositoryImpl(
-//            firebaseAuth,
-//            firebaseFirestore,
-//            userDataSource,
-//            secureStorageManager,
-//            context
-//        )
-//    }
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        firebaseAuth: FirebaseAuth,
+        firebaseFirestore: FirebaseFirestore,
+        userDataSource: FirebaseUserDataSource,
+        secureStorageManager: SecureStorageManager,
+        @ApplicationContext context: Context
+    ): AuthRepository {
+        return AuthRepositoryImpl(
+            firebaseAuth,
+            firebaseFirestore,
+            userDataSource,
+            secureStorageManager,
+            context
+        )
+    }
 
     @Provides
     @Singleton

@@ -60,7 +60,8 @@ import androidx.navigation.NavHostController
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     // Note: Changed to NavController type to match what rememberNavController returns
-    private lateinit var navController: NavController
+    private var _navController: NavController? = null
+    private val navController get() = _navController!!
 
     @Inject
     lateinit var networkMonitor: NetworkMonitor
@@ -79,9 +80,10 @@ class MainActivity : AppCompatActivity() {
             val windowSize = rememberWindowSize()
             val contentPadding = rememberContentPadding(windowSize)
             val navControllerInstance = rememberNavController()
+            _navController = navControllerInstance
 
             // Store the navController instance
-            navController = navControllerInstance
+            _navController = navControllerInstance
 
             // Handle deep links
             LaunchedEffect(intent) {
@@ -119,16 +121,17 @@ class MainActivity : AppCompatActivity() {
     // Handle new intents (e.g., when app is already running)
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        try {
-            setIntent(intent)
-            if (::navController.isInitialized) {
-                // Using the stored navController instance
-                deepLinkHandler.handleDeepLink(intent, navController)
-            } else {
-                Log.e("MainActivity", "NavController not initialized in onNewIntent")
+        setIntent(intent)
+
+        // Wait until navController is initialized
+        _navController?.let { controller ->
+            try {
+                deepLinkHandler.handleDeepLink(intent, controller)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Deep link error in onNewIntent: ${e.message}", e)
             }
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Error in onNewIntent: ${e.message}", e)
+        } ?: run {
+            Log.w("MainActivity", "NavController not initialized yet. Deferring deep link.")
         }
     }
 }
