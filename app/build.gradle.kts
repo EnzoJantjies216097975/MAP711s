@@ -10,10 +10,10 @@ plugins {
     id("com.google.gms.google-services") version "4.4.2" // apply false
 }
 
-repositories{
-    mavenCentral()
-    google()
-}
+//repositories{
+//    mavenCentral()
+//    google()
+//}
 
 android {
     namespace = "com.map711s.namibiahockey"
