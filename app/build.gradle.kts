@@ -152,6 +152,8 @@ dependencies {
 
     // Pull to refresh
     implementation(libs.accompanist.swiperefresh)
+    implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.firebase.appcheck.debug)
 
     // Testing
     testImplementation(libs.junit)

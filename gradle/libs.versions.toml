@@ -55,6 +55,8 @@ transportBackendCct = "3.1.9"
 runtimeSavedInstanceState = "1.0.0-alpha11"
 workRuntimeKtx = "2.10.1"
 zxingAndroidEmbedded = "4.3.0"
+firebaseAppcheckPlayintegrity = "18.0.0"
+firebaseAppcheckDebug = "18.0.0"
 
 
 [libraries]
@@ -135,6 +137,8 @@ androidx-runtime-saved-instance-state = { group = "androidx.compose.runtime", na
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "coreVersion" }
+firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity", version.ref = "firebaseAppcheckPlayintegrity" }
+firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug", version.ref = "firebaseAppcheckDebug" }
 
 
 [plugins]
