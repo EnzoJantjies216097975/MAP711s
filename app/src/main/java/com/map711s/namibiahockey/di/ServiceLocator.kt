@@ -47,9 +47,14 @@ object ServiceLocator {
     private val firebaseNewsDataSource by lazy { FirebaseNewsDataSource(firebaseFirestore) }
     private val firebaseTeamDataSource by lazy { FirebaseTeamDataSource(firebaseFirestore) }
 
+    val networkMonitor by lazy {
+        check(applicationContext != null) { "ServiceLocator not initialized. Call initialize() first." }
+        NetworkMonitor(requireContext())
+    }
+
     // Utilities
     val secureStorageManager by lazy { SecureStorageManager(requireContext()) }
-    val networkMonitor by lazy { NetworkMonitor(requireContext()) }
+    // val networkMonitor by lazy { NetworkMonitor(requireContext()) }
     val notificationManager by lazy { NotificationManager(requireContext()) }
     val imageManager by lazy { ImageManager(requireContext()) }
     val memoryWatcher by lazy { MemoryWatcher(requireContext()) }
@@ -97,6 +102,8 @@ object ServiceLocator {
             requireContext()
         )
     }
+
+
 
     val newsRepository: NewsRepository by lazy {
         NewsRepositoryImpl(firebaseFirestore, requireContext())

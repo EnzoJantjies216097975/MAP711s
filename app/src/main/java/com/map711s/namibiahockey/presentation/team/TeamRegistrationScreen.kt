@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
@@ -23,10 +24,10 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -101,7 +102,7 @@ fun TeamRegistrationScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -140,7 +141,7 @@ fun TeamRegistrationScreen(
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
 
-                    Divider(modifier = Modifier.padding(bottom = 16.dp))
+                    HorizontalDivider(modifier = Modifier.padding(bottom = 16.dp))
 
                     // Team name field
                     OutlinedTextField(
@@ -263,7 +264,7 @@ fun TeamRegistrationScreen(
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
 
-                    Divider(modifier = Modifier.padding(bottom = 16.dp))
+                    HorizontalDivider(modifier = Modifier.padding(bottom = 16.dp))
 
                     // Coach name field
                     OutlinedTextField(
@@ -316,7 +317,7 @@ fun TeamRegistrationScreen(
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
 
-                    Divider(modifier = Modifier.padding(bottom = 16.dp))
+                    HorizontalDivider(modifier = Modifier.padding(bottom = 16.dp))
 
                     // Contact email field
                     OutlinedTextField(

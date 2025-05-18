@@ -25,8 +25,8 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -349,7 +349,7 @@ fun EventCard(
 
             Spacer(modifier = Modifier.height(NHUSpacing.sm))
 
-            Divider()
+            HorizontalDivider()
 
             Spacer(modifier = Modifier.height(NHUSpacing.sm))
 
