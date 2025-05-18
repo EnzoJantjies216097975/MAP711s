@@ -9,7 +9,6 @@ import coil.memory.MemoryCache
 import coil.util.DebugLogger
 import com.map711s.namibiahockey.BuildConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
