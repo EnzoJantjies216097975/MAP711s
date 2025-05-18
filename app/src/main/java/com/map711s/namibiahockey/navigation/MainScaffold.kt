@@ -1,0 +1,42 @@
+package com.map711s.namibiahockey.navigation
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScaffold(
+    navController: NavHostController,
+    startDestination: String = Routes.SPLASH
+) {
+    val showBottomBar = navController.currentBackStackEntryAsState().value?.destination?.route in listOf(
+        Routes.HOME,
+        Routes.TEAM_REGISTRATION,
+        Routes.EVENT_ENTRIES,
+        Routes.PLAYER_MANAGEMENT,
+        Routes.NEWS_FEED
+    )
+
+    Scaffold(
+        bottomBar = {
+            if (showBottomBar) {
+                BottomNavigationBar(navController = navController)
+            }
+        }
+    ) { paddingValues ->
+        NamibiaHockeyNavHost(
+            navController = navController,
+            startDestination = startDestination,
+            modifier = Modifier.padding(paddingValues)
+        )
+    }
+}
+
+@Composable
+fun navController.currentBackStackEntryAsState() = androidx.compose.runtime.remember {
+    androidx.compose.runtime.mutableStateOf(currentBackStackEntry)
+}
