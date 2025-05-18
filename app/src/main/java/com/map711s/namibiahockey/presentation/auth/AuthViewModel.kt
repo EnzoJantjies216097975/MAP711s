@@ -1,8 +1,11 @@
 package com.map711s.namibiahockey.presentation.auth
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.map711s.namibiahockey.data.mapper.toData
 import com.map711s.namibiahockey.data.mapper.toDomain
+import com.map711s.namibiahockey.di.ServiceLocator
 import com.map711s.namibiahockey.domain.model.UserRole
 import com.map711s.namibiahockey.domain.repository.AuthRepository
 import com.map711s.namibiahockey.presentation.auth.state.LoginState
@@ -10,17 +13,23 @@ import com.map711s.namibiahockey.presentation.auth.state.LoginUiState
 import com.map711s.namibiahockey.presentation.auth.state.RegisterState
 import com.map711s.namibiahockey.presentation.common.BaseViewModel
 import com.map711s.namibiahockey.presentation.profile.state.UserProfileState
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
+//class AuthViewModelFactory : ViewModelProvider.Factory {
+//    @Suppress("UNCHECKED_CAST")
+//    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+//        if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
+//            return AuthViewModel(ServiceLocator.authRepository) as T
+//        }
+//        throw IllegalArgumentException("Unkown viewModel class")
+//    }
+//}
 
-@HiltViewModel
-class AuthViewModel @Inject constructor(
+class AuthViewModel (
     private val authRepository: AuthRepository
 ) : BaseViewModel<LoginUiState>() {
 

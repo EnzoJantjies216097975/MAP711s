@@ -48,7 +48,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.di.EventViewModelFactory
 import com.map711s.namibiahockey.ui.theme.NHUSpacing
 import com.map711s.namibiahockey.ui.components.errorstates.ErrorType
 import com.map711s.namibiahockey.ui.components.loaders.EventListShimmer
@@ -68,10 +70,11 @@ import com.map711s.namibiahockey.util.WindowSizeClass
 @Composable
 fun EventEntriesScreen(
     onNavigateBack: () -> Unit,
-    viewModel: EventViewModel = hiltViewModel(),
+    // viewModel: EventViewModel = hiltViewModel(),
     onNavigateToAddEvent: () -> Unit,
     windowSize: WindowSize
 ) {
+    val viewModel: EventViewModel = viewModel(factory = EventViewModelFactory())
     var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
     val topAppBarState = listOf("Upcoming", "Past", "My Entries")

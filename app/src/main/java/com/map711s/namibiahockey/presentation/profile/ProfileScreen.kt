@@ -49,14 +49,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.map711s.namibiahockey.di.AuthViewModelFactory
 import com.map711s.namibiahockey.presentation.auth.AuthViewModel
+import com.map711s.namibiahockey.presentation.auth.AuthViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onNavigateBack: () -> Unit,
-    viewModel: AuthViewModel = hiltViewModel()
+    // viewModel: AuthViewModel = hiltViewModel()
 ) {
+    val viewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory)
     val userProfileState by viewModel.userProfileState.collectAsState()
     var showLogoutConfirmDialog by remember { mutableStateOf(false) }
 

@@ -56,6 +56,10 @@ import com.map711s.namibiahockey.util.rememberWindowSize
 import javax.inject.Inject
 import android.util.Log
 import androidx.navigation.NavHostController
+import com.map711s.namibiahockey.di.ServiceLocator
+import com.map711s.namibiahockey.di.ServiceLocator.deepLinkHandler
+import com.map711s.namibiahockey.di.ServiceLocator.networkMonitor
+import com.map711s.namibiahockey.di.ServiceLocator.notificationManager
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -63,17 +67,21 @@ class MainActivity : AppCompatActivity() {
     private var _navController: NavController? = null
     private val navController get() = _navController!!
 
-    @Inject
-    lateinit var networkMonitor: NetworkMonitor
-
-    @Inject
-    lateinit var deepLinkHandler: DeepLinkHandler
-
-    @Inject
-    lateinit var notificationManager: NotificationManager
+//    @Inject
+//    lateinit var networkMonitor: NetworkMonitor
+//
+//    @Inject
+//    lateinit var deepLinkHandler: DeepLinkHandler
+//
+//    @Inject
+//    lateinit var notificationManager: NotificationManager
 
     override fun onCreate(savedInstanceState: Bundle?) {  // Fixed: Added the savedInstanceState parameter
         super.onCreate(savedInstanceState)
+
+        val networkMonitor = ServiceLocator.networkMonitor
+        val deepLinkHandler = ServiceLocator.deepLinkHandler
+        val notificationManager = ServiceLocator.notificationManager
 
         setContent {
             // Get window size information

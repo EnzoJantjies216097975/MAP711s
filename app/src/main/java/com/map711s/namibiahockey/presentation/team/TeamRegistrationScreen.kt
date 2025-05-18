@@ -54,7 +54,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.map711s.namibiahockey.data.model.Team
+import com.map711s.namibiahockey.di.TeamViewModelFactory
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,9 +64,10 @@ import com.map711s.namibiahockey.data.model.Team
 fun TeamRegistrationScreen(
     onNavigateBack: () -> Unit,
     onNavigateToHome: () -> Unit,
-    viewModel: TeamViewModel = hiltViewModel()
+    //viewModel: TeamViewModel = hiltViewModel()
 
 ) {
+    val viewModel: TeamViewModel = viewModel(factory = TeamViewModelFactory())
     val snackbarHostState = remember { SnackbarHostState() }
     val teamState by viewModel.teamState.collectAsState()
     val context = LocalContext.current

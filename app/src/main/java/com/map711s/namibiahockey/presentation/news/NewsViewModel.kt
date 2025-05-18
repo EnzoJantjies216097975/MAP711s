@@ -1,6 +1,5 @@
 package com.map711s.namibiahockey.presentation.news
 
-
 import com.map711s.namibiahockey.presentation.news.state.NewsListState
 import com.map711s.namibiahockey.data.model.NewsPiece
 import com.map711s.namibiahockey.presentation.news.state.NewsState
@@ -16,8 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@HiltViewModel
-class NewsViewModel @Inject constructor(
+class NewsViewModel(
     private val newsRepository: NewsRepository
 ) : ViewModel() {
 

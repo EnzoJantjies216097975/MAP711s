@@ -57,7 +57,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.map711s.namibiahockey.data.model.UserRole
+import com.map711s.namibiahockey.di.AuthViewModelFactory
 import com.map711s.namibiahockey.presentation.auth.AuthViewModel
 
 
@@ -66,8 +68,9 @@ import com.map711s.namibiahockey.presentation.auth.AuthViewModel
 fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToHome: () -> Unit,
-    viewModel: AuthViewModel = hiltViewModel()
+    // viewModel: AuthViewModel = hiltViewModel()
 ) {
+    val viewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory())
     val registerState by viewModel.registerState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 

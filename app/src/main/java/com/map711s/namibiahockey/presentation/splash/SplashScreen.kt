@@ -27,16 +27,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.map711s.namibiahockey.R
 import com.map711s.namibiahockey.presentation.auth.AuthViewModel
+import com.map711s.namibiahockey.presentation.auth.AuthViewModelFactory
 import kotlinx.coroutines.delay
 
 
 @Composable
 fun SplashScreen(
     onNavigateToLogin: () -> Unit,
-    viewModel: AuthViewModel = hiltViewModel()
+    // viewModel: AuthViewModel = hiltViewModel()
 ) {
+    val viewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory())
     //val loginState = viewModel.loginState.value
     val scaleAnimation = remember { Animatable(0.8f) }
 

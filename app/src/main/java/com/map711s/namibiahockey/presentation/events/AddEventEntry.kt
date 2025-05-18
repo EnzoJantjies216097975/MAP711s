@@ -20,7 +20,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.di.EventViewModelFactory
 import java.util.*
 import com.map711s.namibiahockey.presentation.events.state.EventState
 import com.map711s.namibiahockey.presentation.events.state.EventListState
@@ -30,8 +32,9 @@ import com.map711s.namibiahockey.presentation.events.state.EventListState
 fun AddEventScreen(
     onNavigateBack: () -> Unit,
     onNavigateToEvents: () -> Unit,
-    viewModel: EventViewModel = hiltViewModel()
+    // viewModel: EventViewModel = hiltViewModel()
 ) {
+    val viewModel: EventViewModel = viewModel(factory = EventViewModelFactory())
     val snackbarHostState = remember { SnackbarHostState() }
     val eventState by viewModel.eventState.collectAsState()
     val context = LocalContext.current

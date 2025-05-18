@@ -55,15 +55,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.map711s.namibiahockey.data.model.NewsCategory
+import com.map711s.namibiahockey.di.NewsViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsFeedScreen(
     onNavigateBack: () -> Unit,
     onNavigateToAddNews: () -> Unit,
-    viewModel: NewsViewModel = hiltViewModel()
+    // viewModel: NewsViewModel = hiltViewModel()
 ) {
+    val viewModel: NewsViewModel = viewModel(factory = NewsViewModelFactory())
     var seachQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("All", "Tournament", "League", "Team", "Player")

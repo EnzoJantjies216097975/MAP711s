@@ -16,8 +16,7 @@ import com.map711s.namibiahockey.presentation.events.state.EventState
 import com.map711s.namibiahockey.presentation.events.state.EventListState
 
 
-@HiltViewModel
-class EventViewModel @Inject constructor(
+class EventViewModel(
     private val eventRepository: EventRepository
 ) : ViewModel() {
 
