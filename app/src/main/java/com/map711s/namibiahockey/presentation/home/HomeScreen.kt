@@ -53,7 +53,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.map711s.namibiahockey.data.model.EventItem
 import com.map711s.namibiahockey.data.model.NewsItem
 import com.map711s.namibiahockey.di.AuthViewModelFactory
-import com.map711s.namibiahockey.presentation.auth.AuthViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -68,7 +67,7 @@ fun HomeScreen(
     onNavigateToProfile: () -> Unit,
     // viewModel: AuthViewModel = hiltViewModel()
 ) {
-    val viewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory)
+    val viewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory())
 
     val userProfileState by viewModel.userProfileState.collectAsState()
 

@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SecureStorageManager @Inject constructor(
+class SecureStorageManager(
     @ApplicationContext private val context: Context
 ) {
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)

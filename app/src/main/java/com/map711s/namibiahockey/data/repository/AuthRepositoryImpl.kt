@@ -21,7 +21,7 @@ import kotlinx.coroutines.runBlocking
 import com.map711s.namibiahockey.data.remote.model.FirebaseUser as CustomFirebaseUser
 
 @Singleton
-class AuthRepositoryImpl @Inject constructor(
+class AuthRepositoryImpl(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val userDataSource: FirebaseUserDataSource,

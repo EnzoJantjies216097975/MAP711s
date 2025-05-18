@@ -19,9 +19,10 @@ class AuthViewModelFactory : ViewModelProvider.Factory {
 
 class EventViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T{
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(EventViewModel::class.java)) {
-            return EventViewModel(ServiceLocator.eventRepository) as T
+            val dataRepository = ServiceLocator.getEventDataRepository()
+            return EventViewModel(dataRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
@@ -31,7 +32,8 @@ class NewsViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(NewsViewModel::class.java)) {
-            return NewsViewModel(ServiceLocator.newsRepository) as T
+            val dataRepository = ServiceLocator.getNewsDataRepository()
+            return NewsViewModel(dataRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
@@ -41,7 +43,8 @@ class TeamViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TeamViewModel::class.java)) {
-            return TeamViewModel(ServiceLocator.teamRepository) as T
+            val dataRepository = ServiceLocator.getTeamDataRepository()
+            return TeamViewModel(dataRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

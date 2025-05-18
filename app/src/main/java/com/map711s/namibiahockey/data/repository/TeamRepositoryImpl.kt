@@ -12,7 +12,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
 
 @Singleton
-class TeamRepositoryImpl @Inject constructor(
+class TeamRepositoryImpl(
     private val firestore: FirebaseFirestore,
     @ApplicationContext private val context: Context
 ) : TeamRepository {

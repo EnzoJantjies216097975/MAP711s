@@ -3,8 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     //id("kotlin-kapt")
-    id("com.google.devtools.ksp") version "2.0.21-1.0.27"
-    id("com.google.dagger.hilt.android") version "2.56.2"
+    // id("com.google.devtools.ksp") version "2.0.21-1.0.27"
+    // id("com.google.dagger.hilt.android") version "2.56.2"
     id("com.google.gms.google-services") //version "4.4.2" // apply false
 }
 
@@ -78,25 +78,25 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
 
     // Dependency Injection - Hilt
-    implementation(libs.hilt.android)
+    // implementation(libs.hilt.android)
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.transport.runtime)
     implementation(libs.androidx.espresso.core)
     implementation(libs.transport.backend.cct)
     implementation(libs.transport.backend.cct)
     implementation(libs.androidx.runtime.saved.instance.state)
-    ksp(libs.dagger.hilt.android.compiler)
-    implementation(libs.androidx.hilt.work)
+    // ksp(libs.dagger.hilt.android.compiler)
+    // implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.navigation.runtime.android)
-    implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.androidx.hilt.navigation.fragment)
-    implementation(libs.androidx.hilt.work)
-    ksp(libs.androidx.hilt.compiler)
+    // implementation(libs.androidx.hilt.navigation.compose)
+    // implementation(libs.androidx.hilt.navigation.fragment)
+    // implementation(libs.androidx.hilt.work)
+    // ksp(libs.androidx.hilt.compiler)
 
     // Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
+    // ksp(libs.androidx.room.compiler)
 
     // Retrofit for API calls
     implementation(libs.retrofit)

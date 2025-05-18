@@ -13,7 +13,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ImageManager @Inject constructor(
+class ImageManager(
     @ApplicationContext private val context: Context
 ) {
     // Create a custom image loader for the application

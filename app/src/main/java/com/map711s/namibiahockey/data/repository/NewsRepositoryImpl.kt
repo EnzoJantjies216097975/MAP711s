@@ -13,7 +13,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
 
 @Singleton
-class NewsRepositoryImpl @Inject constructor(
+class NewsRepositoryImpl(
     private val firestore: FirebaseFirestore,
     @ApplicationContext private val context: Context
 ) : NewsRepository {

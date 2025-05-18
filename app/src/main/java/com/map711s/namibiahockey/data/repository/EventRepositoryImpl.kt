@@ -12,13 +12,12 @@ import com.map711s.namibiahockey.util.FirestorePaginator
 import com.map711s.namibiahockey.util.NetworkMonitor
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
-import javax.inject.Inject
 import javax.inject.Singleton
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
 
 @Singleton
-class EventRepositoryImpl @Inject constructor(
+class EventRepositoryImpl(
     private val firestore: FirebaseFirestore,
     private val networkMonitor: NetworkMonitor,
     private val offlineQueue: OfflineOperationQueue,

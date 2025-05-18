@@ -17,7 +17,7 @@ import javax.inject.Singleton
 import android.content.Context
 
 @Singleton
-class MatchRepositoryImpl @Inject constructor(
+class MatchRepositoryImpl(
     private val firestore: FirebaseFirestore,
     @ApplicationContext private val context: Context
 ) : MatchRepository {

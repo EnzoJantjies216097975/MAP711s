@@ -116,4 +116,17 @@ object ServiceLocator {
     private fun requireContext(): Context {
         return applicationContext ?: throw IllegalStateException("ServiceLocator not initialized with context")
     }
+
+    // Add these methods to get data repositories
+    fun getEventDataRepository(): com.map711s.namibiahockey.data.repository.EventRepository {
+        return com.map711s.namibiahockey.data.repository.EventRepository(firebaseFirestore)
+    }
+
+    fun getNewsDataRepository(): com.map711s.namibiahockey.data.repository.NewsRepository {
+        return com.map711s.namibiahockey.data.repository.NewsRepository()
+    }
+
+    fun getTeamDataRepository(): com.map711s.namibiahockey.data.repository.TeamRepository {
+        return com.map711s.namibiahockey.data.repository.TeamRepository(firebaseFirestore)
+    }
 }

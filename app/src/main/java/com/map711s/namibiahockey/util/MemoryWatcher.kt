@@ -11,7 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MemoryWatcher @Inject constructor(
+class MemoryWatcher(
     @ApplicationContext private val context: Context
 ) {
     private val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager

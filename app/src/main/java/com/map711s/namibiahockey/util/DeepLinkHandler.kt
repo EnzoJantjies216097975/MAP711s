@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class DeepLinkHandler @Inject constructor() {
+class DeepLinkHandler{
 
     // Domain constants
     private val WEBSITE_DOMAIN = "namibiahockey.org"

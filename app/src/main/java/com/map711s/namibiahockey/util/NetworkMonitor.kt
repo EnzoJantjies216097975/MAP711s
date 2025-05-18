@@ -14,7 +14,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NetworkMonitor @Inject constructor(
+class NetworkMonitor(
     @ApplicationContext private val context: Context
 ) {
     // Provide network status as a Flow

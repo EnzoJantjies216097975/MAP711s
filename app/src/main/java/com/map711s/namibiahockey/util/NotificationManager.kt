@@ -21,7 +21,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NotificationManager @Inject constructor(
+class NotificationManager(
     @ApplicationContext private val context: Context
 ) {
     companion object {

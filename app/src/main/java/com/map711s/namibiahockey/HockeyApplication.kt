@@ -6,20 +6,16 @@ import com.map711s.namibiahockey.BuildConfig
 import android.content.ComponentCallbacks2
 import android.util.Log
 import com.google.firebase.FirebaseApp
-import com.map711s.namibiahockey.di.AppInitializer
 import com.map711s.namibiahockey.di.ServiceLocator
 import com.map711s.namibiahockey.util.ImageManager
 import com.map711s.namibiahockey.util.MemoryWatcher
-import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
 
-@HiltAndroidApp
+
+
 class HockeyApplication : Application() {
 
     private lateinit var memoryWatcher: MemoryWatcher
     private lateinit var imageManager: ImageManager
-
-//    lateinit var appInitializer: AppInitializer
 
     override fun onCreate() {
         try {
@@ -40,7 +36,6 @@ class HockeyApplication : Application() {
 
             // Set the default Coil image loader
             Coil.setImageLoader(imageManager.imageLoader)
-            // appInitializer.initialize()
 
             Log.d("HockeyApp", "Application initialized successfully")
         } catch (e: Exception) {

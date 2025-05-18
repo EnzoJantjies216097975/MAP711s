@@ -26,11 +26,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.map711s.namibiahockey.R
+import com.map711s.namibiahockey.di.AuthViewModelFactory
 import com.map711s.namibiahockey.presentation.auth.AuthViewModel
-import com.map711s.namibiahockey.presentation.auth.AuthViewModelFactory
 import kotlinx.coroutines.delay
 
 
