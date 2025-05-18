@@ -9,9 +9,7 @@ import coil.memory.MemoryCache
 import coil.util.DebugLogger
 import com.map711s.namibiahockey.BuildConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Singleton
 
-@Singleton
 class ImageManager(
     @ApplicationContext private val context: Context
 ) {

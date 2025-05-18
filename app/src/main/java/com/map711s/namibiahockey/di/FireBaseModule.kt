@@ -13,17 +13,14 @@
 //import dagger.hilt.InstallIn
 //import dagger.hilt.android.qualifiers.ApplicationContext
 //import dagger.hilt.components.SingletonComponent
-//import javax.inject.Singleton
 //
 //@Module
 //@InstallIn(SingletonComponent::class)
 //object FireBaseModule {
 //    @Provides
-//    @Singleton
 //    fun provideFirebaseAuth(): FirebaseAuth = Firebase.auth
 //
 //    @Provides
-//    @Singleton
 //    fun provideFirebaseFirestore(firebaseSetup: FirebaseSetup): FirebaseFirestore {
 //        val firestore = Firebase.firestore
 //        firebaseSetup.configureCaching(firestore)
@@ -31,7 +28,6 @@
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideFirebaseAnalytics(@ApplicationContext context: Context): FirebaseAnalytics {
 //        return FirebaseAnalytics.getInstance(context)
 //    }

@@ -16,14 +16,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
 // Extension function for DataStore
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "offline_operations")
 
-@Singleton
-class OfflineOperationQueue @Inject constructor(
+class OfflineOperationQueue(
     @ApplicationContext private val context: Context,
     private val networkMonitor: NetworkMonitor
 ) {

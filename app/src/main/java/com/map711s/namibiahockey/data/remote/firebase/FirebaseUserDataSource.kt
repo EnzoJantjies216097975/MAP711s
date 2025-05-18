@@ -4,11 +4,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
 import com.map711s.namibiahockey.data.remote.model.FirebaseUser
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class FirebaseUserDataSource @Inject constructor(
+class FirebaseUserDataSource(
     private val firestore: FirebaseFirestore
 ){
     private val usersCollection = firestore.collection("users")

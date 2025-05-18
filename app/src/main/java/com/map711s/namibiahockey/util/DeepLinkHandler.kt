@@ -4,10 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.navigation.NavController
 import java.util.regex.Pattern
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class DeepLinkHandler{
 
     // Domain constants

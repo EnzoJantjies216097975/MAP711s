@@ -10,8 +10,6 @@ import com.map711s.namibiahockey.domain.model.UserRole
 import com.map711s.namibiahockey.domain.repository.AuthRepository
 import com.map711s.namibiahockey.util.SecureStorageManager
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
@@ -20,7 +18,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import com.map711s.namibiahockey.data.remote.model.FirebaseUser as CustomFirebaseUser
 
-@Singleton
 class AuthRepositoryImpl(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,

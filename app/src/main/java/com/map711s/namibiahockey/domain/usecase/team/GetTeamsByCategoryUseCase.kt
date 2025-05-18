@@ -2,9 +2,8 @@ package com.map711s.namibiahockey.domain.usecase.team
 
 import com.map711s.namibiahockey.data.model.Team
 import com.map711s.namibiahockey.domain.repository.TeamRepository
-import javax.inject.Inject
 
-class GetTeamsByCategoryUseCase @Inject constructor(
+class GetTeamsByCategoryUseCase (
     private val teamRepository: TeamRepository
 ) {
     suspend operator fun invoke(category: String): Result<List<Team>> {

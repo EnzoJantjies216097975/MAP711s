@@ -1,9 +1,8 @@
 package com.map711s.namibiahockey.domain.usecase.player
 
 import com.map711s.namibiahockey.domain.repository.PlayerRepository
-import javax.inject.Inject
 
-class DeletePlayerUseCase @Inject constructor(
+class DeletePlayerUseCase (
     private val playerRepository: PlayerRepository
 ) {
     suspend operator fun invoke(playerId: String): Result<Unit> {

@@ -2,9 +2,8 @@ package com.map711s.namibiahockey.domain.usecase.player
 
 import com.map711s.namibiahockey.data.model.Player
 import com.map711s.namibiahockey.domain.repository.PlayerRepository
-import javax.inject.Inject
 
-class UpdatePlayerUseCase @Inject constructor(
+class UpdatePlayerUseCase(
     private val playerRepository: PlayerRepository
 ) {
     suspend operator fun invoke(player: Player): Result<Unit> {

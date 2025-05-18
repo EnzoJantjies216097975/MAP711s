@@ -4,11 +4,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
 import com.map711s.namibiahockey.data.model.EventEntry
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class FirebaseEventDataSource @Inject constructor(
+class FirebaseEventDataSource(
     private val firestore: FirebaseFirestore
 ) {
     private val eventsCollection = firestore.collection("events")

@@ -10,14 +10,12 @@
 //import dagger.hilt.InstallIn
 //import dagger.hilt.android.qualifiers.ApplicationContext
 //import dagger.hilt.components.SingletonComponent
-//import javax.inject.Singleton
 //
 //@Module
 //@InstallIn(SingletonComponent::class)
 //object StorageModule {
 //
 //    @Provides
-//    @Singleton
 //    fun provideEncryptedSharedPreferences(
 //        @ApplicationContext context: Context
 //    ): SharedPreferences {
@@ -33,14 +31,12 @@
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideSecureStorageManager(@ApplicationContext context: Context): SecureStorageManager {
 //        return SecureStorageManager(context)
 //    }
 //
 //    // For non-sensitive data, use regular SharedPreferences
 //    @Provides
-//    @Singleton
 //    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
 //        return context.getSharedPreferences("hockey_prefs", Context.MODE_PRIVATE)
 //    }

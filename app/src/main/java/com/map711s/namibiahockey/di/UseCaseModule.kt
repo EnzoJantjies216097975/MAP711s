@@ -14,7 +14,6 @@
 //import dagger.Provides
 //import dagger.hilt.InstallIn
 //import dagger.hilt.components.SingletonComponent
-//import javax.inject.Singleton
 //
 //@Module
 //@InstallIn(SingletonComponent::class)
@@ -22,50 +21,42 @@
 //
 //    // Auth use cases
 //    @Provides
-//    @Singleton
 //    fun provideLoginUseCase(authRepository: AuthRepository): LoginUseCase {
 //        return LoginUseCase(authRepository)
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideRegisterUseCase(authRepository: AuthRepository): RegisterUseCase {
 //        return RegisterUseCase(authRepository)
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideLogoutUseCase(authRepository: AuthRepository): LogoutUseCase {
 //        return LogoutUseCase(authRepository)
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideGetUserProfileUseCase(authRepository: AuthRepository): GetUserProfileUseCase {
 //        return GetUserProfileUseCase(authRepository)
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideResetPasswordUseCase(authRepository: AuthRepository): ResetPasswordUseCase {
 //        return ResetPasswordUseCase(authRepository)
 //    }
 //
 //    // Event use cases
 //    @Provides
-//    @Singleton
 //    fun provideCreateEventUseCase(eventRepository: EventRepository): CreateEventUseCase {
 //        return CreateEventUseCase(eventRepository)
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideGetAllEventsUseCase(eventRepository: EventRepository): GetAllEventsUseCase {
 //        return GetAllEventsUseCase(eventRepository)
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideGetEventUseCase(eventRepository: EventRepository): GetEventUseCase {
 //        return GetEventUseCase(eventRepository)
 //    }

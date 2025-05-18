@@ -2,9 +2,8 @@ package com.map711s.namibiahockey.domain.usecase.auth
 
 import com.map711s.namibiahockey.domain.model.UserRole
 import com.map711s.namibiahockey.domain.repository.AuthRepository
-import javax.inject.Inject
 
-class RegisterUseCase @Inject constructor(
+class RegisterUseCase (
     private val authRepository: AuthRepository
 ) {
     suspend operator fun invoke(

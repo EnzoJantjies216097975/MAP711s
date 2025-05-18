@@ -4,11 +4,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
 import com.map711s.namibiahockey.data.model.Team
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class FirebaseTeamDataSource @Inject constructor(
+class FirebaseTeamDataSource(
     private val firestore: FirebaseFirestore
 ) {
     private val teamsCollection = firestore.collection("teams")

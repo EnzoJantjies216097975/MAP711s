@@ -1,9 +1,8 @@
 package com.map711s.namibiahockey.domain.usecase.news
 
 import com.map711s.namibiahockey.domain.repository.NewsRepository
-import javax.inject.Inject
 
-class SetNewsBookmarkStatusUseCase @Inject constructor(
+class SetNewsBookmarkStatusUseCase (
     private val newsRepository: NewsRepository
 ) {
     suspend operator fun invoke(newsId: String, isBookmarked: Boolean): Result<Unit> {

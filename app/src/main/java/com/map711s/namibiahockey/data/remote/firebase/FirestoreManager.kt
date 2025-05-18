@@ -5,11 +5,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class FirestoreManager @Inject constructor(
+class FirestoreManager(
     @ApplicationContext private val context: Context,
     private val firestore: FirebaseFirestore
 ) {

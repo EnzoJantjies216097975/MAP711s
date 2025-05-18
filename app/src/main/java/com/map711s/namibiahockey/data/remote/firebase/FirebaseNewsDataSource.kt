@@ -4,11 +4,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
 import com.map711s.namibiahockey.data.model.NewsPiece
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class FirebaseNewsDataSource @Inject constructor(
+class FirebaseNewsDataSource(
     private val firestore: FirebaseFirestore
 ) {
     private val newsCollection = firestore.collection("news")

@@ -8,7 +8,6 @@
 //import retrofit2.Retrofit
 //import retrofit2.converter.gson.GsonConverterFactory
 //import java.util.concurrent.TimeUnit
-//import javax.inject.Singleton
 //import dagger.Module
 //import dagger.Provides
 //
@@ -17,7 +16,6 @@
 //@InstallIn(SingletonComponent::class)
 //object NetworkModule {
 //    @Provides
-//    @Singleton
 //    fun provideOkHttpClient(): OkHttpClient {
 //        return OkHttpClient.Builder()
 //            .connectTimeout(30, TimeUnit.SECONDS)
@@ -33,7 +31,6 @@
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
 //        return Retrofit.Builder()
 //            .baseUrl("https://namibiahockey.org/")

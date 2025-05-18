@@ -21,7 +21,6 @@ import androidx.navigation.compose.rememberNavController
 import com.map711s.namibiahockey.navigation.BottomNavigationBar
 import com.map711s.namibiahockey.navigation.NamibiaHockeyNavHost
 import com.map711s.namibiahockey.ui.theme.NamibiaHockeyTheme
-import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -53,7 +52,6 @@ import com.map711s.namibiahockey.util.WindowSize
 import com.map711s.namibiahockey.util.WindowSizeClass
 import com.map711s.namibiahockey.util.rememberContentPadding
 import com.map711s.namibiahockey.util.rememberWindowSize
-import javax.inject.Inject
 import android.util.Log
 import androidx.navigation.NavHostController
 import com.map711s.namibiahockey.di.ServiceLocator
@@ -61,19 +59,15 @@ import com.map711s.namibiahockey.di.ServiceLocator.deepLinkHandler
 import com.map711s.namibiahockey.di.ServiceLocator.networkMonitor
 import com.map711s.namibiahockey.di.ServiceLocator.notificationManager
 
-@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     // Note: Changed to NavController type to match what rememberNavController returns
     private var _navController: NavController? = null
     private val navController get() = _navController!!
 
-//    @Inject
 //    lateinit var networkMonitor: NetworkMonitor
 //
-//    @Inject
 //    lateinit var deepLinkHandler: DeepLinkHandler
 //
-//    @Inject
 //    lateinit var notificationManager: NotificationManager
 
     override fun onCreate(savedInstanceState: Bundle?) {  // Fixed: Added the savedInstanceState parameter

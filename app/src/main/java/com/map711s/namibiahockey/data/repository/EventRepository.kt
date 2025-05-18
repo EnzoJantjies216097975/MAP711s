@@ -6,11 +6,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.map711s.namibiahockey.data.model.EventEntry
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class EventRepository @Inject constructor(
+class EventRepository(
     private val firestore: FirebaseFirestore
 ) {
     // Create a new event

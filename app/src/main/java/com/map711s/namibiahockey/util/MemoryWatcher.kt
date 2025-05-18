@@ -7,10 +7,7 @@ import android.os.Looper
 import android.util.Log
 import coil.Coil
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class MemoryWatcher(
     @ApplicationContext private val context: Context
 ) {

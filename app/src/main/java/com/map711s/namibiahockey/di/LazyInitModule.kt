@@ -13,15 +13,12 @@
 //import kotlinx.coroutines.Dispatchers
 //import kotlinx.coroutines.SupervisorJob
 //import kotlinx.coroutines.launch
-//import javax.inject.Inject
-//import javax.inject.Singleton
 //
 //@Module
 //@InstallIn(SingletonComponent::class)
 //object LazyInitModule {
 //
 //    @Provides
-//    @Singleton
 //    fun provideAppInitializer(
 //        @ApplicationContext context: Context,
 //        // Inject dependencies that need lazy initialization
@@ -31,7 +28,7 @@
 //    }
 //}
 //
-//class AppInitializer @Inject constructor(
+//class AppInitializer(
 //    private val context: Context,
 //    private val firebaseSetup: FirebaseSetup
 //) {

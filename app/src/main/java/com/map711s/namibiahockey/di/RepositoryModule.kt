@@ -28,7 +28,6 @@
 //object RepositoryModule {
 //
 //    @Provides
-//    @Singleton
 //    fun provideAuthRepository(
 //        firebaseAuth: FirebaseAuth,
 //        firebaseFirestore: FirebaseFirestore,
@@ -46,7 +45,6 @@
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideEventRepository(
 //        firestore: FirebaseFirestore,
 //        networkMonitor: NetworkMonitor,
@@ -62,7 +60,6 @@
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideNewsRepository(
 //        firestore: FirebaseFirestore,
 //        @ApplicationContext context: Context
@@ -71,7 +68,6 @@
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideTeamRepository(
 //        firestore: FirebaseFirestore,
 //        @ApplicationContext context: Context

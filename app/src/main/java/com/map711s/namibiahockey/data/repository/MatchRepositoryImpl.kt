@@ -12,11 +12,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.tasks.await
 import java.util.Date
-import javax.inject.Inject
-import javax.inject.Singleton
 import android.content.Context
 
-@Singleton
 class MatchRepositoryImpl(
     private val firestore: FirebaseFirestore,
     @ApplicationContext private val context: Context

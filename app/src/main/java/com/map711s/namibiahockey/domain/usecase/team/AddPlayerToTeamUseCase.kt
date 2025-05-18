@@ -1,9 +1,8 @@
 package com.map711s.namibiahockey.domain.usecase.team
 
 import com.map711s.namibiahockey.domain.repository.TeamRepository
-import javax.inject.Inject
 
-class AddPlayerToTeamUseCase @Inject constructor(
+class AddPlayerToTeamUseCase(
     private val teamRepository: TeamRepository
 ) {
     suspend operator fun invoke(teamId: String, playerId: String): Result<Unit> {

@@ -6,16 +6,12 @@ import com.google.firebase.messaging.RemoteMessage
 import com.map711s.namibiahockey.di.ServiceLocator
 import com.map711s.namibiahockey.di.ServiceLocator.notificationManager
 import com.map711s.namibiahockey.util.NotificationManager
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@AndroidEntryPoint
 class HockeyMessagingService : FirebaseMessagingService() {
 
-//    @Inject
 //    lateinit var notificationManager: NotificationManager
 
     private val notificationManager by lazy { ServiceLocator.notificationManager }

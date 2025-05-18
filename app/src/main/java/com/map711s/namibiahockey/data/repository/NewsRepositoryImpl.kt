@@ -7,12 +7,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
 
-@Singleton
 class NewsRepositoryImpl(
     private val firestore: FirebaseFirestore,
     @ApplicationContext private val context: Context

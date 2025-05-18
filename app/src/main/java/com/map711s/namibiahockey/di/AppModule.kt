@@ -30,25 +30,21 @@
 //abstract class AppBindingsModule {
 //
 ////    @Binds
-////    @Singleton
 ////    abstract fun bindAuthRepository(
 ////        impl: AuthRepositoryImpl
 ////    ): AuthRepository
 //
 //    @Binds
-//    @Singleton
 //    abstract fun bindEventRepository(
 //        impl: EventRepositoryImpl
 //    ): EventRepository
 //
 //    @Binds
-//    @Singleton
 //    abstract fun bindNewsRepository(
 //        impl: NewsRepositoryImpl
 //    ): NewsRepository
 //
 //    @Binds
-//    @Singleton
 //    abstract fun bindTeamRepository(
 //        impl: TeamRepositoryImpl
 //    ): TeamRepository
@@ -59,13 +55,11 @@
 //object AppProvidersModule {
 //
 //    @Provides
-//    @Singleton
 //    fun provideFirebaseStorage(): FirebaseStorage {
 //        return Firebase.storage
 //    }
 //
 //    @Provides
-//    @Singleton
 //    fun provideImageLoader(imageManager: ImageManager): ImageLoader {
 //        return imageManager.imageLoader
 //    }

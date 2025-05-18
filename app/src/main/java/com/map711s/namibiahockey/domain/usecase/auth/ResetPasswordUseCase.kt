@@ -1,9 +1,8 @@
 package com.map711s.namibiahockey.domain.usecase.auth
 
 import com.map711s.namibiahockey.domain.repository.AuthRepository
-import javax.inject.Inject
 
-class ResetPasswordUseCase @Inject constructor(
+class ResetPasswordUseCase(
     private val authRepository: AuthRepository
 ) {
     suspend operator fun invoke(email: String): Result<Unit> {

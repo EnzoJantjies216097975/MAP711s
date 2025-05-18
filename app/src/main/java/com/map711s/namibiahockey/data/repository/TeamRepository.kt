@@ -3,11 +3,8 @@ package com.map711s.namibiahockey.data.repository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.map711s.namibiahockey.data.model.Team
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class TeamRepository @Inject constructor(
+class TeamRepository(
     private val firestore: FirebaseFirestore
 ) {
     // Create a new team

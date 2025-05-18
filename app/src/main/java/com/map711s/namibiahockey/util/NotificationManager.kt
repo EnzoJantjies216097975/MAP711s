@@ -20,7 +20,6 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 class NotificationManager(
     @ApplicationContext private val context: Context
 ) {
