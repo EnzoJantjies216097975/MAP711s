@@ -3,7 +3,6 @@ package com.map711s.namibiahockey.navigation
 import AddEventScreen
 import AddNewsScreen
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,13 +19,11 @@ import com.map711s.namibiahockey.screens.team.TeamRegistrationScreen
 @Composable
 fun NamibiaHockeyNavHost(
     navController: NavHostController,
-    startDestination: String = Routes.SPLASH,
-    modifier: Modifier = Modifier
+    startDestination: String = Routes.SPLASH
 ) {
     NavHost(
         navController = navController,
-        startDestination = startDestination,
-        modifier = modifier
+        startDestination = startDestination
     ) {
         // Splash screen
         composable(Routes.SPLASH) {
@@ -62,6 +59,10 @@ fun NamibiaHockeyNavHost(
         // Main screens
         composable(Routes.HOME) {
             HomeScreen(
+                onNavigateToTeamRegistration = { navController.navigate(Routes.TEAM_REGISTRATION) },
+                onNavigateToEventEntries = { navController.navigate(Routes.EVENT_ENTRIES) },
+                onNavigateToPlayerManagement = { navController.navigate(Routes.PLAYER_MANAGEMENT) },
+                onNavigateToNewsFeed = { navController.navigate(Routes.NEWS_FEED) },
                 onNavigateToProfile = { navController.navigate(Routes.PROFILE) }
             )
         }
@@ -81,7 +82,6 @@ fun NamibiaHockeyNavHost(
                 onNavigateToAddEvent = {navController.navigate(Routes.ADD_EVENT)}
             )
         }
-
         composable(Routes.ADD_EVENT){
             AddEventScreen(
                 onNavigateBack = { navController.navigateUp() },
@@ -101,7 +101,6 @@ fun NamibiaHockeyNavHost(
                 onNavigateToAddNews = {navController.navigate(Routes.ADD_NEWS)}
             )
         }
-
         composable(Routes.ADD_NEWS){
             AddNewsScreen(
                 onNavigateBack = {navController.navigateUp()},

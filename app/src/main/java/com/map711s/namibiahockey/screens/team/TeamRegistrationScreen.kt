@@ -1,6 +1,5 @@
 package com.map711s.namibiahockey.screens.team
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,7 +23,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -41,8 +38,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -58,22 +52,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.map711s.namibiahockey.data.model.Team
-import com.map711s.namibiahockey.viewmodel.TeamViewModel
-import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeamRegistrationScreen(
-    onNavigateBack: () -> Unit,
-    onNavigateToHome: () -> Unit,
-    viewModel: TeamViewModel = hiltViewModel()
-
+    onNavigateBack: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    val teamState by viewModel.teamState.collectAsState()
-    val context = LocalContext.current
 
     // Team registration form fields
     var teamName by remember { mutableStateOf("") }
@@ -84,18 +69,10 @@ fun TeamRegistrationScreen(
     var coachName by remember { mutableStateOf("") }
     var managerName by remember { mutableStateOf("") }
     var contactEmail by remember { mutableStateOf("") }
-    var contactPhone by remember { mutableStateOf("") }
+    var contactPhone by remember { mutableStateOf("")}
 
     val categories = listOf("Men's", "Women's", "Boys U18", "Girls U18", "Boys U16", "Girls U16", "Boys U14", "Girls U14")
     val divisions = listOf("Premier League", "First Division", "Second Division", "Development League")
-
-    LaunchedEffect(teamState) {
-        if (teamState.isSuccess) {
-            Toast.makeText(context, "Registration successful!", Toast.LENGTH_SHORT).show()
-            onNavigateToHome()
-        }
-
-    }
 
     Scaffold(
         topBar = {
@@ -370,33 +347,16 @@ fun TeamRegistrationScreen(
 
                 Button(
                     onClick = {
-                        val team = Team(
-                            name = teamName,
-                            category = category,
-                            division = division,
-                            coach = coachName,
-                            manager = managerName,
-                        )
-                        viewModel.createTeam(team)
+                        // Submit team registration
+                        // In a real implementation, this would save the team to the database
                     },
                     modifier = Modifier
                         .weight(1f)
                         .height(50.dp),
                     enabled = teamName.isNotBlank() && category.isNotBlank() && division.isNotBlank() &&
-                            coachName.isNotBlank() && managerName.isNotBlank() && contactEmail.isNotBlank() && contactPhone.isNotBlank()
+                            coachName.isNotBlank() && contactEmail.isNotBlank() && contactPhone.isNotBlank()
                 ) {
-                    if (teamState.isLoading) {
-                        CircularProgressIndicator(
-                            color = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    } else {
-                        Text(
-                            text = "Register Team",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text(text = "Register Team")
                 }
             }
 

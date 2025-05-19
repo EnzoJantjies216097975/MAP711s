@@ -1,11 +1,15 @@
 package com.map711s.namibiahockey.screens.home
 
+import android.graphics.drawable.Icon
+import android.icu.text.CaseMap.Title
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.map711s.namibiahockey.viewmodel.AuthViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,19 +22,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SportsHockey
 import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -40,13 +55,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.map711s.namibiahockey.R
+import com.map711s.namibiahockey.data.model.Event
 import com.map711s.namibiahockey.data.model.EventItem
 import com.map711s.namibiahockey.data.model.NewsItem
-import com.map711s.namibiahockey.viewmodel.AuthViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,15 +74,21 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    onNavigateToTeamRegistration: () -> Unit,
+    onNavigateToEventEntries: () -> Unit,
+    onNavigateToPlayerManagement: () -> Unit,
+    onNavigateToNewsFeed: () -> Unit,
     onNavigateToProfile: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
+
     val userProfileState by viewModel.userProfileState.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Namibia Hockey Union") },
+                title = { Text(text = "Namibia Hockey Union")
+                        },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
@@ -86,12 +112,13 @@ fun HomeScreen(
                 }
             )
         }
-    ) { paddingValues ->
+    ) {
+        paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Welcome message
             item {
@@ -108,6 +135,22 @@ fun HomeScreen(
                     val userName = userProfileState.user?.name ?: "Hockey Enthusiast"
                     WelcomeSection(userName = userName)
                 }
+            }
+
+            // Feature cards
+            item {
+                Text(
+                    text = "Quick Access",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
+                FeatureCardRow(
+                    onTeamRegistrationClick = onNavigateToTeamRegistration,
+                    onEventEntriesClick = onNavigateToEventEntries,
+                    onPlayerManagmentClick = onNavigateToPlayerManagement,
+                    onNewsFeedClick =  onNavigateToNewsFeed
+                )
             }
 
             // Upcoming events
@@ -134,7 +177,7 @@ fun HomeScreen(
                     )
                 )
 
-                events.forEach { event ->
+                events.forEach{ event ->
                     EventCard(event = event)
                 }
             }
@@ -163,7 +206,7 @@ fun HomeScreen(
                 )
 
                 newsItem.forEach { news ->
-                    NewsCard(news = news)
+                    NewsCard(news = news, onClick = onNavigateToNewsFeed)
                 }
             }
 
@@ -204,7 +247,7 @@ fun WelcomeSection(userName: String) {
         )
 
         Text(
-            text = "Stay updated with all hockey activities",
+            text = "Stay updated with all hockey activites",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
@@ -212,7 +255,105 @@ fun WelcomeSection(userName: String) {
 }
 
 @Composable
-fun EventCard(event: EventItem) {
+fun FeatureCardRow(
+    onTeamRegistrationClick: () -> Unit,
+    onEventEntriesClick: () -> Unit,
+    onPlayerManagmentClick: () -> Unit,
+    onNewsFeedClick: () -> Unit
+){
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            FeatureCard(
+                icon = Icons.Default.Groups,
+                title = "Team Registration",
+                onClick = onTeamRegistrationClick,
+
+            )
+        }
+
+        item {
+            FeatureCard(
+                icon = Icons.Default.CalendarMonth,
+                title = "Event Entries",
+                onClick = onEventEntriesClick
+            )
+        }
+
+        item {
+            FeatureCard(
+                icon = Icons.Default.Person,
+                title = "Player Management",
+                onClick = onPlayerManagmentClick,
+            )
+        }
+
+        item {
+            FeatureCard(
+                icon = Icons.Default.Info,
+                title = "News & Updates",
+                onClick = onNewsFeedClick
+            )
+        }
+    }
+}
+
+@Composable
+fun FeatureCard(
+    icon: ImageVector,
+    title: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .width(150.dp)
+            .height(140.dp)
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
+            )
+        }
+
+
+    }
+}
+
+@Composable
+fun EventCard(event: EventItem){
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -269,14 +410,18 @@ fun EventCard(event: EventItem) {
     }
 }
 
+
+
 @Composable
 fun NewsCard(
-    news: NewsItem
+    news: NewsItem,
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
