@@ -63,7 +63,8 @@ import com.map711s.namibiahockey.viewmodel.EventViewModel
 fun EventEntriesScreen(
     onNavigateBack: () -> Unit,
     viewModel: EventViewModel = hiltViewModel(),
-    onNavigateToAddEvent: () -> Unit
+    onNavigateToAddEvent: () -> Unit,
+    hockeyType: HockeyType,
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
