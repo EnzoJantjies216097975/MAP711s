@@ -9,11 +9,11 @@ object Routes {
     const val HOCKEY_TYPE_SELECTION = "hockey_type_selection"
 
     const val HOME = "home"
-    const val HOME_WITH_TYPE = " home/{hockeyType}"
+    const val HOME_WITH_TYPE = "home/{hockeyType}"
 
     const val TEAM_REGISTRATION = "team_registration/{hockeyType}"
     const val EVENT_ENTRIES = "event_entries/{hockeyType}"
-    const val PLAYER_MANAGEMENT = "player_management"
+    const val PLAYER_MANAGEMENT = "player_management/{hockeyType}"
     const val NEWS_FEED = "news_feed/{hockeyType}"
     const val PROFILE = "profile"
     const val ADD_EVENT = "add_event/{hockeyType}"
@@ -27,5 +27,4 @@ object Routes {
     fun newsFeed(hockeyType: String) = "news_feed/$hockeyType"
     fun addEvent(hockeyType: String) = "add_event/$hockeyType"
     fun addNews(hockeyType: String) = "add_news/$hockeyType"
-
 }

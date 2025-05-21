@@ -6,33 +6,24 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Business
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Landscape
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -47,10 +38,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.map711s.namibiahockey.components.FeatureCardRow
+import com.map711s.namibiahockey.data.model.EventEntry
 import com.map711s.namibiahockey.data.model.EventItem
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.data.model.NewsItem
@@ -101,17 +92,17 @@ fun HomeScreen(
                     // Hockey type switcher button
                     IconButton(
                         onClick = {
-                            onSwitchHockeyType(
-                                if (hockeyType == HockeyType.OUTDOOR) HockeyType.INDOOR
-                                else HockeyType.OUTDOOR
-                            )
+                            val newType = if (selectedHockeyType == HockeyType.OUTDOOR)
+                                HockeyType.INDOOR else HockeyType.OUTDOOR
+                            onSwitchHockeyType(newType)
+                            selectedHockeyType = newType
                         }
                     ) {
                         Icon(
-                            imageVector = if (hockeyType == HockeyType.OUTDOOR)
-                                Icons.Default.Home // Replace with appropriate icons
+                            imageVector = if (selectedHockeyType == HockeyType.OUTDOOR)
+                                Icons.Default.Home
                             else
-                                Icons.Default.Business, // Replace with appropriate icons
+                                Icons.Default.Business,
                             contentDescription = "Switch Hockey Type",
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
@@ -130,7 +121,7 @@ fun HomeScreen(
                             imageVector = Icons.Default.AccountCircle,
                             contentDescription = "Profile",
                             tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(60.dp)
+                            modifier = Modifier.size(28.dp)
                         )
                     }
                 }
@@ -143,7 +134,7 @@ fun HomeScreen(
                 .padding(paddingValues)
         ) {
             // Display hockey type indicator
-            HockeyTypeIndicator(hockeyType = hockeyType)
+            HockeyTypeIndicator(hockeyType = selectedHockeyType)
 
             // Rest of HomeScreen content
             LazyColumn(
@@ -163,7 +154,7 @@ fun HomeScreen(
                         }
                     } else {
                         val userName = userProfileState.user?.name ?: "Hockey Enthusiast"
-                        WelcomeSection(userName = userName, hockeyType = hockeyType)
+                        WelcomeSection(userName = userName)
                     }
                 }
 
@@ -202,7 +193,7 @@ fun HomeScreen(
                         }
                     } else if (eventListState.events.isEmpty()) {
                         Text(
-                            text = "No upcoming events for ${hockeyType.name.lowercase()} hockey",
+                            text = "No upcoming events for ${selectedHockeyType.name.lowercase()} hockey",
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(16.dp)
                         )
@@ -210,7 +201,12 @@ fun HomeScreen(
                         // Filter events by hockey type
                         val filteredEvents = eventListState.events.filter { event ->
                             try {
-                                HockeyType.valueOf(event.hockeyType ?: "OUTDOOR") == hockeyType
+                                val typeStr = event.hockeyType.toString()
+                                if (typeStr.isNotEmpty()) {
+                                    HockeyType.valueOf(typeStr) == selectedHockeyType
+                                } else {
+                                    false
+                                }
                             } catch (e: Exception) {
                                 false
                             }
@@ -228,13 +224,17 @@ fun HomeScreen(
 
                         if (eventItems.isEmpty()) {
                             Text(
-                                text = "No upcoming events for ${hockeyType.name.lowercase()} hockey",
+                                text = "No upcoming events for ${selectedHockeyType.name.lowercase()} hockey",
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.padding(16.dp)
                             )
                         } else {
-                            eventItems.take(3).forEach { event ->
-                                EventCard(event = event)
+                            eventItems.take(3).forEach { eventItem ->
+                                EventCard(
+                                    event = convertToEventEntry(eventItem),
+                                    onRegisterClick = { /* Handle registration */ },
+                                    onViewDetailsClick = { /* Handle view details */ }
+                                )
                             }
 
                             if (eventItems.size > 3) {
@@ -270,21 +270,15 @@ fun HomeScreen(
                         }
                     } else if (newsListState.newsPieces.isEmpty()) {
                         Text(
-                            text = "No news for ${hockeyType.name.lowercase()} hockey",
+                            text = "No news for ${selectedHockeyType.name.lowercase()} hockey",
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(16.dp)
                         )
                     } else {
                         // Filter news by hockey type
-                        val filteredNews = newsListState.newsPieces.filter { news ->
-                            try {
-                                HockeyType.valueOf(news.hockeyType ?: "OUTDOOR") == hockeyType
-                            } catch (e: Exception) {
-                                false
-                            }
-                        }
+                        val filteredNews = newsListState.newsPieces
 
-                        // Convert to NewsItem for display
+                        // Convert to NewsItem for display (for display purposes if needed)
                         val newsItems = filteredNews.map { news ->
                             NewsItem(
                                 id = news.id,
@@ -296,16 +290,22 @@ fun HomeScreen(
 
                         if (newsItems.isEmpty()) {
                             Text(
-                                text = "No news for ${hockeyType.name.lowercase()} hockey",
+                                text = "No news for ${selectedHockeyType.name.lowercase()} hockey",
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.padding(16.dp)
                             )
                         } else {
-                            newsItems.take(3).forEach { news ->
-                                NewsCard(news = news, onClick = onNavigateToNewsFeed)
+                            // Use the original NewsPiece objects from the state
+                            filteredNews.take(3).forEach { newsPiece ->
+                                NewsCard(
+                                    news = newsPiece,
+                                    onNewsClick = { /* Handle news click */ },
+                                    onBookmarkClick = { _, _ -> /* Handle bookmark */ },
+                                    onShareClick = { /* Handle share */ }
+                                )
                             }
 
-                            if (newsItems.size > 3) {
+                            if (filteredNews.size > 3) {
                                 TextButton(
                                     onClick = onNavigateToNewsFeed,
                                     modifier = Modifier
@@ -327,9 +327,6 @@ fun HomeScreen(
         }
     }
 }
-
-
-
 
 @Composable
 fun HockeyTypeIndicator(hockeyType: HockeyType) {
@@ -393,4 +390,19 @@ fun WelcomeSection(userName: String) {
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
     }
+}
+
+private fun convertToEventEntry(eventItem: EventItem): EventEntry {
+    return EventEntry(
+        id = eventItem.id,
+        title = eventItem.title,
+        description = "Event details", // Default description
+        startDate = eventItem.date.split(" - ").firstOrNull() ?: "",
+        endDate = eventItem.date.split(" - ").getOrElse(1) { "" },
+        location = eventItem.location,
+        registrationDeadline = "", // Default value
+        isRegistered = false,
+        registeredTeams = 0,
+        hockeyType = HockeyType.OUTDOOR // Default value, adjust as needed
+    )
 }

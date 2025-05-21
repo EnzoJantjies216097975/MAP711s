@@ -1,7 +1,6 @@
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Button
@@ -24,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -48,6 +45,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.map711s.namibiahockey.components.HockeyTypeHeader
+import com.map711s.namibiahockey.components.HockeyTypeOptions
 import com.map711s.namibiahockey.data.model.EventEntry
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.viewmodel.EventViewModel
@@ -352,7 +351,7 @@ fun AddEventScreen(
                         registrationDeadline = registrationDeadline,
                         registeredTeams = registeredTeams,
                         isRegistered = isRegistered,
-                        hockeyType = selectedHockeyType.name // Store hockey type as string
+                        hockeyType = selectedHockeyType // Store hockey type as string
                     )
 
                     viewModel.createEvent(event)
