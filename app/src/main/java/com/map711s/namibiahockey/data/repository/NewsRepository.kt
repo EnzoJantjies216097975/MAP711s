@@ -3,8 +3,8 @@ package com.map711s.namibiahockey.data.repository
 import NewsPiece
 import android.util.Log
 import com.google.firebase.Firebase
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.map711s.namibiahockey.data.model.HockeyType
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -104,4 +104,31 @@ class NewsRepository @Inject constructor(
         } finally {
             Log.d("NewsRepository", "getAllNewsPieces() finished")
         }
-    }}
+    }
+
+    suspend fun getNewsPiecesByType(hockeyType: HockeyType): Result<List<NewsPiece>> {
+        return try {
+            Log.d("NewsRepository", "Fetching ${hockeyType.name} news from Firestore")
+            val querySnapshot = firestore.collection("news")
+                .whereEqualTo("hockeyType", hockeyType.name)
+                .get()
+                .await()
+
+            val newsPieces = querySnapshot.documents.mapNotNull { document ->
+                try {
+                    val newsPiece = document.toObject(NewsPiece::class.java)
+                    Log.d("NewsRepository", "Mapped news: $newsPiece")
+                    newsPiece?.copy(id = document.id)
+                } catch (e: Exception) {
+                    Log.e("NewsRepository", "Error mapping document ${document.id}", e)
+                    null
+                }
+            }
+
+            Result.success(newsPieces)
+        } catch (e: Exception) {
+            Log.e("NewsRepository", "Error fetching news by type", e)
+            Result.failure(e)
+        }
+    }
+}

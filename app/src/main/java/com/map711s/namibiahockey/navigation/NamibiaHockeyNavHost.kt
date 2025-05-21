@@ -19,6 +19,8 @@ import com.map711s.namibiahockey.screens.player.PlayerManagementScreen
 import com.map711s.namibiahockey.screens.profile.ProfileScreen
 import com.map711s.namibiahockey.screens.splash.SplashScreen
 import com.map711s.namibiahockey.screens.team.TeamRegistrationScreen
+import com.map711s.namibiahockey.components.HockeyTypeHeader
+import com.map711s.namibiahockey.components.HockeyTypeOptions
 
 @Composable
 fun NamibiaHockeyNavHost(
@@ -81,6 +83,7 @@ fun NamibiaHockeyNavHost(
 
             HomeScreen(
                 hockeyType = hockeyType,
+
                 onSwitchHockeyType = { newType ->
                     navController.navigate(Routes.homeWithType(newType.name)) {
                         // Pop only the current Home destination to replace it
