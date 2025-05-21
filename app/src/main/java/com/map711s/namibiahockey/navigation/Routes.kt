@@ -5,13 +5,27 @@ object Routes {
     const val SPLASH = "splash"
     const val LOGIN = "login"
     const val REGISTER = "register"
+
+    const val HOCKEY_TYPE_SELECTION = "hockey_type_selection"
+
     const val HOME = "home"
-    const val TEAM_REGISTRATION = "team_registration"
-    const val EVENT_ENTRIES = "event_entries"
+    const val HOME_WITH_TYPE = " home/{hockeyType}"
+
+    const val TEAM_REGISTRATION = "team_registration/{hockeyType}"
+    const val EVENT_ENTRIES = "event_entries/{hockeyType}"
     const val PLAYER_MANAGEMENT = "player_management"
-    const val NEWS_FEED = "news_feed"
+    const val NEWS_FEED = "news_feed/{hockeyType}"
     const val PROFILE = "profile"
-    const val ADD_EVENT = "add_event"
-    const val ADD_NEWS = "add_news"
+    const val ADD_EVENT = "add_event/{hockeyType}"
+    const val ADD_NEWS = "add_news/{hockeyType}"
+
+    // Navigation helpers
+    fun homeWithType(hockeyType: String) = "home/$hockeyType"
+    fun teamRegistration(hockeyType: String) = "team_registration/$hockeyType"
+    fun eventEntries(hockeyType: String) = "event_entries/$hockeyType"
+    fun playerManagement(hockeyType: String) = "player_management/$hockeyType"
+    fun newsFeed(hockeyType: String) = "news_feed/$hockeyType"
+    fun addEvent(hockeyType: String) = "add_event/$hockeyType"
+    fun addNews(hockeyType: String) = "add_news/$hockeyType"
 
 }

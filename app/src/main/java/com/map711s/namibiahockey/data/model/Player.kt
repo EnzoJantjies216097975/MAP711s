@@ -7,6 +7,7 @@ data class Player(
     val id: String = "",
     val userId: String = "", // Reference to User
     val name: String = "",
+    val hockeyType: HockeyType = HockeyType.BOTH,
     val dateOfBirth: Date = Date(),
     val position: String = "",
     val jerseyNumber: Int = 0,

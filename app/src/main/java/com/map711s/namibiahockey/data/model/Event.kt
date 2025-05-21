@@ -5,6 +5,7 @@ import java.util.Date
 data class Event(
     val id: String = "",
     val name: String = "",
+    val hockeyType: HockeyType= HockeyType.OUTDOOR,
     val description: String = "",
     val startDate: Date = Date(),
     val endDate: Date = Date(),

@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.data.model.HockeyType
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -13,13 +14,43 @@ class EventRepository @Inject constructor(
 //    private val firestore: Any = Firebase.firestore
 ) {
     private val firestore = Firebase.firestore
+    private val eventsCollection = firestore.collection("events")
 
     // Create a new event
     suspend fun createEvent(event: EventEntry): Result<String> {
         return try {
-            val documentReference = firestore.collection("events").add(event.toHashMap()).await()
+            val eventMap = event.toHashMap() // This now includes the hockeyType field
+            val documentReference = eventsCollection.add(eventMap).await()
             Result.success(documentReference.id)
         } catch (e: Exception) {
+            Log.e("EventRepository", "Error creating event", e)
+            Result.failure(e)
+        }
+    }
+
+    // Get events filtered by hockey type
+    suspend fun getEventsByType(hockeyType: HockeyType): Result<List<EventEntry>> {
+        return try {
+            Log.d("EventRepository", "Fetching ${hockeyType.name} events from Firestore")
+            val querySnapshot = eventsCollection
+                .whereEqualTo("hockeyType", hockeyType.name)
+                .get()
+                .await()
+
+            val events = querySnapshot.documents.mapNotNull { document ->
+                try {
+                    val event = document.toObject(EventEntry::class.java)
+                    Log.d("EventRepository", "Mapped event: $event")
+                    event?.copy(id = document.id)
+                } catch (e: Exception) {
+                    Log.e("EventRepository", "Error mapping document ${document.id}", e)
+                    null
+                }
+            }
+
+            Result.success(events)
+        } catch (e: Exception) {
+            Log.e("EventRepository", "Error fetching events by type", e)
             Result.failure(e)
         }
     }
@@ -27,7 +58,7 @@ class EventRepository @Inject constructor(
     // Get an event by ID
     suspend fun getEvent(eventId: String): Result<EventEntry> {
         return try {
-            val documentSnapshot = firestore.collection("events").document(eventId).get().await()
+            val documentSnapshot = eventsCollection.document(eventId).get().await()
             if (documentSnapshot.exists()) {
                 val event = documentSnapshot.toObject(EventEntry::class.java)
                     ?: return Result.failure(Exception("Failed to parse event data"))
@@ -43,7 +74,7 @@ class EventRepository @Inject constructor(
     // Update an existing event
     suspend fun updateEvent(event: EventEntry): Result<Unit> {
         return try {
-            firestore.collection("events").document(event.id).set(event.toHashMap()).await()
+            eventsCollection.document(event.id).set(event.toHashMap()).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -53,7 +84,7 @@ class EventRepository @Inject constructor(
     // Delete an event by ID
     suspend fun deleteEvent(eventId: String): Result<Unit> {
         return try {
-            firestore.collection("events").document(eventId).delete().await()
+            eventsCollection.document(eventId).delete().await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -112,11 +143,15 @@ class EventRepository @Inject constructor(
 
     // Register for an event
     suspend fun registerForEvent(eventId: String): Result<Unit> {
+        // Implementation remains largely the same
         return try {
             val eventResult = getEvent(eventId)
             if (eventResult.isSuccess) {
                 val event = eventResult.getOrThrow()
-                val updatedEvent = event.copy(isRegistered = true, registeredTeams = event.registeredTeams + 1)
+                val updatedEvent = event.copy(
+                    isRegistered = true,
+                    registeredTeams = event.registeredTeams + 1
+                )
                 updateEvent(updatedEvent)
             } else {
                 Result.failure(eventResult.exceptionOrNull() ?: Exception("Failed to get event"))
@@ -128,11 +163,15 @@ class EventRepository @Inject constructor(
 
     // Unregister from an event
     suspend fun unregisterFromEvent(eventId: String): Result<Unit> {
+        // Implementation remains largely the same
         return try {
             val eventResult = getEvent(eventId)
             if (eventResult.isSuccess) {
                 val event = eventResult.getOrThrow()
-                val updatedEvent = event.copy(isRegistered = false, registeredTeams = event.registeredTeams - 1)
+                val updatedEvent = event.copy(
+                    isRegistered = false,
+                    registeredTeams = event.registeredTeams - 1
+                )
                 updateEvent(updatedEvent)
             } else {
                 Result.failure(eventResult.exceptionOrNull() ?: Exception("Failed to get event"))

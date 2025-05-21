@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.data.repository.EventRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -212,4 +213,30 @@ class EventViewModel @Inject constructor(
     fun resetEventState(){
         _eventState.update { EventState() }
     }
+
+    // Add this method to EventViewModel.kt
+    suspend fun loadEventsByType(hockeyType: HockeyType) {
+        _eventListState.update { it.copy(isLoading = true, error = null) }
+        viewModelScope.launch {
+            eventRepository.getEventsByType(hockeyType)
+                .onSuccess { events ->
+                    _eventListState.update {
+                        it.copy(
+                            isLoading = false,
+                            events = events
+                        )
+                    }
+                }
+                .onFailure { exception ->
+                    _eventListState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = exception.message ?: "Failed to load events"
+                        )
+                    }
+                }
+        }
+    }
+
+
 }

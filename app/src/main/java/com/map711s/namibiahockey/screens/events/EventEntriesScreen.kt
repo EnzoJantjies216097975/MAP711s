@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.LocationOn
@@ -28,7 +27,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -57,8 +55,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.viewmodel.EventViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,10 +70,29 @@ fun EventEntriesScreen(
     val topAppBarState = listOf("Upcoming", "Past", "My Entries")
     val eventsEntriesState by viewModel.eventListState.collectAsState()
     val eventsEntries = eventsEntriesState.events
-    val isLoading = eventsEntriesState.isLoading // Get loading state
+    val isLoading = eventsEntriesState.isLoading
+    var selectedHockeyType by remember { mutableStateOf(HockeyType.BOTH) }
+
     LaunchedEffect(key1 = true) {
         viewModel.loadAllEvents()
     }
+
+    // Hockey Type Selector
+    TabRow(
+        selectedTabIndex = if (selectedHockeyType == HockeyType.OUTDOOR) 0 else 1
+    ) {
+        Tab(
+            selected = selectedHockeyType == HockeyType.OUTDOOR,
+            onClick = { selectedHockeyType = HockeyType.OUTDOOR },
+            text = { Text("Outdoor Hockey") }
+        )
+        Tab(
+            selected = selectedHockeyType == HockeyType.INDOOR,
+            onClick = { selectedHockeyType = HockeyType.INDOOR },
+            text = { Text("Indoor Hockey") }
+        )
+    }
+
     // Filtered events based on search and tab
     val filteredEvents = if (searchQuery.isBlank()) {
         when (selectedTabIndex) {

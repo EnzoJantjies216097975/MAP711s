@@ -2,25 +2,17 @@ package com.map711s.namibiahockey.navigation
 
 import AddEventScreen
 import AddNewsScreen
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.screens.auth.LoginScreen
 import com.map711s.namibiahockey.screens.auth.RegisterScreen
 import com.map711s.namibiahockey.screens.events.EventEntriesScreen
+import com.map711s.namibiahockey.screens.hockey.HockeyTypeSelectionScreen
 import com.map711s.namibiahockey.screens.home.HomeScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsFeedScreen
 import com.map711s.namibiahockey.screens.player.PlayerManagementScreen
@@ -30,129 +22,175 @@ import com.map711s.namibiahockey.screens.team.TeamRegistrationScreen
 
 @Composable
 fun NamibiaHockeyNavHost(
-    navController: NavHostController = rememberNavController(),
+    navController: NavHostController,
     startDestination: String = Routes.SPLASH
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        // Define bottom navigation items
-        val bottomNavItems = listOf(
-            BottomNavItem("Home", Routes.HOME, Icons.Default.Home),
-            BottomNavItem("Teams", Routes.TEAM_REGISTRATION, Icons.Default.Groups),
-            BottomNavItem("Events", Routes.EVENT_ENTRIES, Icons.Default.CalendarMonth),
-            BottomNavItem("Players", Routes.PLAYER_MANAGEMENT, Icons.Default.Person),
-            BottomNavItem("News", Routes.NEWS_FEED, Icons.Default.Info)
-        )
-
-        // Check if current screen should show bottom navigation
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
-
-        val showBottomBar = when (currentRoute) {
-            Routes.SPLASH, Routes.LOGIN, Routes.REGISTER -> false
-            else -> true
+        // Splash screen
+        composable(Routes.SPLASH) {
+            SplashScreen(
+                onNavigateToLogin = { navController.navigate(Routes.LOGIN) }
+            )
         }
 
-        Scaffold(
-            bottomBar = {
-                if (showBottomBar) {
-                    BottomNavigationBar(navController, bottomNavItems)
+        // Authentication screens
+        composable(Routes.LOGIN) {
+            LoginScreen(
+                onNavigateToRegister = { navController.navigate(Routes.REGISTER) },
+                onNavigateToHome = {
+                    navController.navigate(Routes.HOCKEY_TYPE_SELECTION) {
+                        // Clear the back stack so user can't go back to login
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
                 }
-            }
-        ) { innerPadding ->
-            NavHost(
-                navController = navController,
-                startDestination = startDestination,
-                modifier = Modifier.padding(innerPadding)
-            ) {
-                // Existing navigation destinations...
-                // (rest of your navigation composables remain the same)
+            )
+        }
 
-                // Splash screen
-                composable(Routes.SPLASH) {
-                    SplashScreen(
-                        onNavigateToLogin = { navController.navigate(Routes.LOGIN) }
-                    )
+        composable(Routes.REGISTER) {
+            RegisterScreen(
+                onNavigateToLogin = { navController.navigate(Routes.LOGIN) },
+                onNavigateToHome = {
+                    navController.navigate(Routes.HOCKEY_TYPE_SELECTION) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
                 }
+            )
+        }
 
-                // Authentication screens
-                composable(Routes.LOGIN) {
-                    LoginScreen(
-                        onNavigateToRegister = { navController.navigate(Routes.REGISTER) },
-                        onNavigateToHome = {
-                            navController.navigate(Routes.HOME) {
-                                // Clear the back stack so user can't go back to login
-                                popUpTo(Routes.LOGIN) { inclusive = true }
-                            }
-                        }
-                    )
+        // Hockey type selection screen
+        composable(Routes.HOCKEY_TYPE_SELECTION) {
+            HockeyTypeSelectionScreen(
+                onHockeyTypeSelected = { hockeyType ->
+                    navController.navigate(Routes.homeWithType(hockeyType.name)) {
+                        popUpTo(Routes.HOCKEY_TYPE_SELECTION) { inclusive = true }
+                    }
                 }
+            )
+        }
 
-                composable(Routes.REGISTER) {
-                    RegisterScreen(
-                        onNavigateToLogin = { navController.navigate(Routes.LOGIN) },
-                        onNavigateToHome = {
-                            navController.navigate(Routes.HOME) {
-                                popUpTo(Routes.LOGIN) { inclusive = true }
-                            }
-                        }
-                    )
-                }
+        // Main screens with hockey type parameter
+        composable(
+            route = Routes.HOME_WITH_TYPE,
+            arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyType = HockeyType.valueOf(hockeyTypeStr)
 
-                // Main screens
-                composable(Routes.HOME) {
-                    HomeScreen(
-                        onNavigateToProfile = { navController.navigate(Routes.PROFILE) }
-                    )
+            HomeScreen(
+                hockeyType = hockeyType,
+                onSwitchHockeyType = { newType ->
+                    navController.navigate(Routes.homeWithType(newType.name)) {
+                        // Pop only the current Home destination to replace it
+                        popUpTo(Routes.HOME_WITH_TYPE) { inclusive = true }
+                    }
+                },
+                onNavigateToTeamRegistration = {
+                    navController.navigate(Routes.teamRegistration(hockeyType.name))
+                },
+                onNavigateToEventEntries = {
+                    navController.navigate(Routes.eventEntries(hockeyType.name))
+                },
+                onNavigateToPlayerManagement = {
+                    navController.navigate(Routes.playerManagement(hockeyType.name))
+                },
+                onNavigateToNewsFeed = {
+                    navController.navigate(Routes.newsFeed(hockeyType.name))
+                },
+                onNavigateToProfile = {
+                    navController.navigate(Routes.PROFILE)
                 }
+            )
+        }
 
-                composable(Routes.TEAM_REGISTRATION) {
-                    TeamRegistrationScreen(
-                        onNavigateBack = { navController.navigateUp() }
-                    )
-                }
+        composable(
+            route = Routes.TEAM_REGISTRATION,
+            arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyType = HockeyType.valueOf(hockeyTypeStr)
 
-                composable(Routes.EVENT_ENTRIES) {
-                    EventEntriesScreen(
-                        onNavigateBack = { navController.navigateUp() },
-                        onNavigateToAddEvent = {navController.navigate(Routes.ADD_EVENT)}
-                    )
-                }
+            TeamRegistrationScreen(
+                hockeyType = hockeyType,
+                onNavigateBack = { navController.navigateUp() }
+            )
+        }
 
-                composable(Routes.ADD_EVENT){
-                    AddEventScreen(
-                        onNavigateBack = { navController.navigateUp() },
-                        onNavigateToEvents = {navController.navigate(Routes.EVENT_ENTRIES)}
-                    )
-                }
+        composable(
+            route = Routes.EVENT_ENTRIES,
+            arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyType = HockeyType.valueOf(hockeyTypeStr)
 
-                composable(Routes.PLAYER_MANAGEMENT) {
-                    PlayerManagementScreen(
-                        onNavigateBack = { navController.navigateUp() }
-                    )
-                }
+            EventEntriesScreen(
+                hockeyType = hockeyType,
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToAddEvent = { navController.navigate(Routes.addEvent(hockeyType.name)) }
+            )
+        }
 
-                composable(Routes.NEWS_FEED) {
-                    NewsFeedScreen(
-                        onNavigateBack = { navController.navigateUp() },
-                        onNavigateToAddNews = {navController.navigate(Routes.ADD_NEWS)}
-                    )
-                }
+        composable(
+            route = Routes.ADD_EVENT,
+            arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyType = HockeyType.valueOf(hockeyTypeStr)
 
-                composable(Routes.ADD_NEWS){
-                    AddNewsScreen(
-                        onNavigateBack = {navController.navigateUp()},
-                        onNavigateToNews = {navController.navigate(Routes.NEWS_FEED)}
-                    )
-                }
+            AddEventScreen(
+                hockeyType = hockeyType,
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToEvents = { navController.navigate(Routes.eventEntries(hockeyType.name)) }
+            )
+        }
 
-                composable(Routes.PROFILE) {
-                    ProfileScreen(
-                        onNavigateBack = { navController.navigateUp() }
-                    )
-                }
-            }
+        composable(
+            route = Routes.PLAYER_MANAGEMENT,
+            arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyType = HockeyType.valueOf(hockeyTypeStr)
+
+            PlayerManagementScreen(
+                hockeyType = hockeyType,
+                onNavigateBack = { navController.navigateUp() }
+            )
+        }
+
+        composable(
+            route = Routes.NEWS_FEED,
+            arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyType = HockeyType.valueOf(hockeyTypeStr)
+
+            NewsFeedScreen(
+                hockeyType = hockeyType,
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToAddNews = { navController.navigate(Routes.addNews(hockeyType.name)) }
+            )
+        }
+
+        composable(
+            route = Routes.ADD_NEWS,
+            arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyType = HockeyType.valueOf(hockeyTypeStr)
+
+            AddNewsScreen(
+                hockeyType = hockeyType,
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToNews = { navController.navigate(Routes.newsFeed(hockeyType.name)) }
+            )
+        }
+
+        composable(Routes.PROFILE) {
+            ProfileScreen(
+                onNavigateBack = { navController.navigateUp() }
+            )
         }
     }
+}

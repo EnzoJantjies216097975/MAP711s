@@ -1,11 +1,12 @@
 package com.map711s.namibiahockey.viewmodel
 
 import NewsListState
+import NewsPiece
+import NewsState
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import NewsPiece
-import NewsState
+import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.data.repository.NewsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,5 +105,29 @@ class NewsViewModel @Inject constructor(
 
     fun resetNewsState() {
         _newsState.update { NewsState() }
+    }
+
+    // Add this method to NewsViewModel.kt
+    suspend fun loadNewsPiecesByType(hockeyType: HockeyType) {
+        _newsListState.update { it.copy(isLoading = true, error = null) }
+        viewModelScope.launch {
+            newsRepository.getNewsPiecesByType(hockeyType)
+                .onSuccess { newsPieces ->
+                    _newsListState.update {
+                        it.copy(
+                            isLoading = false,
+                            newsPieces = newsPieces
+                        )
+                    }
+                }
+                .onFailure { exception ->
+                    _newsListState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = exception.message ?: "Failed to load news pieces"
+                        )
+                    }
+                }
+        }
     }
 }

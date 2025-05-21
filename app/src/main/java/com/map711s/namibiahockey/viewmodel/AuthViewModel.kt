@@ -217,4 +217,24 @@ class AuthViewModel @Inject constructor(
                 }
         }
     }
+
+    fun updateUserProfile(user: User) {
+        viewModelScope.launch {
+            _userProfileState.update { it.copy(isLoading = true, error = null) }
+
+            authRepository.updateUserProfile(user)
+                .onSuccess {
+                    // Reload the user profile to get updated data
+                    loadUserProfile()
+                }
+                .onFailure { exception ->
+                    _userProfileState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = exception.message ?: "Failed to update profile"
+                        )
+                    }
+                }
+        }
+    }
 }

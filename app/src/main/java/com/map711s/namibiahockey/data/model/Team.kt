@@ -5,6 +5,7 @@ import java.util.Date
 data class Team(
     val id: String = "",
     val name: String = "",
+    val hockeyType: HockeyType = HockeyType.OUTDOOR,
     val category: String = "", // e.g., Men's, Women's, Junior
     val division: String = "", // e.g., Premier, First Division
     val coach: String = "",
