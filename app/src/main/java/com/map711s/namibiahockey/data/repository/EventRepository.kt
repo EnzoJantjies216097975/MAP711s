@@ -19,7 +19,14 @@ class EventRepository @Inject constructor(
     // Create a new event
     suspend fun createEvent(event: EventEntry): Result<String> {
         return try {
-            val eventMap = event.toHashMap() // This now includes the hockeyType field
+            // Get current user ID
+            val userId = authRepository.getCurrentUserId() ?:
+            return Result.failure(Exception("User not authenticated"))
+
+            // Add the user ID to the event data
+            val eventWithUser = event.copy(createdBy = userId)
+            val eventMap = eventWithUser.toHashMap()
+
             val documentReference = eventsCollection.add(eventMap).await()
             Result.success(documentReference.id)
         } catch (e: Exception) {

@@ -1,6 +1,5 @@
 package com.map711s.namibiahockey.navigation
 
-import AddEventScreen
 import AddNewsScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -11,6 +10,7 @@ import androidx.navigation.navArgument
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.screens.auth.LoginScreen
 import com.map711s.namibiahockey.screens.auth.RegisterScreen
+import com.map711s.namibiahockey.screens.events.AddEventScreen
 import com.map711s.namibiahockey.screens.events.EventDetailsScreen
 import com.map711s.namibiahockey.screens.events.EventEntriesScreen
 import com.map711s.namibiahockey.screens.hockey.HockeyTypeSelectionScreen

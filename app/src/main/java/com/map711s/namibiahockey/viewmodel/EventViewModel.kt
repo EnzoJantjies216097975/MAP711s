@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.map711s.namibiahockey.data.model.EventEntry
 import com.map711s.namibiahockey.data.model.HockeyType
+import com.map711s.namibiahockey.data.repository.AuthRepository
 import com.map711s.namibiahockey.data.repository.EventRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EventViewModel @Inject constructor(
-    private val eventRepository: EventRepository
+    private val eventRepository: EventRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     // Event creation/update state
@@ -30,6 +32,17 @@ class EventViewModel @Inject constructor(
     // Create a new event
     fun createEvent(event: EventEntry) {
         _eventState.update { it.copy(isLoading = true, error = null) }
+
+        if (authRepository.getCurrentUserId() == null) {
+            _eventState.update {
+                it.copy(
+                    isLoading = false,
+                    error = "You must be logged in to create events"
+                )
+            }
+            return
+        }
+
         viewModelScope.launch {
             eventRepository.createEvent(event)
                 .onSuccess { eventId ->
@@ -158,6 +171,18 @@ class EventViewModel @Inject constructor(
     fun registerForEvent(eventId: String) {
         _eventState.update { it.copy(isLoading = true, error = null, eventId = eventId) }
         viewModelScope.launch {
+            // Get current user ID
+            val userId = authRepository.getCurrentUserId()
+            if (userId == null) {
+                _eventState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "You must be logged in to register for events"
+                    )
+                }
+                return@launch
+            }
+
             // Find the event in the list
             val event = _eventListState.value.events.find { it.id == eventId }
             if (event == null) {
@@ -172,7 +197,7 @@ class EventViewModel @Inject constructor(
 
             if (event.isRegistered) {
                 // If already registered, unregister
-                eventRepository.unregisterFromEvent(eventId)
+                eventRepository.unregisterFromEvent(eventId, userId)
                     .onSuccess {
                         // Update the event state
                         _eventState.update {
@@ -184,8 +209,7 @@ class EventViewModel @Inject constructor(
                         }
 
                         // Update the event in the list
-                        _eventListState.update { state ->
-                            val updatedEvents = state.events.map { e ->
+                            val updatedEvents = _eventListState.value.events.map { e ->
                                 if (e.id == eventId) {
                                     e.copy(
                                         isRegistered = false,
@@ -193,8 +217,8 @@ class EventViewModel @Inject constructor(
                                     )
                                 } else e
                             }
-                            state.copy(events = updatedEvents)
-                        }
+                            _eventListState.update { it.copy(events = updatedEvents) }
+
                     }
                     .onFailure { exception ->
                         _eventState.update {
@@ -206,7 +230,7 @@ class EventViewModel @Inject constructor(
                     }
             } else {
                 // If not registered, register
-                eventRepository.registerForEvent(eventId)
+                eventRepository.registerForEvent(eventId, userId)
                     .onSuccess {
                         // Update the event state
                         _eventState.update {
@@ -218,17 +242,16 @@ class EventViewModel @Inject constructor(
                         }
 
                         // Update the event in the list
-                        _eventListState.update { state ->
-                            val updatedEvents = state.events.map { e ->
-                                if (e.id == eventId) {
-                                    e.copy(
-                                        isRegistered = true,
-                                        registeredTeams = e.registeredTeams + 1
-                                    )
-                                } else e
-                            }
-                            state.copy(events = updatedEvents)
+                        val updatedEvents = _eventListState.value.events.map { e ->
+                            if (e.id == eventId) {
+                                e.copy(
+                                    isRegistered = true,
+                                    registeredTeams = e.registeredTeams + 1
+                                )
+                            } else e
                         }
+                        _eventListState.update { it.copy(events = updatedEvents) }
+
                     }
                     .onFailure { exception ->
                         _eventState.update {
@@ -239,6 +262,56 @@ class EventViewModel @Inject constructor(
                         }
                     }
             }
+        }
+    }
+
+    fun unregisterFromEvent(eventId: String) {
+        _eventState.update { it.copy(isLoading = true, error = null, eventId = eventId) }
+        viewModelScope.launch {
+            // Get current user ID
+            val userId = authRepository.getCurrentUserId()
+            if (userId == null) {
+                _eventState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "You must be logged in to unregister from events"
+                    )
+                }
+                return@launch
+            }
+
+            eventRepository.unregisterFromEvent(eventId, userId)
+                .onSuccess {
+                    // Update the event state
+                    _eventState.update {
+                        it.copy(
+                            isLoading = false,
+                            isSuccess = true,
+                            isRegistered = false
+                        )
+                    }
+
+                    // Update the event in the list
+                    _eventListState.update { state ->
+                        val updatedEvents = state.events.map { e ->
+                            if (e.id == eventId) {
+                                e.copy(
+                                    isRegistered = false,
+                                    registeredTeams = maxOf(0, e.registeredTeams - 1)
+                                )
+                            } else e
+                        }
+                        state.copy(events = updatedEvents)
+                    }
+                }
+                .onFailure { exception ->
+                    _eventState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = exception.message ?: "Failed to unregister from event"
+                        )
+                    }
+                }
         }
     }
 

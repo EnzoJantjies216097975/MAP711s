@@ -78,6 +78,16 @@ fun EventEntriesScreen(
     val isLoading = eventsEntriesState.isLoading
     var selectedHockeyType by remember { mutableStateOf(hockeyType) }
     val snackbarHostState = remember { SnackbarHostState() }
+    var loadingEventId by remember { mutableStateOf<String?>(null) }
+
+    // Observe event state to update loading
+    LaunchedEffect(viewModel.eventState.collectAsState().value) {
+        val eventState = viewModel.eventState.value
+        if (!eventState.isLoading) {
+            // If no longer loading, clear the loading event ID
+            loadingEventId = null
+        }
+    }
 
     // Effect to show error messages
     LaunchedEffect(eventsEntriesState.error) {
@@ -254,12 +264,13 @@ fun EventEntriesScreen(
                         EventCard(
                             event = event,
                             onRegisterClick = { eventId ->
+                                loadingEventId = eventId
                                 viewModel.registerForEvent(eventId)
                             },
                             onViewDetailsClick = { eventId ->
                                 onNavigateToEventDetails(eventId, event.hockeyType)
                             },
-                            isLoading = isLoading && viewModel.eventState.value.eventId == event.id
+                            isLoading = loadingEventId == event.id
                         )
                     }
 
@@ -280,6 +291,21 @@ fun EventCard(
     onViewDetailsClick: (String) -> Unit,
     isLoading: Boolean = false
 ) {
+    // Keep track of registration state locally to ensure UI updates
+    var isRegistered by remember(event.id, event.isRegistered) {
+        mutableStateOf(event.isRegistered)
+    }
+
+    var registeredTeams by remember(event.id, event.registeredTeams) {
+        mutableStateOf(event.registeredTeams)
+    }
+
+    // Use useEffect to update local state when event changes
+    LaunchedEffect(event) {
+        isRegistered = event.isRegistered
+        registeredTeams = event.registeredTeams
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -379,7 +405,11 @@ fun EventCard(
                 } else if (event.isRegistered) {
                     // Show unregister option
                     Button(
-                        onClick = { onRegisterClick(event.id) },
+                        onClick = {
+                            onRegisterClick(event.id)
+                            isRegistered = false
+                            registeredTeams = maxOf(0, registeredTeams - 1)
+                                  },
                         modifier = Modifier.height(36.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error
@@ -390,7 +420,11 @@ fun EventCard(
                 } else {
                     // Show register option
                     Button(
-                        onClick = { onRegisterClick(event.id) },
+                        onClick = {
+                            onRegisterClick(event.id)
+                            isRegistered = true
+                            registeredTeams = registeredTeams + 1
+                                  },
                         modifier = Modifier.height(36.dp)
                     ) {
                         Text(text = "Register")

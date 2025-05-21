@@ -21,6 +21,7 @@ import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Edit
@@ -28,7 +29,6 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
@@ -782,7 +782,7 @@ fun ProfileScreen(
                         )
 
                         SettingsItem(
-                            icon = Icons.Default.Help,
+                            icon = Icons.AutoMirrored.Filled.Help,
                             title = "Help & Support",
                             onClick = { /* Navigate to help screen */ }
                         )

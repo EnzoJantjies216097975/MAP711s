@@ -1,4 +1,6 @@
+package com.map711s.namibiahockey.screens.events
 
+import DatePickerField
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,12 +13,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,7 +50,8 @@ import com.map711s.namibiahockey.components.HockeyTypeOptions
 import com.map711s.namibiahockey.data.model.EventEntry
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.viewmodel.EventViewModel
-import java.util.Calendar
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,32 +65,59 @@ fun AddEventScreen(
     val eventState by viewModel.eventState.collectAsState()
     val context = LocalContext.current
 
-    // Form fields
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
     var startDate by remember { mutableStateOf("") }
     var endDate by remember { mutableStateOf("") }
     var registrationDeadline by remember { mutableStateOf("") }
+
     var registeredTeams by remember { mutableStateOf(0) }
     var isRegistered by remember { mutableStateOf(false) }
     var hockeyType by remember { mutableStateOf(HockeyType.OUTDOOR) }
 
+    // Form fields
+    var title by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("") }
+
+    // Date fields using LocalDate to properly manage dates
+    var startLocalDate by remember { mutableStateOf<LocalDate?>(null) }
+    var endLocalDate by remember { mutableStateOf<LocalDate?>(null) }
+    var registrationDeadlineLocalDate by remember { mutableStateOf<LocalDate?>(null) }
+
+    // Selected hockey type
     var selectedHockeyType by remember { mutableStateOf(hockeyType) }
 
-    // Date picker states
-    var showStartDatePicker by remember { mutableStateOf(false) }
-    var showEndDatePicker by remember { mutableStateOf(false) }
-    var showRegistrationDeadlinePicker by remember { mutableStateOf(false) }
+    // Date formatter
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    // Validation state
+    val formIsValid = title.isNotBlank() &&
+            description.isNotBlank() &&
+            location.isNotBlank() &&
+            startLocalDate != null &&
+            endLocalDate != null &&
+            registrationDeadlineLocalDate != null
+
+    // Parse dates for comparison (if needed)
+    val parsedStartDate = try {
+        if (startDate.isNotEmpty()) LocalDate.parse(startDate, dateFormatter) else null
+    } catch (e: Exception) { null }
+
+    val parsedEndDate = try {
+        if (endDate.isNotEmpty()) LocalDate.parse(endDate, dateFormatter) else null
+    } catch (e: Exception) { null }
+
+    // Minimum allowed dates for the pickers
+    val today = LocalDate.now()
 
     LaunchedEffect(eventState) {
         if (eventState.isSuccess) {
             Toast.makeText(context, "Event created successfully!", Toast.LENGTH_SHORT).show()
             viewModel.resetEventState() // Reset the form state
-            onNavigateToEvents()
+            onNavigateToEvents() // Navigate to events list
         }
-        if (eventState.error != null) {
-            snackbarHostState.showSnackbar(eventState.error!!)
+
+        eventState.error?.let {
+            snackbarHostState.showSnackbar(it)
         }
     }
 
@@ -100,7 +128,7 @@ fun AddEventScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -163,7 +191,8 @@ fun AddEventScreen(
                             capitalization = KeyboardCapitalization.Words,
                             imeAction = ImeAction.Next
                         ),
-                        singleLine = true
+                        singleLine = true,
+                        isError = title.isEmpty() && eventState.error != null
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -180,6 +209,7 @@ fun AddEventScreen(
                             imeAction = ImeAction.Next
                         ),
                         maxLines = 3,
+                        isError = description.isEmpty() && eventState.error != null
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -195,146 +225,57 @@ fun AddEventScreen(
                             capitalization = KeyboardCapitalization.Words,
                             imeAction = ImeAction.Next
                         ),
-                        singleLine = true
+                        singleLine = true,
+                        isError = location.isEmpty() && eventState.error != null
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Start Date field
-                    OutlinedTextField(
-                        value = startDate,
-                        onValueChange = { }, // Date is selected via the dialog.
-                        label = { Text("Start Date") },
-                        placeholder = { Text("Select start date") },
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
-                        trailingIcon = {
-                            IconButton(onClick = { showStartDatePicker = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.CalendarMonth,
-                                    contentDescription = "Select Start Date"
-                                )
+                    DatePickerField(
+                        value = startLocalDate?.format(dateFormatter) ?: "",
+                        onDateSelected = { date ->
+                            startLocalDate = date
+                            // If end date is before new start date, update it
+                            if (endLocalDate != null && endLocalDate!!.isBefore(date)) {
+                                endLocalDate = date
                             }
                         },
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next
-                        ),
-                        singleLine = true,
+                        label = "Start Date",
+                        placeholder = "Select start date",
+                        modifier = Modifier.fillMaxWidth(),
+                        minDate = today
                     )
-                    // Date Picker Dialog
-                    if (showStartDatePicker) {
-                        DatePickerDialog(
-                            onDismissRequest = { showStartDatePicker = false },
-                            confirmButton = {
-                                Button(onClick = {
-                                    // Handle the date and format it as you need
-                                    showStartDatePicker = false
-                                    // You can use a Calendar instance to get the date
-                                    val calendar = Calendar.getInstance()
-                                    // Or use the date from date picker
-                                    startDate = "2024-08-03" // hardcoded example
-                                }) {
-                                    Text("Confirm")
-                                }
-                            },
-                            dismissButton = {
-                                Button(onClick = { showStartDatePicker = false }) {
-                                    Text("Cancel")
-                                }
-                            }
-                        ) {
-                            // DatePicker() // From  androidx.compose.material3.DatePicker
-                            Text("Date Picker") // placeholder
-                        }
-                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // End Date field
-                    OutlinedTextField(
-                        value = endDate,
-                        onValueChange = {  },
-                        label = { Text("End Date") },
-                        placeholder = { Text("Select end date") },
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
-                        trailingIcon = {
-                            IconButton(onClick = { showEndDatePicker = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.CalendarMonth,
-                                    contentDescription = "Select End Date"
-                                )
-                            }
+                    DatePickerField(
+                        value = endLocalDate?.format(dateFormatter) ?: "",
+                        onDateSelected = { date ->
+                            endLocalDate = date
                         },
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next
-                        ),
-                        singleLine = true
+                        label = "End Date",
+                        placeholder = "Select end date",
+                        modifier = Modifier.fillMaxWidth(),
+                        minDate = startLocalDate ?: today
                     )
-                    if (showEndDatePicker) {
-                        DatePickerDialog(
-                            onDismissRequest = { showEndDatePicker = false },
-                            confirmButton = {
-                                Button(onClick = {
-                                    showEndDatePicker = false
-                                    endDate = "2024-08-10"
-                                }) {
-                                    Text("Confirm")
-                                }
-                            },
-                            dismissButton = {
-                                Button(onClick = { showEndDatePicker = false }) {
-                                    Text("Cancel")
-                                }
-                            }
-                        ) {
-                            Text("Date Picker")
-                        }
-                    }
+
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Registration Deadline field
-                    OutlinedTextField(
-                        value = registrationDeadline,
-                        onValueChange = {  },
-                        label = { Text("Registration Deadline") },
-                        placeholder = { Text("Select registration deadline") },
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
-                        trailingIcon = {
-                            IconButton(onClick = { showRegistrationDeadlinePicker = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.CalendarMonth,
-                                    contentDescription = "Select Registration Deadline"
-                                )
-                            }
+                    DatePickerField(
+                        value = registrationDeadlineLocalDate?.format(dateFormatter) ?: "",
+                        onDateSelected = { date ->
+                            registrationDeadlineLocalDate = date
                         },
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Done
-                        ),
-                        singleLine = true
+                        label = "Registration Deadline",
+                        placeholder = "Select registration deadline",
+                        modifier = Modifier.fillMaxWidth(),
+                        minDate = today,
+                        maxDate = startLocalDate
                     )
-                    if (showRegistrationDeadlinePicker) {
-                        DatePickerDialog(
-                            onDismissRequest = { showRegistrationDeadlinePicker = false },
-                            confirmButton = {
-                                Button(onClick = {
-                                    showRegistrationDeadlinePicker = false;
-                                    registrationDeadline = "2024-07-20"
-                                }) {
-                                    Text("Confirm")
-                                }
-                            },
-                            dismissButton = {
-                                Button(onClick = { showRegistrationDeadlinePicker = false }) {
-                                    Text("Cancel")
-                                }
-                            }
-                        ) {
-                            Text("Date Picker")
-                        }
-                    }
                 }
             }
 
@@ -346,21 +287,21 @@ fun AddEventScreen(
                         title = title,
                         description = description,
                         location = location,
-                        startDate = startDate,
-                        endDate = endDate,
-                        registrationDeadline = registrationDeadline,
-                        registeredTeams = registeredTeams,
-                        isRegistered = isRegistered,
+                        startDate = startLocalDate?.format(dateFormatter) ?: "",
+                        endDate = endLocalDate?.format(dateFormatter) ?: "",
+                        registrationDeadline = registrationDeadlineLocalDate?.format(dateFormatter) ?: "",
+                        registeredTeams = 0,
+                        isRegistered = false,
                         hockeyType = selectedHockeyType // Store hockey type as string
                     )
-
                     viewModel.createEvent(event)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                enabled = title.isNotBlank() && description.isNotBlank() && location.isNotBlank() &&
-                        startDate.isNotBlank() && endDate.isNotBlank() && registrationDeadline.isNotBlank()
+                enabled = formIsValid && !eventState.isLoading
+//                enabled = title.isNotBlank() && description.isNotBlank() && location.isNotBlank() &&
+//                        startDate.isNotBlank() && endDate.isNotBlank() && registrationDeadline.isNotBlank()
             ) {
                 if (eventState.isLoading) {
                     CircularProgressIndicator(
@@ -375,6 +316,18 @@ fun AddEventScreen(
                     )
                 }
             }
+
+            // Optional: Add a visual indicator for required fields
+            if (!formIsValid) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "All fields are required",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             Spacer(modifier = Modifier.height(24.dp))
         }

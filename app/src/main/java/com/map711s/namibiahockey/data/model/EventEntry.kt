@@ -11,7 +11,8 @@ data class EventEntry(
     val isRegistered: Boolean = false,
     val registeredTeams: Int = 0,
     val hockeyType: HockeyType = HockeyType.OUTDOOR,
-    val registeredUserIds: List<String> = emptyList()
+    val registeredUserIds: List<String> = emptyList(),
+    val createdBy: String = "",
 )  {
     // Extension function to convert EventEntry to HashMap
     fun toHashMap(): HashMap<String, Any> {
