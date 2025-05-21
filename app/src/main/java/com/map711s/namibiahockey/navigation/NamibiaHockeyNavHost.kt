@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.screens.auth.LoginScreen
 import com.map711s.namibiahockey.screens.auth.RegisterScreen
+import com.map711s.namibiahockey.screens.events.EventDetailsScreen
 import com.map711s.namibiahockey.screens.events.EventEntriesScreen
 import com.map711s.namibiahockey.screens.hockey.HockeyTypeSelectionScreen
 import com.map711s.namibiahockey.screens.home.HomeScreen
@@ -142,7 +143,32 @@ fun NamibiaHockeyNavHost(
                 onNavigateBack = { navController.navigateUp() },
                 onNavigateToAddEvent = {
                     navController.navigate(Routes.addEvent(hockeyType.name))
+                },
+                onNavigateToEventDetails = { eventId, eventHockeyType ->
+                    navController.navigate(Routes.eventDetails(eventHockeyType.name, eventId))
                 }
+            )
+        }
+
+        composable(
+            route = Routes.EVENT_DETAILS,
+            arguments = listOf(
+                navArgument("hockeyType") { type = NavType.StringType },
+                navArgument("eventId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyType = try {
+                HockeyType.valueOf(hockeyTypeStr)
+            } catch (e: Exception) {
+                HockeyType.OUTDOOR // Default fallback
+            }
+            val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
+
+            EventDetailsScreen(
+                eventId = eventId,
+                hockeyType = hockeyType,
+                onNavigateBack = { navController.navigateUp() }
             )
         }
 

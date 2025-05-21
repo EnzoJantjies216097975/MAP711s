@@ -59,6 +59,7 @@ import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.data.model.NewsCategory
 import com.map711s.namibiahockey.viewmodel.NewsViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsFeedScreen(

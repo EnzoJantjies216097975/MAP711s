@@ -27,10 +27,6 @@ class EventViewModel @Inject constructor(
     private val _eventListState = MutableStateFlow(EventListState())
     val eventListState: StateFlow<EventListState> = _eventListState.asStateFlow()
 
-//    init {
-//        loadAllEvents()
-//    }
-
     // Create a new event
     fun createEvent(event: EventEntry) {
         _eventState.update { it.copy(isLoading = true, error = null) }
@@ -59,14 +55,15 @@ class EventViewModel @Inject constructor(
 
     // Get an event by ID
     fun getEvent(eventId: String) {
-        _eventState.update { it.copy(isLoading = true, error = null) }
+        _eventState.update { it.copy(isLoading = true, error = null, eventId = eventId) }
         viewModelScope.launch {
             eventRepository.getEvent(eventId)
                 .onSuccess { event ->
                     _eventState.update {
                         it.copy(
                             isLoading = false,
-                            event = event
+                            event = event,
+                            isRegistered = event.isRegistered
                         )
                     }
                 }
@@ -143,8 +140,7 @@ class EventViewModel @Inject constructor(
                             events = events
                         )
                     }
-                    Log.i("it.NOerror", "loadAllEvents: ")
-
+                    Log.i("EventViewModel", "Loaded ${events.size} events")
                 }
                 .onFailure { exception ->
                     _eventListState.update {
@@ -153,69 +149,106 @@ class EventViewModel @Inject constructor(
                             error = exception.message ?: "Failed to load events"
                         )
                     }
-                    Log.i("it.error", "loadAllEvents: ")
+                    Log.e("EventViewModel", "Error loading events: ${exception.message}")
                 }
         }
     }
 
     // Register for an event
     fun registerForEvent(eventId: String) {
-        _eventState.update { it.copy(isLoading = true, error = null) }
+        _eventState.update { it.copy(isLoading = true, error = null, eventId = eventId) }
         viewModelScope.launch {
-            eventRepository.registerForEvent(eventId)
-                .onSuccess {
-                    _eventState.update {
-                        it.copy(
-                            isLoading = false,
-                            isSuccess = true,
-                            isRegistered = true
-                        )
-                    }
-                    loadAllEvents()
+            // Find the event in the list
+            val event = _eventListState.value.events.find { it.id == eventId }
+            if (event == null) {
+                _eventState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Event not found"
+                    )
                 }
-                .onFailure { exception ->
-                    _eventState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = exception.message ?: "Failed to register for event"
-                        )
+                return@launch
+            }
+
+            if (event.isRegistered) {
+                // If already registered, unregister
+                eventRepository.unregisterFromEvent(eventId)
+                    .onSuccess {
+                        // Update the event state
+                        _eventState.update {
+                            it.copy(
+                                isLoading = false,
+                                isSuccess = true,
+                                isRegistered = false
+                            )
+                        }
+
+                        // Update the event in the list
+                        _eventListState.update { state ->
+                            val updatedEvents = state.events.map { e ->
+                                if (e.id == eventId) {
+                                    e.copy(
+                                        isRegistered = false,
+                                        registeredTeams = maxOf(0, e.registeredTeams - 1)
+                                    )
+                                } else e
+                            }
+                            state.copy(events = updatedEvents)
+                        }
                     }
-                }
+                    .onFailure { exception ->
+                        _eventState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = exception.message ?: "Failed to unregister from event"
+                            )
+                        }
+                    }
+            } else {
+                // If not registered, register
+                eventRepository.registerForEvent(eventId)
+                    .onSuccess {
+                        // Update the event state
+                        _eventState.update {
+                            it.copy(
+                                isLoading = false,
+                                isSuccess = true,
+                                isRegistered = true
+                            )
+                        }
+
+                        // Update the event in the list
+                        _eventListState.update { state ->
+                            val updatedEvents = state.events.map { e ->
+                                if (e.id == eventId) {
+                                    e.copy(
+                                        isRegistered = true,
+                                        registeredTeams = e.registeredTeams + 1
+                                    )
+                                } else e
+                            }
+                            state.copy(events = updatedEvents)
+                        }
+                    }
+                    .onFailure { exception ->
+                        _eventState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = exception.message ?: "Failed to register for event"
+                            )
+                        }
+                    }
+            }
         }
     }
 
-    // Unregister from an event
-    fun unregisterFromEvent(eventId: String) {
-        _eventState.update { it.copy(isLoading = true, error = null) }
-        viewModelScope.launch {
-            eventRepository.unregisterFromEvent(eventId)
-                .onSuccess {
-                    _eventState.update {
-                        it.copy(
-                            isLoading = false,
-                            isSuccess = true,
-                            isRegistered = false
-                        )
-                    }
-                    loadAllEvents()
-                }
-                .onFailure { exception ->
-                    _eventState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = exception.message ?: "Failed to unregister from event"
-                        )
-                    }
-                }
-        }
-    }
     // Reset event form
-    fun resetEventState(){
+    fun resetEventState() {
         _eventState.update { EventState() }
     }
 
-    // Add this method to EventViewModel.kt
-    suspend fun loadEventsByType(hockeyType: HockeyType) {
+    // Load events by hockey type
+    fun loadEventsByType(hockeyType: HockeyType) {
         _eventListState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
             eventRepository.getEventsByType(hockeyType)
@@ -237,6 +270,4 @@ class EventViewModel @Inject constructor(
                 }
         }
     }
-
-
 }

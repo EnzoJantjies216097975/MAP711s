@@ -10,11 +10,12 @@ data class EventEntry(
     val registrationDeadline: String = "",
     val isRegistered: Boolean = false,
     val registeredTeams: Int = 0,
-    val hockeyType: HockeyType = HockeyType.OUTDOOR
+    val hockeyType: HockeyType = HockeyType.OUTDOOR,
+    val registeredUserIds: List<String> = emptyList()
 )  {
     // Extension function to convert EventEntry to HashMap
     fun toHashMap(): HashMap<String, Any> {
-        return hashMapOf(
+        val map = hashMapOf(
             "id" to id,
             "title" to title,
             "description" to description,
@@ -24,7 +25,9 @@ data class EventEntry(
             "registrationDeadline" to registrationDeadline,
             "isRegistered" to isRegistered,
             "registeredTeams" to registeredTeams,
-            "hockeyType" to hockeyType.name // Store the enum as a string
+            "hockeyType" to hockeyType.name, // Store the enum as a string
+            "registeredUserIds" to registeredUserIds
         )
+        return map
     }
 }

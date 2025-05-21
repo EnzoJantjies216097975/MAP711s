@@ -142,40 +142,78 @@ class EventRepository @Inject constructor(
     }
 
     // Register for an event
-    suspend fun registerForEvent(eventId: String): Result<Unit> {
-        // Implementation remains largely the same
+    suspend fun registerForEvent(eventId: String, userId: String): Result<Unit> {
         return try {
-            val eventResult = getEvent(eventId)
-            if (eventResult.isSuccess) {
-                val event = eventResult.getOrThrow()
-                val updatedEvent = event.copy(
-                    isRegistered = true,
-                    registeredTeams = event.registeredTeams + 1
-                )
-                updateEvent(updatedEvent)
-            } else {
-                Result.failure(eventResult.exceptionOrNull() ?: Exception("Failed to get event"))
+            val eventDoc = firestore.collection("events").document(eventId).get().await()
+
+            if (!eventDoc.exists()) {
+                return Result.failure(Exception("Event not found"))
             }
+
+            val event = eventDoc.toObject(EventEntry::class.java)
+                ?: return Result.failure(Exception("Failed to parse event data"))
+
+            // Check if user is already registered
+            val isAlreadyRegistered = event.registeredUserIds.contains(userId)
+
+            if (isAlreadyRegistered) {
+                return Result.failure(Exception("Already registered for this event"))
+            }
+
+            // Add user to registeredUserIds
+            val updatedUserIds = event.registeredUserIds + userId
+
+            val updatedEvent = event.copy(
+                registeredTeams = event.registeredTeams + 1,
+                registeredUserIds = updatedUserIds,
+                isRegistered = true // This is now user-specific in the UI
+            )
+
+            firestore.collection("events")
+                .document(eventId)
+                .set(updatedEvent.toHashMap())
+                .await()
+
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     // Unregister from an event
-    suspend fun unregisterFromEvent(eventId: String): Result<Unit> {
-        // Implementation remains largely the same
+    suspend fun unregisterFromEvent(eventId: String, userId: String): Result<Unit> {
         return try {
-            val eventResult = getEvent(eventId)
-            if (eventResult.isSuccess) {
-                val event = eventResult.getOrThrow()
-                val updatedEvent = event.copy(
-                    isRegistered = false,
-                    registeredTeams = event.registeredTeams - 1
-                )
-                updateEvent(updatedEvent)
-            } else {
-                Result.failure(eventResult.exceptionOrNull() ?: Exception("Failed to get event"))
+            val eventDoc = firestore.collection("events").document(eventId).get().await()
+
+            if (!eventDoc.exists()) {
+                return Result.failure(Exception("Event not found"))
             }
+
+            val event = eventDoc.toObject(EventEntry::class.java)
+                ?: return Result.failure(Exception("Failed to parse event data"))
+
+            // Check if user is registered
+            val isRegistered = event.registeredUserIds.contains(userId)
+
+            if (!isRegistered) {
+                return Result.failure(Exception("Not registered for this event"))
+            }
+
+            // Remove user from registeredUserIds
+            val updatedUserIds = event.registeredUserIds.filter { it != userId }
+
+            val updatedEvent = event.copy(
+                registeredTeams = maxOf(0, event.registeredTeams - 1),
+                registeredUserIds = updatedUserIds,
+                isRegistered = false // This is now user-specific in the UI
+            )
+
+            firestore.collection("events")
+                .document(eventId)
+                .set(updatedEvent.toHashMap())
+                .await()
+
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
