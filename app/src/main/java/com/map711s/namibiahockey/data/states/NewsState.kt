@@ -1,4 +1,6 @@
-import NewsPiece
+package com.map711s.namibiahockey.data.states
+
+import com.map711s.namibiahockey.data.model.NewsPiece
 
 // State for a single News Piece
 data class NewsState(

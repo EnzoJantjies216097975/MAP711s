@@ -1,27 +1,28 @@
 package com.map711s.namibiahockey.data.repository
 
-import NewsPiece
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.map711s.namibiahockey.data.model.HockeyType
+import com.map711s.namibiahockey.data.model.NewsPiece
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class NewsRepository @Inject constructor(
-    // private val firestore: FirebaseFirestore
 ) {
     private val firestore = Firebase.firestore
+    private val newsCollection = firestore.collection("news")
 
     // Create a new news piece
     suspend fun createNewsPiece(newsPiece: NewsPiece): Result<String> {
         return try {
             val newsMap = newsPiece.toHashMap()
-            val documentReference = firestore.collection("news").add(newsMap).await()
+            val documentReference = newsCollection.add(newsMap).await()
             Result.success(documentReference.id)
         } catch (e: Exception) {
+            Log.e("NewsRepository", "Error creating news piece", e)
             Result.failure(e)
         }
     }
@@ -29,15 +30,16 @@ class NewsRepository @Inject constructor(
     // Get a news piece by ID
     suspend fun getNewsPiece(newsId: String): Result<NewsPiece> {
         return try {
-            val documentSnapshot = firestore.collection("news").document(newsId).get().await()
+            val documentSnapshot = newsCollection.document(newsId).get().await()
             if (documentSnapshot.exists()) {
                 val newsPiece = documentSnapshot.toObject(NewsPiece::class.java)
                     ?: return Result.failure(Exception("Failed to parse news data"))
-                Result.success(newsPiece.copy(id = documentSnapshot.id)) // Ensure ID is included.
+                Result.success(newsPiece.copy(id = documentSnapshot.id))
             } else {
                 Result.failure(Exception("News piece not found"))
             }
         } catch (e: Exception) {
+            Log.e("NewsRepository", "Error getting news piece", e)
             Result.failure(e)
         }
     }
@@ -45,10 +47,11 @@ class NewsRepository @Inject constructor(
     // Update an existing news piece
     suspend fun updateNewsPiece(newsPiece: NewsPiece): Result<Unit> {
         return try {
-            val newsMap = newsPiece.toHashMap() // Use the helper function
-            firestore.collection("news").document(newsPiece.id).set(newsMap).await()
+            val newsMap = newsPiece.toHashMap()
+            newsCollection.document(newsPiece.id).set(newsMap).await()
             Result.success(Unit)
         } catch (e: Exception) {
+            Log.e("NewsRepository", "Error updating news piece", e)
             Result.failure(e)
         }
     }
@@ -56,9 +59,10 @@ class NewsRepository @Inject constructor(
     // Delete a news piece by ID
     suspend fun deleteNewsPiece(newsId: String): Result<Unit> {
         return try {
-            firestore.collection("news").document(newsId).delete().await()
+            newsCollection.document(newsId).delete().await()
             Result.success(Unit)
         } catch (e: Exception) {
+            Log.e("NewsRepository", "Error deleting news piece", e)
             Result.failure(e)
         }
     }
@@ -68,7 +72,7 @@ class NewsRepository @Inject constructor(
         Log.d("NewsRepository", "getAllNewsPieces() called")
         return try {
             Log.d("NewsRepository", "Fetching news from Firestore...")
-            val querySnapshot = firestore.collection("news").get().await()
+            val querySnapshot = newsCollection.get().await()
             Log.d("NewsRepository", "Firestore get() successful")
 
             val newsPiecesFromSource = querySnapshot.documents
@@ -84,13 +88,13 @@ class NewsRepository @Inject constructor(
                     val newsPiece = document.toObject(NewsPiece::class.java)
                     Log.d(
                         "NewsRepository",
-                        "Mapping document: ${document.id} to NewsPiece: $newsPiece, Document Data: ${document.data}"
+                        "Mapping document: ${document.id} to NewsPiece: $newsPiece"
                     )
                     newsPiece?.copy(id = document.id) // Ensure ID is set
                 } catch (e: Exception) {
                     Log.e(
                         "NewsRepository",
-                        "Error mapping document ${document.id}: ${e.message}, Document Data: ${document.data}",
+                        "Error mapping document ${document.id}: ${e.message}",
                         e
                     )
                     null
@@ -106,10 +110,11 @@ class NewsRepository @Inject constructor(
         }
     }
 
+    // Get news pieces by hockey type
     suspend fun getNewsPiecesByType(hockeyType: HockeyType): Result<List<NewsPiece>> {
         return try {
             Log.d("NewsRepository", "Fetching ${hockeyType.name} news from Firestore")
-            val querySnapshot = firestore.collection("news")
+            val querySnapshot = newsCollection
                 .whereEqualTo("hockeyType", hockeyType.name)
                 .get()
                 .await()
@@ -128,6 +133,33 @@ class NewsRepository @Inject constructor(
             Result.success(newsPieces)
         } catch (e: Exception) {
             Log.e("NewsRepository", "Error fetching news by type", e)
+            Result.failure(e)
+        }
+    }
+
+    // Get bookmarked news pieces
+    suspend fun getBookmarkedNewsPieces(): Result<List<NewsPiece>> {
+        return try {
+            Log.d("NewsRepository", "Fetching bookmarked news from Firestore")
+            val querySnapshot = newsCollection
+                .whereEqualTo("isBookmarked", true)
+                .get()
+                .await()
+
+            val newsPieces = querySnapshot.documents.mapNotNull { document ->
+                try {
+                    val newsPiece = document.toObject(NewsPiece::class.java)
+                    Log.d("NewsRepository", "Mapped bookmarked news: $newsPiece")
+                    newsPiece?.copy(id = document.id)
+                } catch (e: Exception) {
+                    Log.e("NewsRepository", "Error mapping document ${document.id}", e)
+                    null
+                }
+            }
+
+            Result.success(newsPieces)
+        } catch (e: Exception) {
+            Log.e("NewsRepository", "Error fetching bookmarked news", e)
             Result.failure(e)
         }
     }

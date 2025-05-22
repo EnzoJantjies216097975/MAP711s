@@ -1,6 +1,6 @@
 package com.map711s.namibiahockey.screens.newsfeed
 
-import NewsPiece
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
@@ -36,6 +37,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -51,33 +54,60 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.data.model.NewsCategory
+import com.map711s.namibiahockey.data.model.NewsPiece
 import com.map711s.namibiahockey.viewmodel.NewsViewModel
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsFeedScreen(
     onNavigateBack: () -> Unit,
     onNavigateToAddNews: () -> Unit,
+    onNavigateToNewsDetails: (String) -> Unit,
     viewModel: NewsViewModel = hiltViewModel(),
     hockeyType: HockeyType,
 ) {
-    var seachQuery by remember { mutableStateOf("") }
+    var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
-    val tabs = listOf("All", "Tournament", "League", "Team", "Player")
+    val tabs = listOf("All", "Tournament", "League", "Team", "Player", "Bookmarked")
     val newsListState by viewModel.newsListState.collectAsState()
-    // Sample news items for demonstration
     val newsItems = newsListState.newsPieces.toMutableList()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
     LaunchedEffect(key1 = true) {
         viewModel.loadAllNewsPieces()
     }
+
+    // If tab changes to "Bookmarked", load bookmarked news
+    LaunchedEffect(selectedTabIndex) {
+        if (selectedTabIndex == 5) { // "Bookmarked" tab
+            viewModel.loadBookmarkedNews()
+        } else if (selectedTabIndex == 0) { // "All" tab
+            viewModel.loadAllNewsPieces()
+        }
+    }
+
     var isLoading =  newsListState.isLoading
+
+    // Share news function
+    fun shareNews(news: NewsPiece) {
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, news.title)
+            putExtra(Intent.EXTRA_TEXT, "${news.title}\n\n${news.content.take(200)}...\n\nBy ${news.authorName}")
+        }
+        val chooserIntent = Intent.createChooser(shareIntent, "Share news via")
+        startActivity(context, chooserIntent, null)
+    }
 
     // Filtered news based on search and tab
     val filteredNews = if (seachQuery.isBlank()) {
@@ -92,8 +122,8 @@ fun NewsFeedScreen(
     } else {
         newsItems.filter {
             it.title.contains(seachQuery, ignoreCase = true) ||
-                    it.content.contains(seachQuery, ignoreCase = true) ||
-                    it.authorName.contains(seachQuery, ignoreCase = true)
+            it.content.contains(seachQuery, ignoreCase = true) ||
+            it.authorName.contains(seachQuery, ignoreCase = true)
         }
     }
 
@@ -106,6 +136,14 @@ fun NewsFeedScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { /* Filter news */ }) {
+                        Icon(
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = "Filter"
                         )
                     }
                 }
@@ -122,7 +160,8 @@ fun NewsFeedScreen(
                     tint = Color.White
                 )
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -144,8 +183,8 @@ fun NewsFeedScreen(
 
             // Search field
             OutlinedTextField(
-                value = seachQuery,
-                onValueChange = { seachQuery = it },
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
@@ -159,13 +198,15 @@ fun NewsFeedScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(25.dp)
             )
+
             if (isLoading) { // Show loading indicator
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator() // Use a CircularProgressIndicator
-                }}
+                    CircularProgressIndicator()
+                }
+            }
             // News list
             else if (filteredNews.isEmpty()) {
                 Box(
@@ -175,7 +216,15 @@ fun NewsFeedScreen(
                     contentAlignment = Alignment.Center
                 ){
                     Text(
-                        text = "No news items found",
+                        text = when (selectedTabIndex) {
+                            0 -> "No news items found"
+                            1 -> "No tournament news found"
+                            2 -> "No league news found"
+                            3 -> "No team news found"
+                            4 -> "No player news found"
+                            5 -> "No bookmarked news found"
+                            else -> "No news items found"
+                        },
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
@@ -189,13 +238,10 @@ fun NewsFeedScreen(
                     items(filteredNews){ news ->
                         NewsCard(
                             news = news,
-                            onNewsClick = {},
-                            onShareClick = {},
+                            onNewsClick = { onNavigateToNewsDetails(news.id) },
+                            onShareClick = { shareNews(news) },
                             onBookmarkClick = { newsId, isBookmarked ->
-                                val index = newsItems.indexOfFirst { it.id == newsId }
-                                if (index != -1) {
-                                    newsItems[index] = newsItems[index].copy(isBookmarked = isBookmarked)
-                                }
+                                viewModel.toggleBookmark(newsId, isBookmarked)
                             },
                         )
                     }
@@ -219,6 +265,13 @@ fun NewsCard(
     onBookmarkClick: (String, Boolean) -> Unit,
     onShareClick: (String) -> Unit
 ) {
+    var isBookmarked by remember { mutableStateOf(news.isBookmarked) }
+
+    // Update local state when news changes
+    LaunchedEffect(news.isBookmarked) {
+        isBookmarked = news.isBookmarked
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -266,7 +319,7 @@ fun NewsCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = news.authorName.first().toString(),
+                        text = news.authorName.firstOrNull()?.toString() ?: "A",
                         color = Color.White,
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -291,7 +344,7 @@ fun NewsCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // News content (preview)
+            // News content preview (shortened)
             Text(
                 text = news.content,
                 style = MaterialTheme.typography.bodyMedium,
@@ -311,7 +364,7 @@ fun NewsCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = { onShareClick(news.id) }
+                    onClick = { onShareClick(news) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Share,
@@ -319,15 +372,30 @@ fun NewsCard(
                         tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     )
                 }
+
                 Spacer(modifier = Modifier.weight(1f))
 
+                // Read more text
+                Text(
+                    text = "Read more",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable { onNewsClick(news.id) }
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
                 IconButton(
-                    onClick = { onBookmarkClick(news.id, !news.isBookmarked) }
+                    onClick = {
+                        isBookmarked = !isBookmarked
+                        onBookmarkClick(news.id, isBookmarked)
+                    }
                 ) {
                     Icon(
-                        imageVector = if (news.isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                        contentDescription = if (news.isBookmarked) "Remove Bookmark" else "Add Bookmark",
-                        tint = if (news.isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                        contentDescription = if (isBookmarked) "Remove Bookmark" else "Add Bookmark",
+                        tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                 }
             }

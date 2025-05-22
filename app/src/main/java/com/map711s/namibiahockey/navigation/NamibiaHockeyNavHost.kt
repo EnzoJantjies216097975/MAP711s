@@ -1,6 +1,5 @@
 package com.map711s.namibiahockey.navigation
 
-import AddNewsScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -15,6 +14,8 @@ import com.map711s.namibiahockey.screens.events.EventDetailsScreen
 import com.map711s.namibiahockey.screens.events.EventEntriesScreen
 import com.map711s.namibiahockey.screens.hockey.HockeyTypeSelectionScreen
 import com.map711s.namibiahockey.screens.home.HomeScreen
+import com.map711s.namibiahockey.screens.newsfeed.AddNewsScreen
+import com.map711s.namibiahockey.screens.newsfeed.NewsDetailsScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsFeedScreen
 import com.map711s.namibiahockey.screens.player.PlayerManagementScreen
 import com.map711s.namibiahockey.screens.profile.ProfileScreen
@@ -228,7 +229,22 @@ fun NamibiaHockeyNavHost(
                 onNavigateBack = { navController.navigateUp() },
                 onNavigateToAddNews = {
                     navController.navigate(Routes.addNews(hockeyType.name))
+                },
+                onNavigateToNewsDetails = { newsId ->
+                    navController.navigate(Routes.newsDetails(newsId))
                 }
+            )
+        }
+
+        composable(
+            route = Routes.NEWS_DETAILS,
+            arguments = listOf(navArgument("newsId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val newsId = backStackEntry.arguments?.getString("newsId") ?: ""
+
+            NewsDetailsScreen(
+                newsId = newsId,
+                onNavigateBack = { navController.navigateUp() }
             )
         }
 

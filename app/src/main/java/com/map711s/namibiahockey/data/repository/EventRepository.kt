@@ -11,10 +11,11 @@ import javax.inject.Singleton
 
 @Singleton
 class EventRepository @Inject constructor(
-//    private val firestore: Any = Firebase.firestore
+    private val authRepository: AuthRepository
 ) {
     private val firestore = Firebase.firestore
     private val eventsCollection = firestore.collection("events")
+
 
     // Create a new event
     suspend fun createEvent(event: EventEntry): Result<String> {
