@@ -14,6 +14,7 @@ import com.map711s.namibiahockey.screens.events.EventDetailsScreen
 import com.map711s.namibiahockey.screens.events.EventEntriesScreen
 import com.map711s.namibiahockey.screens.hockey.HockeyTypeSelectionScreen
 import com.map711s.namibiahockey.screens.home.HomeScreen
+import com.map711s.namibiahockey.screens.main.MainAppScaffold
 import com.map711s.namibiahockey.screens.newsfeed.AddNewsScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsDetailsScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsFeedScreen
@@ -61,7 +62,6 @@ fun NamibiaHockeyNavHost(
             )
         }
 
-
         // Hockey type selection screen
         composable(Routes.HOCKEY_TYPE_SELECTION) {
             HockeyTypeSelectionScreen(
@@ -85,28 +85,34 @@ fun NamibiaHockeyNavHost(
                 HockeyType.OUTDOOR
             }
 
-            HomeScreen(
-                hockeyType = hockeyType,
+            MainAppScaffold(
                 navController = navController,
-                onSwitchHockeyType = { newHockeyType ->
-                    navController.navigate(Routes.mainApp(newHockeyType.name)) {
-                        popUpTo(Routes.MAIN_APP) { inclusive = true }
-                    }
-                },
+                hockeyType = hockeyType,
                 onNavigateToProfile = {
                     navController.navigate(Routes.PROFILE)
+                },
+                onNavigateToAddEvent = {
+                    navController.navigate(Routes.addEvent(hockeyType.name))
+                },
+                onNavigateToAddNews = {
+                    navController.navigate(Routes.addNews(hockeyType.name))
+                },
+                onNavigateToEventDetails = { eventId, eventHockeyType ->
+                    navController.navigate(Routes.eventDetails(eventHockeyType.name, eventId))
+                },
+                onNavigateToNewsDetails = { newsId ->
+                    navController.navigate(Routes.newsDetails(newsId))
                 },
                 onNavigateToTeamRegistration = {
                     navController.navigate(Routes.teamRegistration(hockeyType.name))
                 },
-                onNavigateToEventEntries = {
-                    navController.navigate(Routes.eventEntries(hockeyType.name))
+                onNavigateToTeamDetails = { teamId ->
+                    navController.navigate(Routes.teamDetails(teamId))
                 },
-                onNavigateToPlayerManagement = {
-                    navController.navigate(Routes.playerManagement(hockeyType.name))
-                },
-                onNavigateToNewsFeed = {
-                    navController.navigate(Routes.newsFeed(hockeyType.name))
+                onSwitchHockeyType = { newHockeyType ->
+                    navController.navigate(Routes.mainApp(newHockeyType.name)) {
+                        popUpTo(Routes.MAIN_APP) { inclusive = true }
+                    }
                 }
             )
         }
@@ -128,7 +134,6 @@ fun NamibiaHockeyNavHost(
                 onNavigateBack = { navController.navigateUp() }
             )
         }
-
 
         composable(
             route = Routes.EVENT_ENTRIES,
@@ -152,7 +157,6 @@ fun NamibiaHockeyNavHost(
                 }
             )
         }
-
 
         composable(
             route = Routes.EVENT_DETAILS,

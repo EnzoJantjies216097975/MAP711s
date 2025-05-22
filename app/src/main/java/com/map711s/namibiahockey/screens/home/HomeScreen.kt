@@ -39,8 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import com.map711s.namibiahockey.components.FeatureCardRow
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.screens.events.EventCard
 import com.map711s.namibiahockey.screens.newsfeed.NewsCard
@@ -55,13 +53,10 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     hockeyType: HockeyType,
-    navController: NavHostController,
-    onSwitchHockeyType: (HockeyType) -> Unit,
-    onNavigateToTeamRegistration: () -> Unit,
-    onNavigateToEventEntries: () -> Unit,
-    onNavigateToPlayerManagement: () -> Unit,
-    onNavigateToNewsFeed: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToEventDetails: (String, HockeyType) -> Unit,
+    onNavigateToNewsDetails: (String) -> Unit,
+    onSwitchHockeyType: (HockeyType) -> Unit,
     authViewModel: AuthViewModel = hiltViewModel(),
     eventViewModel: EventViewModel = hiltViewModel(),
     newsViewModel: NewsViewModel = hiltViewModel()
@@ -129,7 +124,7 @@ fun HomeScreen(
         // Display hockey type indicator
         HockeyTypeIndicator(hockeyType = selectedHockeyType)
 
-        // Rest of HomeScreen content
+        // Main content
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -151,22 +146,6 @@ fun HomeScreen(
                 }
             }
 
-            // Feature cards
-            item {
-                Text(
-                    text = "Quick Access",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-
-                FeatureCardRow(
-                    onTeamRegistrationClick = onNavigateToTeamRegistration,
-                    onEventEntriesClick = onNavigateToEventEntries,
-                    onPlayerManagmentClick = onNavigateToPlayerManagement,
-                    onNewsFeedClick = onNavigateToNewsFeed
-                )
-            }
-
             // Upcoming events section
             item {
                 Row(
@@ -182,7 +161,7 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold
                     )
 
-                    TextButton(onClick = onNavigateToEventEntries) {
+                    TextButton(onClick = { /* Navigate to events tab */ }) {
                         Text("View All")
                     }
                 }
@@ -216,7 +195,7 @@ fun HomeScreen(
                     }
                 }
             } else {
-                // Show recent events
+                // Show recent events (limited to 3)
                 items(eventListState.events.take(3)) { event ->
                     EventCard(
                         event = event,
@@ -224,8 +203,9 @@ fun HomeScreen(
                             eventViewModel.registerForEvent(eventId)
                         },
                         onViewDetailsClick = { eventId ->
-                            // Navigate to event details
-                        }
+                            onNavigateToEventDetails(eventId, event.hockeyType)
+                        },
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
             }
@@ -245,7 +225,7 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold
                     )
 
-                    TextButton(onClick = onNavigateToNewsFeed) {
+                    TextButton(onClick = { /* Navigate to news tab */ }) {
                         Text("View All")
                     }
                 }
@@ -279,24 +259,23 @@ fun HomeScreen(
                     }
                 }
             } else {
-                // Show recent news
+                // Show recent news (limited to 3)
                 items(newsListState.newsPieces.take(3)) { newsPiece ->
                     NewsCard(
                         news = newsPiece,
-                        onNewsClick = { newsId ->
-                            // Navigate to news details
-                        },
+                        onNewsClick = { onNavigateToNewsDetails(newsPiece.id) },
                         onBookmarkClick = { newsId, isBookmarked ->
                             newsViewModel.toggleBookmark(newsId, isBookmarked)
                         },
                         onShareClick = { newsId ->
                             // Handle share
-                        }
+                        },
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
             }
 
-            // Add some space at the bottom
+            // Add some space at the bottom for the bottom navigation
             item {
                 Spacer(modifier = Modifier.height(16.dp))
             }

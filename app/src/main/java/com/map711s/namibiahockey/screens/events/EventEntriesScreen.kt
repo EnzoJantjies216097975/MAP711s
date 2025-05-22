@@ -289,7 +289,8 @@ fun EventCard(
     event: EventEntry,
     onRegisterClick: (String) -> Unit,
     onViewDetailsClick: (String) -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     // Keep track of registration state locally to ensure UI updates
     var isRegistered by remember(event.id, event.isRegistered) {
@@ -307,7 +308,7 @@ fun EventCard(
     }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onViewDetailsClick(event.id) },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -409,7 +410,7 @@ fun EventCard(
                             onRegisterClick(event.id)
                             isRegistered = false
                             registeredTeams = maxOf(0, registeredTeams - 1)
-                                  },
+                        },
                         modifier = Modifier.height(36.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error
@@ -424,7 +425,7 @@ fun EventCard(
                             onRegisterClick(event.id)
                             isRegistered = true
                             registeredTeams = registeredTeams + 1
-                                  },
+                        },
                         modifier = Modifier.height(36.dp)
                     ) {
                         Text(text = "Register")

@@ -22,10 +22,12 @@ object Routes {
     const val HOME_WITH_TYPE = "home/{hockeyType}"
 
     // Bottom navigation routes
+    const val BOTTOM_HOME = "bottom_home"
     const val BOTTOM_TEAMS = "bottom_teams"
     const val BOTTOM_EVENTS = "bottom_events"
     const val BOTTOM_NEWS = "bottom_news"
     const val BOTTOM_PROFILE = "bottom_profile"
+    const val BOTTOM_PLAYERS = "bottom_players"
 
     // Detail screens
     const val EVENT_DETAILS = "event_details/{hockeyType}/{eventId}"

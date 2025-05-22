@@ -262,7 +262,8 @@ fun NewsCard(
     news: NewsPiece,
     onNewsClick: (String) -> Unit,
     onBookmarkClick: (String, Boolean) -> Unit,
-    onShareClick: (String) -> Unit
+    onShareClick: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var isBookmarked by remember { mutableStateOf(news.isBookmarked) }
 
@@ -401,7 +402,6 @@ fun NewsCard(
         }
     }
 }
-
 
 
 //@Preview(showBackground = true)
