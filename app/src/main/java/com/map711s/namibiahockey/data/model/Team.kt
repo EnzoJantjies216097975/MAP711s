@@ -16,7 +16,15 @@ data class Team(
     val isNationalTeam: Boolean = false, // New field to identify national teams
     val description: String = "",
     val establishedYear: Int = 0,
-    val homeVenue: String = ""
+    val homeVenue: String = "",
+    val playerCount: Int,
+    val founded: Int = 0,
+    val wins: Int = 0,
+    val losses: Int = 0,
+    val draws: Int = 0,
+    val points: Int = 0,
+    val ranking: Int = 0,
+    val isActive: Boolean = true,
 ) {
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf(
@@ -33,7 +41,15 @@ data class Team(
             "isNationalTeam" to isNationalTeam,
             "description" to description,
             "establishedYear" to establishedYear,
-            "homeVenue" to homeVenue
+            "homeVenue" to homeVenue,
+            "playerCount" to playerCount,
+            "founded" to founded,
+            "wins" to wins,
+            "losses" to losses,
+            "draws" to draws,
+            "points" to points,
+            "ranking" to ranking,
+            "isActive" to isActive
         )
     }
 

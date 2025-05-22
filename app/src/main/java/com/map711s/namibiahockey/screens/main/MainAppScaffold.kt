@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.navigation.BottomNavItem
 import com.map711s.namibiahockey.navigation.BottomNavigationBar
@@ -25,7 +26,7 @@ import com.map711s.namibiahockey.screens.team.TeamsScreen
 
 @Composable
 fun MainAppScaffold(
-    navController: NavHostController,
+    navController: NavHostController, // This is the main nav controller from parent
     hockeyType: HockeyType,
     onNavigateToProfile: () -> Unit,
     onNavigateToAddEvent: () -> Unit,
@@ -36,6 +37,9 @@ fun MainAppScaffold(
     onNavigateToTeamDetails: (String) -> Unit,
     onSwitchHockeyType: (HockeyType) -> Unit
 ) {
+    // Create a SEPARATE NavController for bottom navigation
+    val bottomNavController = rememberNavController()
+
     val bottomNavItems = listOf(
         BottomNavItem(
             name = "Home",
@@ -67,13 +71,13 @@ fun MainAppScaffold(
     Scaffold(
         bottomBar = {
             BottomNavigationBar(
-                navController = navController,
+                navController = bottomNavController, // Use the separate controller
                 items = bottomNavItems
             )
         }
     ) { paddingValues ->
         NavHost(
-            navController = navController,
+            navController = bottomNavController, // Use the separate controller
             startDestination = Routes.BOTTOM_HOME,
             modifier = Modifier.padding(paddingValues)
         ) {

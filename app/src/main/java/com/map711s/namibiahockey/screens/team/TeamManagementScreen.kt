@@ -76,7 +76,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.map711s.namibiahockey.data.model.HockeyType
-import com.map711s.namibiahockey.data.model.Team
 import com.map711s.namibiahockey.data.model.UserRole
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
 import com.map711s.namibiahockey.viewmodel.TeamViewModel
@@ -84,7 +83,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TeamsScreen(
+fun TeamManagementScreen(
     hockeyType: HockeyType,
     onNavigateBack: () -> Unit,
     onNavigateToCreateTeam: () -> Unit,
@@ -228,7 +227,6 @@ fun TeamsScreen(
         )
     }
 
-
     // Filter teams based on search and tab
     val filteredTeams = if (searchQuery.isBlank()) {
         when (selectedTabIndex) {
@@ -252,7 +250,6 @@ fun TeamsScreen(
                     (team.hockeyType == hockeyType || hockeyType == HockeyType.BOTH)
         }
     }
-
 
     Scaffold(
         topBar = {
@@ -865,3 +862,26 @@ private fun TeamStatBadge(
         )
     }
 }
+
+// Team data class with additional statistics
+data class Team(
+    val id: String,
+    val name: String,
+    val hockeyType: HockeyType,
+    val category: String,
+    val division: String,
+    val coach: String,
+    val manager: String,
+    val playerCount: Int,
+    val isNationalTeam: Boolean = false,
+    val founded: Int = 0,
+    val homeVenue: String = "",
+    val wins: Int = 0,
+    val losses: Int = 0,
+    val draws: Int = 0,
+    val points: Int = 0,
+    val ranking: Int = 0,
+    val logoUrl: String = "",
+    val isActive: Boolean = true,
+    val description: String = ""
+)

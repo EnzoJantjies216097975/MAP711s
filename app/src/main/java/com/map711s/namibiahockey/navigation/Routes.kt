@@ -46,6 +46,10 @@ object Routes {
 
     const val PROFILE = "profile"
 
+    const val EDIT_PROFILE = "edit_profile"
+    const val PLAYER_PROFILE_DETAILS = "player_profile_details/{playerId}"
+    const val TEAM_MANAGEMENT = "team_management/{hockeyType}"
+
     // Navigation helpers
     fun mainApp(hockeyType: String) = "main_app/$hockeyType"
     fun homeWithType(hockeyType: String) = "home/$hockeyType"
@@ -58,4 +62,6 @@ object Routes {
     fun eventEntries(hockeyType: String) = "event_entries/$hockeyType"
     fun playerManagement(hockeyType: String) = "player_management/$hockeyType"
     fun newsFeed(hockeyType: String) = "news_feed/$hockeyType"
+    fun playerProfileDetails(playerId: String) = "player_profile_details/$playerId"
+    fun teamManagement(hockeyType: String) = "team_management/$hockeyType"
 }

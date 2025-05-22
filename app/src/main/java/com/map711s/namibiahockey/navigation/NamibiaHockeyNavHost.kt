@@ -13,14 +13,16 @@ import com.map711s.namibiahockey.screens.events.AddEventScreen
 import com.map711s.namibiahockey.screens.events.EventDetailsScreen
 import com.map711s.namibiahockey.screens.events.EventEntriesScreen
 import com.map711s.namibiahockey.screens.hockey.HockeyTypeSelectionScreen
-import com.map711s.namibiahockey.screens.home.HomeScreen
 import com.map711s.namibiahockey.screens.main.MainAppScaffold
 import com.map711s.namibiahockey.screens.newsfeed.AddNewsScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsDetailsScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsFeedScreen
 import com.map711s.namibiahockey.screens.player.PlayerManagementScreen
+import com.map711s.namibiahockey.screens.player.PlayerProfileDetailsScreen
+import com.map711s.namibiahockey.screens.profile.EditProfileScreen
 import com.map711s.namibiahockey.screens.profile.ProfileScreen
 import com.map711s.namibiahockey.screens.splash.SplashScreen
+import com.map711s.namibiahockey.screens.team.TeamManagementScreen
 import com.map711s.namibiahockey.screens.team.TeamRegistrationScreen
 
 @Composable
@@ -278,7 +280,104 @@ fun NamibiaHockeyNavHost(
 
         composable(Routes.PROFILE) {
             ProfileScreen(
-                onNavigateBack = { navController.navigateUp() }
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToEditProfile = { navController.navigate(Routes.EDIT_PROFILE) },
+                onNavigateToPlayerManagement = {
+                    navController.navigate(Routes.playerManagement("OUTDOOR"))
+                },
+                onNavigateToTeamManagement = {
+                    navController.navigate(Routes.teamManagement("OUTDOOR"))
+                }
+            )
+        }
+
+        // Edit Profile Screen
+        composable(Routes.EDIT_PROFILE) {
+            EditProfileScreen(
+                onNavigateBack = { navController.navigateUp() },
+                onSaveSuccess = { navController.navigateUp() }
+            )
+        }
+
+        // Player Profile Details Screen
+        composable(
+            route = Routes.PLAYER_PROFILE_DETAILS,
+            arguments = listOf(navArgument("playerId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val playerId = backStackEntry.arguments?.getString("playerId") ?: ""
+
+            PlayerProfileDetailsScreen(
+                playerId = playerId,
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToEdit = {
+                    // Navigate to player edit screen (to be implemented)
+                    navController.navigate("edit_player/$playerId")
+                }
+            )
+        }
+
+        // Player Profile Details Screen
+        composable(
+            route = Routes.PLAYER_PROFILE_DETAILS,
+            arguments = listOf(navArgument("playerId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val playerId = backStackEntry.arguments?.getString("playerId") ?: ""
+
+            PlayerProfileDetailsScreen(
+                playerId = playerId,
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToEdit = {
+                    // Navigate to player edit screen (to be implemented)
+                    navController.navigate("edit_player/$playerId")
+                }
+            )
+        }
+
+        // Enhanced Player Management Screen
+        composable(
+            route = Routes.PLAYER_MANAGEMENT,
+            arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyType = try {
+                HockeyType.valueOf(hockeyTypeStr)
+            } catch (e: Exception) {
+                HockeyType.OUTDOOR
+            }
+
+            PlayerManagementScreen(
+                hockeyType = hockeyType,
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToPlayerDetails = { playerId ->
+                    navController.navigate(Routes.playerProfileDetails(playerId))
+                }
+            )
+        }
+
+        // Enhanced Team Management Screen
+        composable(
+            route = Routes.TEAM_MANAGEMENT,
+            arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyType = try {
+                HockeyType.valueOf(hockeyTypeStr)
+            } catch (e: Exception) {
+                HockeyType.OUTDOOR
+            }
+
+            TeamManagementScreen(
+                hockeyType = hockeyType,
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToCreateTeam = {
+                    navController.navigate(Routes.teamRegistration(hockeyType.name))
+                },
+                onNavigateToTeamDetails = { teamId ->
+                    navController.navigate(Routes.teamDetails(teamId))
+                },
+                onNavigateToPlayerManagement = { teamId ->
+                    navController.navigate(Routes.playerManagement(hockeyType.name))
+                }
             )
         }
     }
