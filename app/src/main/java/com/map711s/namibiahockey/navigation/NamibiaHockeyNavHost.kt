@@ -13,7 +13,7 @@ import com.map711s.namibiahockey.screens.events.AddEventScreen
 import com.map711s.namibiahockey.screens.events.EventDetailsScreen
 import com.map711s.namibiahockey.screens.events.EventEntriesScreen
 import com.map711s.namibiahockey.screens.hockey.HockeyTypeSelectionScreen
-import com.map711s.namibiahockey.screens.main.MainAppScreen
+import com.map711s.namibiahockey.screens.home.HomeScreen
 import com.map711s.namibiahockey.screens.newsfeed.AddNewsScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsDetailsScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsFeedScreen
@@ -84,7 +84,7 @@ fun NamibiaHockeyNavHost(
                 HockeyType.OUTDOOR
             }
 
-            MainAppScreen(
+            HomeScreen(
                 hockeyType = hockeyType,
                 onNavigateToProfile = {
                     navController.navigate(Routes.PROFILE)
