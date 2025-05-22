@@ -1,19 +1,18 @@
 package com.map711s.namibiahockey.viewmodel
 
-import com.map711s.namibiahockey.data.states.NewsListState
-import com.map711s.namibiahockey.data.states.NewsState
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
-import com.google.firebase.storage.UploadTask
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.data.model.NewsPiece
 import com.map711s.namibiahockey.data.repository.AuthRepository
 import com.map711s.namibiahockey.data.repository.NewsRepository
 import com.map711s.namibiahockey.data.states.ImageUploadState
+import com.map711s.namibiahockey.data.states.NewsListState
+import com.map711s.namibiahockey.data.states.NewsState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -152,8 +151,8 @@ class NewsViewModel @Inject constructor(
                                 StorageException.ERROR_BUCKET_NOT_FOUND -> "Storage bucket not found"
                                 StorageException.ERROR_PROJECT_NOT_FOUND -> "Project not found"
                                 StorageException.ERROR_QUOTA_EXCEEDED -> "Storage quota exceeded"
-                                StorageException.ERROR_UNAUTHENTICATED -> "Authentication required"
-                                StorageException.ERROR_UNAUTHORIZED -> "Unauthorized access"
+                                StorageException.ERROR_NOT_AUTHENTICATED -> "Authentication required"
+                                StorageException.ERROR_NOT_AUTHORIZED -> "Unauthorized access"
                                 StorageException.ERROR_RETRY_LIMIT_EXCEEDED -> "Upload timeout"
                                 else -> "Storage error: ${exception.message}"
                             }
@@ -323,6 +322,80 @@ class NewsViewModel @Inject constructor(
                             error = exception.message ?: "Failed to load news pieces"
                         )
                     }
+                }
+        }
+    }
+
+    fun toggleBookmark(newsId: String, isBookmarked: Boolean) {
+        viewModelScope.launch {
+            try {
+                // Get the current news piece
+                newsRepository.getNewsPiece(newsId)
+                    .onSuccess { newsPiece ->
+                        // Update the bookmark status
+                        val updatedNews = newsPiece.copy(isBookmarked = isBookmarked)
+
+                        // Save the updated news piece
+                        newsRepository.updateNewsPiece(updatedNews)
+                            .onSuccess {
+                                // Update the local state
+                                _newsState.update { it.copy(newsPiece = updatedNews) }
+
+                                // Update the news in the list state
+                                val updatedList = _newsListState.value.newsPieces.map { news ->
+                                    if (news.id == newsId) {
+                                        news.copy(isBookmarked = isBookmarked)
+                                    } else {
+                                        news
+                                    }
+                                }
+                                _newsListState.update { it.copy(newsPieces = updatedList) }
+
+                                Log.d(TAG, "Bookmark toggled for news: $newsId, bookmarked: $isBookmarked")
+                            }
+                            .onFailure { exception ->
+                                Log.e(TAG, "Failed to toggle bookmark", exception)
+                                _newsState.update {
+                                    it.copy(error = "Failed to update bookmark: ${exception.message}")
+                                }
+                            }
+                    }
+                    .onFailure { exception ->
+                        Log.e(TAG, "Failed to get news piece for bookmark toggle", exception)
+                        _newsState.update {
+                            it.copy(error = "Failed to toggle bookmark: ${exception.message}")
+                        }
+                    }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in toggleBookmark", e)
+                _newsState.update {
+                    it.copy(error = "Failed to toggle bookmark: ${e.message}")
+                }
+            }
+        }
+    }
+
+    fun loadBookmarkedNews() {
+        _newsListState.update { it.copy(isLoading = true, error = null) }
+        viewModelScope.launch {
+            newsRepository.getBookmarkedNewsPieces()
+                .onSuccess { bookmarkedNews ->
+                    _newsListState.update {
+                        it.copy(
+                            isLoading = false,
+                            newsPieces = bookmarkedNews
+                        )
+                    }
+                    Log.d(TAG, "Loaded ${bookmarkedNews.size} bookmarked news pieces")
+                }
+                .onFailure { exception ->
+                    _newsListState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = exception.message ?: "Failed to load bookmarked news"
+                        )
+                    }
+                    Log.e(TAG, "Error loading bookmarked news: ${exception.message}", exception)
                 }
         }
     }
