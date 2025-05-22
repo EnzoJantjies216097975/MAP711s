@@ -58,7 +58,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.map711s.namibiahockey.data.model.HockeyType
@@ -110,7 +109,7 @@ fun NewsFeedScreen(
     }
 
     // Filtered news based on search and tab
-    val filteredNews = if (seachQuery.isBlank()) {
+    val filteredNews = if (searchQuery.isBlank()) { // Fixed typo: seachQuery -> searchQuery
         when (selectedTabIndex) {
             0 -> newsItems // All
             1 -> newsItems.filter { it.category == NewsCategory.TOURNAMENT }
@@ -121,9 +120,9 @@ fun NewsFeedScreen(
         }
     } else {
         newsItems.filter {
-            it.title.contains(seachQuery, ignoreCase = true) ||
-            it.content.contains(seachQuery, ignoreCase = true) ||
-            it.authorName.contains(seachQuery, ignoreCase = true)
+            it.title.contains(searchQuery, ignoreCase = true) || // Fixed typo: seachQuery -> searchQuery
+                    it.content.contains(searchQuery, ignoreCase = true) || // Fixed typo: seachQuery -> searchQuery
+                    it.authorName.contains(searchQuery, ignoreCase = true) // Fixed typo: seachQuery -> searchQuery
         }
     }
 
@@ -364,7 +363,7 @@ fun NewsCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = { onShareClick(news) }
+                    onClick = { onShareClick(news.id) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Share,

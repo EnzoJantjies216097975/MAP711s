@@ -8,7 +8,7 @@ data class NewsPiece(
     val publishDate: String = "",
     val category: NewsCategory = NewsCategory.GENERAL,
     val isBookmarked: Boolean = false,
-    val imageUrl: String = "" // Field for storing image URL
+    val imageUrl: String = ""
 ) {
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf(
@@ -17,7 +17,7 @@ data class NewsPiece(
             "content" to content,
             "authorName" to authorName,
             "publishDate" to publishDate,
-            "category" to category.name, // Store the enum name as a String
+            "category" to category.name,
             "isBookmarked" to isBookmarked,
             "imageUrl" to imageUrl
         )
