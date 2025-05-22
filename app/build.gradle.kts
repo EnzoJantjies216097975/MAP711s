@@ -29,12 +29,18 @@ android {
     }
 
     buildTypes {
+        debug {
+            isDebuggable = true
+            // Add Firebase debug logging
+            buildConfigField("boolean", "FIREBASE_DEBUG", "true")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("boolean", "FIREBASE_DEBUG", "false")
         }
     }
     compileOptions {
@@ -46,6 +52,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     buildToolsVersion = "34.0.0"
 }
@@ -86,6 +93,7 @@ dependencies {
     implementation(libs.transport.backend.cct)
     implementation(libs.transport.backend.cct)
     implementation(libs.androidx.runtime.saved.instance.state)
+    implementation(libs.transport.runtime)
     ksp(libs.dagger.hilt.android.compiler)
     // implementation(libs.androidx.hilt.work)
     implementation(libs.androidx.navigation.runtime.android)

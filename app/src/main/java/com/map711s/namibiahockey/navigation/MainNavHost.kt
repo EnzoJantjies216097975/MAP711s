@@ -16,6 +16,7 @@ import com.map711s.namibiahockey.screens.home.HomeScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsDetailsScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsFeedScreen
 import com.map711s.namibiahockey.screens.player.PlayerManagementScreen
+import com.map711s.namibiahockey.screens.profile.ProfileScreen
 import com.map711s.namibiahockey.screens.team.TeamsScreen
 
 @Composable
@@ -43,6 +44,7 @@ fun MainNavHost(
         composable("main_home") {
             HomeScreen(
                 hockeyType = parsedHockeyType,
+                navController = navController,
                 onSwitchHockeyType = { /* Handle hockey type switch */ },
                 onNavigateToTeamRegistration = onNavigateToTeamRegistration,
                 onNavigateToEventEntries = { navController.navigate("main_events") },
@@ -93,6 +95,13 @@ fun MainNavHost(
             PlayerManagementScreen(
                 hockeyType = parsedHockeyType,
                 onNavigateBack = { navController.navigate("main_home") }
+            )
+        }
+
+        // Profile screen
+        composable("profile") {
+            ProfileScreen(
+                onNavigateBack = { navController.navigateUp() }
             )
         }
 

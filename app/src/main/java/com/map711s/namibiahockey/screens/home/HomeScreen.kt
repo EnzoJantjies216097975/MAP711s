@@ -16,18 +16,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Business
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -47,8 +42,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.map711s.namibiahockey.components.FeatureCardRow
 import com.map711s.namibiahockey.data.model.HockeyType
-import com.map711s.namibiahockey.navigation.BottomNavItem
-import com.map711s.namibiahockey.navigation.BottomNavigationBar
 import com.map711s.namibiahockey.screens.events.EventCard
 import com.map711s.namibiahockey.screens.newsfeed.NewsCard
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
@@ -78,254 +71,234 @@ fun HomeScreen(
     val eventListState by eventViewModel.eventListState.collectAsState()
     val newsListState by newsViewModel.newsListState.collectAsState()
 
-    // Bottom navigation items
-    val bottomNavItems = listOf(
-        BottomNavItem("Home", "home", Icons.Default.Home),
-        BottomNavItem("Events", "events", Icons.Default.CalendarMonth),
-        BottomNavItem("Teams", "teams", Icons.Default.Groups),
-        BottomNavItem("News", "news", Icons.Default.Newspaper),
-        BottomNavItem("Profile", "profile", Icons.Default.Person)
-    )
-
     // Load events and news for the selected hockey type
     LaunchedEffect(selectedHockeyType) {
         eventViewModel.loadEventsByType(selectedHockeyType)
         newsViewModel.loadNewsPiecesByType(selectedHockeyType)
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "Namibia Hockey Union") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                actions = {
-                    // Hockey type switcher button
-                    IconButton(
-                        onClick = {
-                            val newType = if (selectedHockeyType == HockeyType.OUTDOOR)
-                                HockeyType.INDOOR else HockeyType.OUTDOOR
-                            onSwitchHockeyType(newType)
-                            selectedHockeyType = newType
-                        }
-                    ) {
-                        Icon(
-                            imageVector = if (selectedHockeyType == HockeyType.OUTDOOR)
-                                Icons.Default.Home
-                            else
-                                Icons.Default.Business,
-                            contentDescription = "Switch Hockey Type",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // Top App Bar
+        TopAppBar(
+            title = { Text(text = "Namibia Hockey Union") },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary
+            ),
+            actions = {
+                // Hockey type switcher button
+                IconButton(
+                    onClick = {
+                        val newType = if (selectedHockeyType == HockeyType.OUTDOOR)
+                            HockeyType.INDOOR else HockeyType.OUTDOOR
+                        onSwitchHockeyType(newType)
+                        selectedHockeyType = newType
                     }
-
-                    IconButton(onClick = { /* Notifications */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Notifications,
-                            contentDescription = "Notifications",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-
-                    IconButton(onClick = onNavigateToProfile) {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Profile",
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
+                ) {
+                    Icon(
+                        imageVector = if (selectedHockeyType == HockeyType.OUTDOOR)
+                            Icons.Default.Home
+                        else
+                            Icons.Default.Business,
+                        contentDescription = "Switch Hockey Type",
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
-            )
-        },
-        bottomBar = {
-            BottomNavigationBar(
-                navController = navController,
-                items = bottomNavItems
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+
+                IconButton(onClick = { /* Notifications */ }) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Notifications",
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+
+                IconButton(onClick = onNavigateToProfile) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Profile",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            }
+        )
+
+        // Display hockey type indicator
+        HockeyTypeIndicator(hockeyType = selectedHockeyType)
+
+        // Rest of HomeScreen content
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Display hockey type indicator
-            HockeyTypeIndicator(hockeyType = selectedHockeyType)
-
-            // Rest of HomeScreen content
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Welcome message
-                item {
-                    if (userProfileState.isLoading) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    } else {
-                        val userName = userProfileState.user?.name ?: "Hockey Enthusiast"
-                        WelcomeSection(userName = userName)
+            // Welcome message
+            item {
+                if (userProfileState.isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
+                } else {
+                    val userName = userProfileState.user?.name ?: "Hockey Enthusiast"
+                    WelcomeSection(userName = userName)
                 }
+            }
 
-                // Feature cards
-                item {
+            // Feature cards
+            item {
+                Text(
+                    text = "Quick Access",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
+                FeatureCardRow(
+                    onTeamRegistrationClick = onNavigateToTeamRegistration,
+                    onEventEntriesClick = onNavigateToEventEntries,
+                    onPlayerManagmentClick = onNavigateToPlayerManagement,
+                    onNewsFeedClick = onNavigateToNewsFeed
+                )
+            }
+
+            // Upcoming events section
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = "Quick Access",
+                        text = "Upcoming Events",
                         style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        fontWeight = FontWeight.Bold
                     )
 
-                    FeatureCardRow(
-                        onTeamRegistrationClick = onNavigateToTeamRegistration,
-                        onEventEntriesClick = onNavigateToEventEntries,
-                        onPlayerManagmentClick = onNavigateToPlayerManagement,
-                        onNewsFeedClick = onNavigateToNewsFeed
+                    TextButton(onClick = onNavigateToEventEntries) {
+                        Text("View All")
+                    }
+                }
+            }
+
+            // Events list
+            if (eventListState.isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            } else if (eventListState.events.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No upcoming events for ${selectedHockeyType.name.lowercase()} hockey",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            } else {
+                // Show recent events
+                items(eventListState.events.take(3)) { event ->
+                    EventCard(
+                        event = event,
+                        onRegisterClick = { eventId ->
+                            eventViewModel.registerForEvent(eventId)
+                        },
+                        onViewDetailsClick = { eventId ->
+                            // Navigate to event details
+                        }
                     )
                 }
+            }
 
-                // Upcoming events section
+            // Latest news section
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Latest News",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    TextButton(onClick = onNavigateToNewsFeed) {
+                        Text("View All")
+                    }
+                }
+            }
+
+            // News list
+            if (newsListState.isLoading) {
                 item {
-                    Row(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .height(150.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Upcoming Events",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        TextButton(onClick = onNavigateToEventEntries) {
-                            Text("View All")
-                        }
+                        CircularProgressIndicator()
                     }
                 }
-
-                // Events list
-                if (eventListState.isLoading) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                } else if (eventListState.events.isEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "No upcoming events for ${selectedHockeyType.name.lowercase()} hockey",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
-                } else {
-                    // Show recent events
-                    items(eventListState.events.take(3)) { event ->
-                        EventCard(
-                            event = event,
-                            onRegisterClick = { eventId ->
-                                eventViewModel.registerForEvent(eventId)
-                            },
-                            onViewDetailsClick = { eventId ->
-                                // Navigate to event details
-                            }
-                        )
-                    }
-                }
-
-                // Latest news section
+            } else if (newsListState.newsPieces.isEmpty()) {
                 item {
-                    Row(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Latest News",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        TextButton(onClick = onNavigateToNewsFeed) {
-                            Text("View All")
-                        }
-                    }
-                }
-
-                // News list
-                if (newsListState.isLoading) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                } else if (newsListState.newsPieces.isEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "No news for ${selectedHockeyType.name.lowercase()} hockey",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
-                } else {
-                    // Show recent news
-                    items(newsListState.newsPieces.take(3)) { newsPiece ->
-                        NewsCard(
-                            news = newsPiece,
-                            onNewsClick = { newsId ->
-                                // Navigate to news details
-                            },
-                            onBookmarkClick = { newsId, isBookmarked ->
-                                newsViewModel.toggleBookmark(newsId, isBookmarked)
-                            },
-                            onShareClick = { newsId ->
-                                // Handle share
-                            }
+                            text = "No news for ${selectedHockeyType.name.lowercase()} hockey",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
                 }
-
-                // Add some space at the bottom
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
+            } else {
+                // Show recent news
+                items(newsListState.newsPieces.take(3)) { newsPiece ->
+                    NewsCard(
+                        news = newsPiece,
+                        onNewsClick = { newsId ->
+                            // Navigate to news details
+                        },
+                        onBookmarkClick = { newsId, isBookmarked ->
+                            newsViewModel.toggleBookmark(newsId, isBookmarked)
+                        },
+                        onShareClick = { newsId ->
+                            // Handle share
+                        }
+                    )
                 }
+            }
+
+            // Add some space at the bottom
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

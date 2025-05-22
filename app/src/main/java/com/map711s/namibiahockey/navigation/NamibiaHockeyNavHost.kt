@@ -13,7 +13,7 @@ import com.map711s.namibiahockey.screens.events.AddEventScreen
 import com.map711s.namibiahockey.screens.events.EventDetailsScreen
 import com.map711s.namibiahockey.screens.events.EventEntriesScreen
 import com.map711s.namibiahockey.screens.hockey.HockeyTypeSelectionScreen
-import com.map711s.namibiahockey.screens.home.HomeScreen
+import com.map711s.namibiahockey.screens.main.MainAppScreen
 import com.map711s.namibiahockey.screens.newsfeed.AddNewsScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsDetailsScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsFeedScreen
@@ -21,7 +21,6 @@ import com.map711s.namibiahockey.screens.player.PlayerManagementScreen
 import com.map711s.namibiahockey.screens.profile.ProfileScreen
 import com.map711s.namibiahockey.screens.splash.SplashScreen
 import com.map711s.namibiahockey.screens.team.TeamRegistrationScreen
-import com.map711s.namibiahockey.screens.team.TeamsScreen
 
 @Composable
 fun NamibiaHockeyNavHost(
@@ -66,97 +65,39 @@ fun NamibiaHockeyNavHost(
         composable(Routes.HOCKEY_TYPE_SELECTION) {
             HockeyTypeSelectionScreen(
                 onHockeyTypeSelected = { hockeyType ->
-                    navController.navigate(Routes.homeWithType(hockeyType.name)) {
+                    navController.navigate(Routes.mainApp(hockeyType.name)) {
                         popUpTo(Routes.HOCKEY_TYPE_SELECTION) { inclusive = true }
                     }
                 }
             )
         }
 
-        // Main screens with hockey type parameter - now with bottom navigation support
+        // Main app with bottom navigation
         composable(
-            route = Routes.HOME_WITH_TYPE,
+            route = Routes.MAIN_APP,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
             val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
-                HockeyType.OUTDOOR // Default fallback
+                HockeyType.OUTDOOR
             }
 
-            HomeScreen(
+            MainAppScreen(
                 hockeyType = hockeyType,
-                navController = navController,
-                onSwitchHockeyType = { newType ->
-                    navController.navigate(Routes.homeWithType(newType.name)) {
-                        popUpTo(Routes.HOME_WITH_TYPE) { inclusive = true }
-                    }
+                onNavigateToProfile = {
+                    navController.navigate(Routes.PROFILE)
+                },
+                onNavigateToAddEvent = {
+                    navController.navigate(Routes.addEvent(hockeyType.name))
+                },
+                onNavigateToAddNews = {
+                    navController.navigate(Routes.addNews(hockeyType.name))
                 },
                 onNavigateToTeamRegistration = {
                     navController.navigate(Routes.teamRegistration(hockeyType.name))
-                },
-                onNavigateToEventEntries = {
-                    navController.navigate(Routes.eventEntries(hockeyType.name))
-                },
-                onNavigateToPlayerManagement = {
-                    navController.navigate(Routes.playerManagement(hockeyType.name))
-                },
-                onNavigateToNewsFeed = {
-                    navController.navigate(Routes.newsFeed(hockeyType.name))
-                },
-                onNavigateToProfile = {
-                    navController.navigate(Routes.PROFILE)
                 }
-            )
-        }
-
-        // Teams screen - accessible via bottom navigation
-        composable(Routes.BOTTOM_TEAMS) {
-            TeamsScreen(
-                hockeyType = HockeyType.OUTDOOR, // Default, can be made dynamic
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToCreateTeam = {
-                    navController.navigate(Routes.teamRegistration(HockeyType.OUTDOOR.name))
-                },
-                onNavigateToTeamDetails = { teamId ->
-                    // Navigate to team details
-                }
-            )
-        }
-
-        // Events screen - accessible via bottom navigation
-        composable(Routes.BOTTOM_EVENTS) {
-            EventEntriesScreen(
-                hockeyType = HockeyType.OUTDOOR, // Default, can be made dynamic
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToAddEvent = {
-                    navController.navigate(Routes.addEvent(HockeyType.OUTDOOR.name))
-                },
-                onNavigateToEventDetails = { eventId, eventHockeyType ->
-                    navController.navigate(Routes.eventDetails(eventHockeyType.name, eventId))
-                }
-            )
-        }
-
-        // News screen - accessible via bottom navigation
-        composable(Routes.BOTTOM_NEWS) {
-            NewsFeedScreen(
-                hockeyType = HockeyType.OUTDOOR, // Default, can be made dynamic
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToAddNews = {
-                    navController.navigate(Routes.addNews(HockeyType.OUTDOOR.name))
-                },
-                onNavigateToNewsDetails = { newsId ->
-                    navController.navigate(Routes.newsDetails(newsId))
-                }
-            )
-        }
-
-        // Profile screen - accessible via bottom navigation
-        composable(Routes.BOTTOM_PROFILE) {
-            ProfileScreen(
-                onNavigateBack = { navController.navigateUp() }
             )
         }
 
