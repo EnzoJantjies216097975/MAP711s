@@ -1,7 +1,5 @@
 package com.map711s.namibiahockey.screens.team
 
-package com.map711s.namibiahockey.screens.team
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
