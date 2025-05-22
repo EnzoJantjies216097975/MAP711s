@@ -1,3 +1,4 @@
+package com.map711s.namibiahockey.data.states
 
 import com.map711s.namibiahockey.data.model.Team
 
@@ -9,7 +10,6 @@ data class TeamState(
     val teamId: String? = null,
     val error: String? = null
 )
-
 
 // State for a list of Teams
 data class TeamListState(

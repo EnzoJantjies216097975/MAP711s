@@ -1,4 +1,4 @@
-
+package com.map711s.namibiahockey.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

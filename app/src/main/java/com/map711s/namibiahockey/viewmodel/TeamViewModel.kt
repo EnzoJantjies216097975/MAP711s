@@ -1,12 +1,11 @@
 package com.map711s.namibiahockey.viewmodel
 
-import TeamListState
-import TeamState
-import androidx.compose.animation.core.copy
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.map711s.namibiahockey.data.model.Team
 import com.map711s.namibiahockey.data.repository.TeamRepository
+import com.map711s.namibiahockey.data.states.TeamListState
+import com.map711s.namibiahockey.data.states.TeamState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -155,8 +154,9 @@ class TeamViewModel @Inject constructor(
                 }
         }
     }
+
     // Reset team form
-    fun resetTeamState(){
+    fun resetTeamState() {
         _teamState.update { TeamState() }
     }
 }

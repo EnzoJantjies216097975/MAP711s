@@ -17,7 +17,7 @@ data class Team(
     val description: String = "",
     val establishedYear: Int = 0,
     val homeVenue: String = ""
-){
+) {
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf(
             "id" to id,
@@ -35,5 +35,64 @@ data class Team(
             "establishedYear" to establishedYear,
             "homeVenue" to homeVenue
         )
+    }
+
+    companion object {
+        fun getNationalTeams(): List<Team> {
+            return listOf(
+                Team(
+                    id = "national_outdoor_mens",
+                    name = "Namibia Men's National Team",
+                    hockeyType = HockeyType.OUTDOOR,
+                    category = "Men's",
+                    division = "National",
+                    coach = "National Coach",
+                    manager = "National Manager",
+                    isNationalTeam = true,
+                    description = "Official Namibia Men's Outdoor Hockey National Team",
+                    establishedYear = 1990,
+                    homeVenue = "National Hockey Stadium"
+                ),
+                Team(
+                    id = "national_outdoor_womens",
+                    name = "Namibia Women's National Team",
+                    hockeyType = HockeyType.OUTDOOR,
+                    category = "Women's",
+                    division = "National",
+                    coach = "National Coach",
+                    manager = "National Manager",
+                    isNationalTeam = true,
+                    description = "Official Namibia Women's Outdoor Hockey National Team",
+                    establishedYear = 1990,
+                    homeVenue = "National Hockey Stadium"
+                ),
+                Team(
+                    id = "national_indoor_mens",
+                    name = "Namibia Men's Indoor Team",
+                    hockeyType = HockeyType.INDOOR,
+                    category = "Men's",
+                    division = "National",
+                    coach = "Indoor Coach",
+                    manager = "Indoor Manager",
+                    isNationalTeam = true,
+                    description = "Official Namibia Men's Indoor Hockey National Team",
+                    establishedYear = 1995,
+                    homeVenue = "National Indoor Arena"
+                ),
+                Team(
+                    id = "national_indoor_womens",
+                    name = "Namibia Women's Indoor Team",
+                    hockeyType = HockeyType.INDOOR,
+                    category = "Women's",
+                    division = "National",
+                    coach = "Indoor Coach",
+                    manager = "Indoor Manager",
+                    isNationalTeam = true,
+                    description = "Official Namibia Women's Indoor Hockey National Team",
+                    establishedYear = 1995,
+                    homeVenue = "National Indoor Arena"
+                )
+            )
+        }
     }
 }

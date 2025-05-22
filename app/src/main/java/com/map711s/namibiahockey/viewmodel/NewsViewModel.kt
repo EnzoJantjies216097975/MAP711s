@@ -302,8 +302,8 @@ class NewsViewModel @Inject constructor(
         _newsState.update { NewsState() }
     }
 
-    // Load news pieces by hockey type
-    suspend fun loadNewsPiecesByType(hockeyType: HockeyType) {
+    // Load news pieces by hockey type - Fixed: removed suspend keyword
+    fun loadNewsPiecesByType(hockeyType: HockeyType) {
         _newsListState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
             newsRepository.getNewsPiecesByType(hockeyType)

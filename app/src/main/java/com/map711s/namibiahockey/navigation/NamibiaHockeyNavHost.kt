@@ -21,6 +21,7 @@ import com.map711s.namibiahockey.screens.player.PlayerManagementScreen
 import com.map711s.namibiahockey.screens.profile.ProfileScreen
 import com.map711s.namibiahockey.screens.splash.SplashScreen
 import com.map711s.namibiahockey.screens.team.TeamRegistrationScreen
+import com.map711s.namibiahockey.screens.team.TeamsScreen
 
 @Composable
 fun NamibiaHockeyNavHost(
@@ -44,7 +45,6 @@ fun NamibiaHockeyNavHost(
                 onNavigateToRegister = { navController.navigate(Routes.REGISTER) },
                 onNavigateToHome = {
                     navController.navigate(Routes.HOCKEY_TYPE_SELECTION) {
-                        // Clear the back stack so user can't go back to login
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
                 }
@@ -73,7 +73,7 @@ fun NamibiaHockeyNavHost(
             )
         }
 
-        // Main screens with hockey type parameter
+        // Main screens with hockey type parameter - now with bottom navigation support
         composable(
             route = Routes.HOME_WITH_TYPE,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
@@ -87,9 +87,9 @@ fun NamibiaHockeyNavHost(
 
             HomeScreen(
                 hockeyType = hockeyType,
+                navController = navController,
                 onSwitchHockeyType = { newType ->
                     navController.navigate(Routes.homeWithType(newType.name)) {
-                        // Pop only the current Home destination to replace it
                         popUpTo(Routes.HOME_WITH_TYPE) { inclusive = true }
                     }
                 },
@@ -111,6 +111,56 @@ fun NamibiaHockeyNavHost(
             )
         }
 
+        // Teams screen - accessible via bottom navigation
+        composable(Routes.BOTTOM_TEAMS) {
+            TeamsScreen(
+                hockeyType = HockeyType.OUTDOOR, // Default, can be made dynamic
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToCreateTeam = {
+                    navController.navigate(Routes.teamRegistration(HockeyType.OUTDOOR.name))
+                },
+                onNavigateToTeamDetails = { teamId ->
+                    // Navigate to team details
+                }
+            )
+        }
+
+        // Events screen - accessible via bottom navigation
+        composable(Routes.BOTTOM_EVENTS) {
+            EventEntriesScreen(
+                hockeyType = HockeyType.OUTDOOR, // Default, can be made dynamic
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToAddEvent = {
+                    navController.navigate(Routes.addEvent(HockeyType.OUTDOOR.name))
+                },
+                onNavigateToEventDetails = { eventId, eventHockeyType ->
+                    navController.navigate(Routes.eventDetails(eventHockeyType.name, eventId))
+                }
+            )
+        }
+
+        // News screen - accessible via bottom navigation
+        composable(Routes.BOTTOM_NEWS) {
+            NewsFeedScreen(
+                hockeyType = HockeyType.OUTDOOR, // Default, can be made dynamic
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToAddNews = {
+                    navController.navigate(Routes.addNews(HockeyType.OUTDOOR.name))
+                },
+                onNavigateToNewsDetails = { newsId ->
+                    navController.navigate(Routes.newsDetails(newsId))
+                }
+            )
+        }
+
+        // Profile screen - accessible via bottom navigation
+        composable(Routes.BOTTOM_PROFILE) {
+            ProfileScreen(
+                onNavigateBack = { navController.navigateUp() }
+            )
+        }
+
+        // Existing detailed screens
         composable(
             route = Routes.TEAM_REGISTRATION,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
@@ -119,7 +169,7 @@ fun NamibiaHockeyNavHost(
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
-                HockeyType.OUTDOOR // Default fallback
+                HockeyType.OUTDOOR
             }
 
             TeamRegistrationScreen(
@@ -136,7 +186,7 @@ fun NamibiaHockeyNavHost(
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
-                HockeyType.OUTDOOR // Default fallback
+                HockeyType.OUTDOOR
             }
 
             EventEntriesScreen(
@@ -162,7 +212,7 @@ fun NamibiaHockeyNavHost(
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
-                HockeyType.OUTDOOR // Default fallback
+                HockeyType.OUTDOOR
             }
             val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
 
@@ -181,7 +231,7 @@ fun NamibiaHockeyNavHost(
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
-                HockeyType.OUTDOOR // Default fallback
+                HockeyType.OUTDOOR
             }
 
             AddEventScreen(
@@ -203,7 +253,7 @@ fun NamibiaHockeyNavHost(
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
-                HockeyType.OUTDOOR // Default fallback
+                HockeyType.OUTDOOR
             }
 
             PlayerManagementScreen(
@@ -211,7 +261,6 @@ fun NamibiaHockeyNavHost(
                 onNavigateBack = { navController.navigateUp() }
             )
         }
-
 
         composable(
             route = Routes.NEWS_FEED,
@@ -221,7 +270,7 @@ fun NamibiaHockeyNavHost(
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
-                HockeyType.OUTDOOR // Default fallback
+                HockeyType.OUTDOOR
             }
 
             NewsFeedScreen(
@@ -253,24 +302,10 @@ fun NamibiaHockeyNavHost(
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
             val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
-            val hockeyType = HockeyType.valueOf(hockeyTypeStr)
-
-            AddNewsScreen(
-                hockeyType = hockeyType,
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToNews = { navController.navigate(Routes.newsFeed(hockeyType.name)) }
-            )
-        }
-
-        composable(
-            route = Routes.ADD_NEWS,
-            arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
-                HockeyType.OUTDOOR // Default fallback
+                HockeyType.OUTDOOR
             }
 
             AddNewsScreen(

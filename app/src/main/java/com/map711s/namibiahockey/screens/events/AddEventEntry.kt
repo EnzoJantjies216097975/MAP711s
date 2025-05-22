@@ -1,6 +1,5 @@
 package com.map711s.namibiahockey.screens.events
 
-import DatePickerField
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -41,10 +40,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.map711s.namibiahockey.components.DatePickerField
 import com.map711s.namibiahockey.components.HockeyTypeHeader
 import com.map711s.namibiahockey.components.HockeyTypeOptions
 import com.map711s.namibiahockey.data.model.EventEntry
@@ -64,14 +63,6 @@ fun AddEventScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val eventState by viewModel.eventState.collectAsState()
     val context = LocalContext.current
-
-    var startDate by remember { mutableStateOf("") }
-    var endDate by remember { mutableStateOf("") }
-    var registrationDeadline by remember { mutableStateOf("") }
-
-    var registeredTeams by remember { mutableStateOf(0) }
-    var isRegistered by remember { mutableStateOf(false) }
-    var hockeyType by remember { mutableStateOf(HockeyType.OUTDOOR) }
 
     // Form fields
     var title by remember { mutableStateOf("") }
@@ -97,23 +88,14 @@ fun AddEventScreen(
             endLocalDate != null &&
             registrationDeadlineLocalDate != null
 
-    // Parse dates for comparison (if needed)
-    val parsedStartDate = try {
-        if (startDate.isNotEmpty()) LocalDate.parse(startDate, dateFormatter) else null
-    } catch (e: Exception) { null }
-
-    val parsedEndDate = try {
-        if (endDate.isNotEmpty()) LocalDate.parse(endDate, dateFormatter) else null
-    } catch (e: Exception) { null }
-
     // Minimum allowed dates for the pickers
     val today = LocalDate.now()
 
     LaunchedEffect(eventState) {
         if (eventState.isSuccess) {
             Toast.makeText(context, "Event created successfully!", Toast.LENGTH_SHORT).show()
-            viewModel.resetEventState() // Reset the form state
-            onNavigateToEvents() // Navigate to events list
+            viewModel.resetEventState()
+            onNavigateToEvents()
         }
 
         eventState.error?.let {
@@ -261,7 +243,6 @@ fun AddEventScreen(
                         minDate = startLocalDate ?: today
                     )
 
-
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Registration Deadline field
@@ -292,7 +273,7 @@ fun AddEventScreen(
                         registrationDeadline = registrationDeadlineLocalDate?.format(dateFormatter) ?: "",
                         registeredTeams = 0,
                         isRegistered = false,
-                        hockeyType = selectedHockeyType // Store hockey type as string
+                        hockeyType = selectedHockeyType
                     )
                     viewModel.createEvent(event)
                 },
@@ -300,8 +281,6 @@ fun AddEventScreen(
                     .fillMaxWidth()
                     .height(50.dp),
                 enabled = formIsValid && !eventState.isLoading
-//                enabled = title.isNotBlank() && description.isNotBlank() && location.isNotBlank() &&
-//                        startDate.isNotBlank() && endDate.isNotBlank() && registrationDeadline.isNotBlank()
             ) {
                 if (eventState.isLoading) {
                     CircularProgressIndicator(
@@ -328,14 +307,6 @@ fun AddEventScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AddEventScreenPreview() {
-    //  AddEventScreen(onNavigateBack = {}, onNavigateToEvents = {})
 }

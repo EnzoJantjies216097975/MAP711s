@@ -1,11 +1,10 @@
-// Modify HomeScreen.kt
-
 package com.map711s.namibiahockey.screens.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,11 +12,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -40,11 +44,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.map711s.namibiahockey.components.FeatureCardRow
-import com.map711s.namibiahockey.data.model.EventEntry
-import com.map711s.namibiahockey.data.model.EventItem
 import com.map711s.namibiahockey.data.model.HockeyType
-import com.map711s.namibiahockey.data.model.NewsItem
+import com.map711s.namibiahockey.navigation.BottomNavItem
+import com.map711s.namibiahockey.navigation.BottomNavigationBar
 import com.map711s.namibiahockey.screens.events.EventCard
 import com.map711s.namibiahockey.screens.newsfeed.NewsCard
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
@@ -58,6 +62,7 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     hockeyType: HockeyType,
+    navController: NavHostController,
     onSwitchHockeyType: (HockeyType) -> Unit,
     onNavigateToTeamRegistration: () -> Unit,
     onNavigateToEventEntries: () -> Unit,
@@ -69,16 +74,24 @@ fun HomeScreen(
     newsViewModel: NewsViewModel = hiltViewModel()
 ) {
     val userProfileState by authViewModel.userProfileState.collectAsState()
-    var selectedHockeyType by remember { mutableStateOf(HockeyType.BOTH) }
+    var selectedHockeyType by remember { mutableStateOf(hockeyType) }
     val eventListState by eventViewModel.eventListState.collectAsState()
     val newsListState by newsViewModel.newsListState.collectAsState()
 
-    // Load events and news for the selected hockey type
-    LaunchedEffect(hockeyType) {
-        eventViewModel.loadEventsByType(hockeyType)
-        newsViewModel.loadNewsPiecesByType(hockeyType)
-    }
+    // Bottom navigation items
+    val bottomNavItems = listOf(
+        BottomNavItem("Home", "home", Icons.Default.Home),
+        BottomNavItem("Events", "events", Icons.Default.CalendarMonth),
+        BottomNavItem("Teams", "teams", Icons.Default.Groups),
+        BottomNavItem("News", "news", Icons.Default.Newspaper),
+        BottomNavItem("Profile", "profile", Icons.Default.Person)
+    )
 
+    // Load events and news for the selected hockey type
+    LaunchedEffect(selectedHockeyType) {
+        eventViewModel.loadEventsByType(selectedHockeyType)
+        newsViewModel.loadNewsPiecesByType(selectedHockeyType)
+    }
 
     Scaffold(
         topBar = {
@@ -125,6 +138,12 @@ fun HomeScreen(
                         )
                     }
                 }
+            )
+        },
+        bottomBar = {
+            BottomNavigationBar(
+                navController = navController,
+                items = bottomNavItems
             )
         }
     ) { paddingValues ->
@@ -174,92 +193,30 @@ fun HomeScreen(
                     )
                 }
 
-                // Upcoming events filtered by hockey type
+                // Upcoming events section
                 item {
-                    Text(
-                        text = "Upcoming Events",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
-
-                    if (eventListState.isLoading) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    } else if (eventListState.events.isEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = "No upcoming events for ${selectedHockeyType.name.lowercase()} hockey",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(16.dp)
+                            text = "Upcoming Events",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
-                    } else {
-                        // Filter events by hockey type
-                        val filteredEvents = eventListState.events.filter { event ->
-                            try {
-                                val typeStr = event.hockeyType.toString()
-                                if (typeStr.isNotEmpty()) {
-                                    HockeyType.valueOf(typeStr) == selectedHockeyType
-                                } else {
-                                    false
-                                }
-                            } catch (e: Exception) {
-                                false
-                            }
-                        }
 
-                        // Convert to EventItem for display
-                        val eventItems = filteredEvents.map { event ->
-                            EventItem(
-                                id = event.id,
-                                title = event.title,
-                                date = "${event.startDate} - ${event.endDate}",
-                                location = event.location
-                            )
-                        }
-
-                        if (eventItems.isEmpty()) {
-                            Text(
-                                text = "No upcoming events for ${selectedHockeyType.name.lowercase()} hockey",
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        } else {
-                            eventItems.take(3).forEach { eventItem ->
-                                EventCard(
-                                    event = convertToEventEntry(eventItem),
-                                    onRegisterClick = { /* Handle registration */ },
-                                    onViewDetailsClick = { /* Handle view details */ }
-                                )
-                            }
-
-                            if (eventItems.size > 3) {
-                                TextButton(
-                                    onClick = onNavigateToEventEntries,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp)
-                                ) {
-                                    Text("View all events")
-                                }
-                            }
+                        TextButton(onClick = onNavigateToEventEntries) {
+                            Text("View All")
                         }
                     }
                 }
 
-                // Latest news filtered by hockey type
-                item {
-                    Text(
-                        text = "Latest News",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
-
-                    if (newsListState.isLoading) {
+                // Events list
+                if (eventListState.isLoading) {
+                    item {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -268,54 +225,100 @@ fun HomeScreen(
                         ) {
                             CircularProgressIndicator()
                         }
-                    } else if (newsListState.newsPieces.isEmpty()) {
-                        Text(
-                            text = "No news for ${selectedHockeyType.name.lowercase()} hockey",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    } else {
-                        // Filter news by hockey type
-                        val filteredNews = newsListState.newsPieces
-
-                        // Convert to NewsItem for display (for display purposes if needed)
-                        val newsItems = filteredNews.map { news ->
-                            NewsItem(
-                                id = news.id,
-                                title = news.title,
-                                summary = news.content.take(100) + "...",
-                                date = news.publishDate
+                    }
+                } else if (eventListState.events.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No upcoming events for ${selectedHockeyType.name.lowercase()} hockey",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                             )
                         }
+                    }
+                } else {
+                    // Show recent events
+                    items(eventListState.events.take(3)) { event ->
+                        EventCard(
+                            event = event,
+                            onRegisterClick = { eventId ->
+                                eventViewModel.registerForEvent(eventId)
+                            },
+                            onViewDetailsClick = { eventId ->
+                                // Navigate to event details
+                            }
+                        )
+                    }
+                }
 
-                        if (newsItems.isEmpty()) {
+                // Latest news section
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Latest News",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        TextButton(onClick = onNavigateToNewsFeed) {
+                            Text("View All")
+                        }
+                    }
+                }
+
+                // News list
+                if (newsListState.isLoading) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                } else if (newsListState.newsPieces.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Text(
                                 text = "No news for ${selectedHockeyType.name.lowercase()} hockey",
                                 style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.padding(16.dp)
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                             )
-                        } else {
-                            // Use the original NewsPiece objects from the state
-                            filteredNews.take(3).forEach { newsPiece ->
-                                NewsCard(
-                                    news = newsPiece,
-                                    onNewsClick = { /* Handle news click */ },
-                                    onBookmarkClick = { _, _ -> /* Handle bookmark */ },
-                                    onShareClick = { /* Handle share */ }
-                                )
-                            }
-
-                            if (filteredNews.size > 3) {
-                                TextButton(
-                                    onClick = onNavigateToNewsFeed,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp)
-                                ) {
-                                    Text("View all news")
-                                }
-                            }
                         }
+                    }
+                } else {
+                    // Show recent news
+                    items(newsListState.newsPieces.take(3)) { newsPiece ->
+                        NewsCard(
+                            news = newsPiece,
+                            onNewsClick = { newsId ->
+                                // Navigate to news details
+                            },
+                            onBookmarkClick = { newsId, isBookmarked ->
+                                newsViewModel.toggleBookmark(newsId, isBookmarked)
+                            },
+                            onShareClick = { newsId ->
+                                // Handle share
+                            }
+                        )
                     }
                 }
 
@@ -390,19 +393,4 @@ fun WelcomeSection(userName: String) {
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
     }
-}
-
-private fun convertToEventEntry(eventItem: EventItem): EventEntry {
-    return EventEntry(
-        id = eventItem.id,
-        title = eventItem.title,
-        description = "Event details", // Default description
-        startDate = eventItem.date.split(" - ").firstOrNull() ?: "",
-        endDate = eventItem.date.split(" - ").getOrElse(1) { "" },
-        location = eventItem.location,
-        registrationDeadline = "", // Default value
-        isRegistered = false,
-        registeredTeams = 0,
-        hockeyType = HockeyType.OUTDOOR // Default value, adjust as needed
-    )
 }
