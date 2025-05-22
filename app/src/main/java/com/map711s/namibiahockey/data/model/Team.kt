@@ -12,19 +12,28 @@ data class Team(
     val manager: String = "",
     val players: List<String> = emptyList(), // List of player IDs
     val createdAt: Date = Date(),
-    val logoUrl: String = ""
+    val logoUrl: String = "",
+    val isNationalTeam: Boolean = false, // New field to identify national teams
+    val description: String = "",
+    val establishedYear: Int = 0,
+    val homeVenue: String = ""
 ){
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf(
             "id" to id,
             "name" to name,
+            "hockeyType" to hockeyType.name,
             "category" to category,
             "division" to division,
             "coach" to coach,
             "manager" to manager,
             "players" to players,
             "createdAt" to createdAt,
-            "logoUrl" to logoUrl
+            "logoUrl" to logoUrl,
+            "isNationalTeam" to isNationalTeam,
+            "description" to description,
+            "establishedYear" to establishedYear,
+            "homeVenue" to homeVenue
         )
     }
 }
