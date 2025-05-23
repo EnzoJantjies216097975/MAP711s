@@ -596,7 +596,7 @@ private fun TeamStatItem(
 }
 
 @Composable
-private fun TeamCard(
+fun TeamCard(
     team: Team,
     onTeamClick: () -> Unit,
     onManagePlayersClick: () -> Unit,
