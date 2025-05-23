@@ -41,10 +41,11 @@ fun MainAppScaffold(
     val bottomNavController = rememberNavController()
 
     val bottomNavItems = listOf(
+
         BottomNavItem(
-            name = "Home",
-            route = Routes.BOTTOM_HOME,
-            icon = Icons.Default.Home
+            name = "News",
+            route = Routes.BOTTOM_NEWS,
+            icon = Icons.Default.Newspaper
         ),
         BottomNavItem(
             name = "Events",
@@ -52,14 +53,14 @@ fun MainAppScaffold(
             icon = Icons.Default.CalendarMonth
         ),
         BottomNavItem(
+            name = "Home",
+            route = Routes.BOTTOM_HOME,
+            icon = Icons.Default.Home
+        ),
+        BottomNavItem(
             name = "Teams",
             route = Routes.BOTTOM_TEAMS,
             icon = Icons.Default.Groups
-        ),
-        BottomNavItem(
-            name = "News",
-            route = Routes.BOTTOM_NEWS,
-            icon = Icons.Default.Newspaper
         ),
         BottomNavItem(
             name = "Players",
