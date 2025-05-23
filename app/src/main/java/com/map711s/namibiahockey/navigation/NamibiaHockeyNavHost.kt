@@ -22,6 +22,7 @@ import com.map711s.namibiahockey.screens.player.PlayerProfileDetailsScreen
 import com.map711s.namibiahockey.screens.profile.EditProfileScreen
 import com.map711s.namibiahockey.screens.profile.ProfileScreen
 import com.map711s.namibiahockey.screens.splash.SplashScreen
+import com.map711s.namibiahockey.screens.team.TeamDetailsScreen
 import com.map711s.namibiahockey.screens.team.TeamManagementScreen
 import com.map711s.namibiahockey.screens.team.TeamRegistrationScreen
 
@@ -380,5 +381,21 @@ fun NamibiaHockeyNavHost(
                 }
             )
         }
+
+        composable(
+            route = Routes.TEAM_DETAILS,
+            arguments = listOf(navArgument("teamId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val teamId = backStackEntry.arguments?.getString("teamId") ?: ""
+
+            TeamDetailsScreen(
+                teamId = teamId,
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToPlayerManagement = { id ->
+                    navController.navigate(Routes.playerManagement("OUTDOOR"))
+                }
+            )
+        }
     }
+
 }

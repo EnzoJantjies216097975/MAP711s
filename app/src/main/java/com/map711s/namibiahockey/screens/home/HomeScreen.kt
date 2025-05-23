@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -57,14 +58,16 @@ fun HomeScreen(
     onNavigateToEventDetails: (String, HockeyType) -> Unit,
     onNavigateToNewsDetails: (String) -> Unit,
     onSwitchHockeyType: (HockeyType) -> Unit,
+    onViewAllEvents: () -> Unit = {},
+    onViewAllNews: () -> Unit = {},
     authViewModel: AuthViewModel = hiltViewModel(),
     eventViewModel: EventViewModel = hiltViewModel(),
     newsViewModel: NewsViewModel = hiltViewModel()
 ) {
     val userProfileState by authViewModel.userProfileState.collectAsState()
-    var selectedHockeyType by remember { mutableStateOf(hockeyType) }
     val eventListState by eventViewModel.eventListState.collectAsState()
     val newsListState by newsViewModel.newsListState.collectAsState()
+    var selectedHockeyType by remember { mutableStateOf(hockeyType) }
 
     // Load events and news for the selected hockey type
     LaunchedEffect(selectedHockeyType) {
@@ -127,6 +130,7 @@ fun HomeScreen(
         // Main content
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Welcome message
