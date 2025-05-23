@@ -22,34 +22,36 @@ data class Player(
 ) {
     // Convert to HashMap for Firestore
     fun toHashMap(): HashMap<String, Any> {
-        val map = hashMapOf(
-            "userId" to userId,
-            "name" to name,
-            "hockeyType" to hockeyType.name,
-            "dateOfBirth" to dateOfBirth,
-            "position" to position,
-            "jerseyNumber" to jerseyNumber,
-            "teamId" to teamId,
-            "contactNumber" to contactNumber,
-            "email" to email,
-            "photoUrl" to photoUrl,
-            "isNationalPlayer" to isNationalPlayer,
-            "nationality" to nationality,
-            "experienceYears" to experienceYears
-        )
+        // Create map with explicit Any type
+        val result = HashMap<String, Any>()
 
-        // Convert stats to a nested map
-        val statsMap = hashMapOf(
-            "goalsScored" to stats.goalsScored,
-            "assists" to stats.assists,
-            "gamesPlayed" to stats.gamesPlayed,
-            "yellowCards" to stats.yellowCards,
-            "redCards" to stats.redCards
-        )
+        // Add all fields manually
+        result["userId"] = userId
+        result["name"] = name
+        result["hockeyType"] = hockeyType.name
+        result["dateOfBirth"] = dateOfBirth
+        result["position"] = position
+        result["jerseyNumber"] = jerseyNumber
+        result["teamId"] = teamId
+        result["contactNumber"] = contactNumber
+        result["email"] = email
+        result["photoUrl"] = photoUrl
+        result["isNationalPlayer"] = isNationalPlayer
+        result["nationality"] = nationality
+        result["experienceYears"] = experienceYears
 
-        map["stats"] = statsMap
+        // Create stats map explicitly
+        val statsMap = HashMap<String, Any>()
+        statsMap["goalsScored"] = stats.goalsScored
+        statsMap["assists"] = stats.assists
+        statsMap["gamesPlayed"] = stats.gamesPlayed
+        statsMap["yellowCards"] = stats.yellowCards
+        statsMap["redCards"] = stats.redCards
 
-        return map
+        // Add stats map to result
+        result["stats"] = statsMap
+
+        return result
     }
 
     // Calculate age from date of birth
