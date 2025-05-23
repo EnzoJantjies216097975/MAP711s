@@ -41,38 +41,43 @@ class AuthRepository @Inject constructor(
         name: String,
         phone: String,
         role: UserRole = UserRole.PLAYER
-    ): Result<FirebaseUser>{
+    ): Result<FirebaseUser> {
         return try {
             Log.d(TAG, "Attempting to register user: $email")
 
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-            val firebaseUser = authResult.user
-                ?: return Result.failure(Exception("Registration failed: User is null"))
+            val firebaseUser = authResult.user ?: throw Exception("User creation failed")
 
-            Log.d(TAG, "User registered successfully: ${firebaseUser.uid}")
-
-            // Create user profile in Firestore
-            val user = User(
-                id = firebaseUser.uid,
-                email = email,
-                name = name,
-                phone = phone,
-                role = role
+            val userMap = hashMapOf(
+                "uid" to firebaseUser.uid,
+                "email" to email,
+                "name" to name,
+                "phone" to phone,
+                "role" to role.name,
+                "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
             )
 
-            // Save user to Firestore
             firestore.collection("users")
                 .document(firebaseUser.uid)
-                .set(user)
+                .set(userMap)
                 .await()
 
-            Log.d(TAG, "User profile saved to Firestore")
             Result.success(firebaseUser)
-
+        } catch (e: FirebaseAuthUserCollisionException) {
+            Log.e(TAG, "User already exists", e)
+            Result.failure(Exception("User already exists"))
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Log.e(TAG, "Invalid credentials", e)
+            Result.failure(Exception("Invalid email format or weak password"))
+        } catch (e: FirebaseNetworkException) {
+            Log.e(TAG, "Network error", e)
+            Result.failure(Exception("Network error, please try again"))
+        } catch (e: FirebaseTooManyRequestsException) {
+            Log.e(TAG, "Too many requests", e)
+            Result.failure(Exception("Too many requests, please try again later"))
         } catch (e: Exception) {
             Log.e(TAG, "Registration failed", e)
-            val errorMessage = getAuthErrorMessage(e)
-            Result.failure(Exception(errorMessage))
+            Result.failure(Exception("Registration failed: ${e.message}"))
         }
     }
 

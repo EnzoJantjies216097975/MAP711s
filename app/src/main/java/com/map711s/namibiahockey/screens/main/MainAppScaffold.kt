@@ -81,16 +81,6 @@ fun MainAppScaffold(
             startDestination = Routes.BOTTOM_HOME,
             modifier = Modifier.padding(paddingValues)
         ) {
-            // Home screen
-            composable(Routes.BOTTOM_HOME) {
-                HomeScreen(
-                    hockeyType = hockeyType,
-                    onNavigateToProfile = onNavigateToProfile,
-                    onNavigateToEventDetails = onNavigateToEventDetails,
-                    onNavigateToNewsDetails = onNavigateToNewsDetails,
-                    onSwitchHockeyType = onSwitchHockeyType
-                )
-            }
 
             // Events screen
             composable(Routes.BOTTOM_EVENTS) {
@@ -102,15 +92,6 @@ fun MainAppScaffold(
                 )
             }
 
-            // Teams screen
-            composable(Routes.BOTTOM_TEAMS) {
-                TeamsScreen(
-                    hockeyType = hockeyType,
-                    onNavigateBack = { }, // No back button in bottom nav
-                    onNavigateToCreateTeam = onNavigateToTeamRegistration,
-                    onNavigateToTeamDetails = onNavigateToTeamDetails
-                )
-            }
 
             // News screen
             composable(Routes.BOTTOM_NEWS) {
@@ -122,11 +103,32 @@ fun MainAppScaffold(
                 )
             }
 
+            // Home screen
+            composable(Routes.BOTTOM_HOME) {
+                HomeScreen(
+                    hockeyType = hockeyType,
+                    onNavigateToProfile = onNavigateToProfile,
+                    onNavigateToEventDetails = onNavigateToEventDetails,
+                    onNavigateToNewsDetails = onNavigateToNewsDetails,
+                    onSwitchHockeyType = onSwitchHockeyType
+                )
+            }
+
             // Players screen
             composable(Routes.BOTTOM_PLAYERS) {
                 PlayerManagementScreen(
                     hockeyType = hockeyType,
                     onNavigateBack = { } // No back button in bottom nav
+                )
+            }
+
+            // Teams screen
+            composable(Routes.BOTTOM_TEAMS) {
+                TeamsScreen(
+                    hockeyType = hockeyType,
+                    onNavigateBack = { }, // No back button in bottom nav
+                    onNavigateToCreateTeam = onNavigateToTeamRegistration,
+                    onNavigateToTeamDetails = onNavigateToTeamDetails
                 )
             }
         }
