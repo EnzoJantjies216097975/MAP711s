@@ -272,3 +272,34 @@ data class Team(
         }
     }
 }
+
+data class TeamStatistics(
+    val gamesPlayed: Int = 0,
+    val wins: Int = 0,
+    val losses: Int = 0,
+    val draws: Int = 0,
+    val points: Int = 0,
+    val bonusPoints: Int = 0,
+    val goalsFor: Int = 0,
+    val goalsAgainst: Int = 0,
+    val goalDifference: Int = goalsFor - goalsAgainst,
+    val position: Int = 0
+)
+
+data class PlayerRequest(
+    val id: String = "",
+    val playerId: String = "",
+    val playerName: String = "",
+    val teamId: String = "",
+    val teamName: String = "",
+    val requestType: RequestType = RequestType.JOIN,
+    val status: RequestStatus = RequestStatus.PENDING,
+    val requestedBy: String = "", // User ID who made request
+    val requestedAt: Date = Date(),
+    val respondedBy: String? = null,
+    val respondedAt: Date? = null,
+    val message: String = ""
+)
+
+enum class RequestType { JOIN, LEAVE, INVITATION }
+enum class RequestStatus { PENDING, APPROVED, REJECTED }

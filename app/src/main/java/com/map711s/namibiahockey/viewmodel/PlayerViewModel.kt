@@ -12,6 +12,9 @@ import com.map711s.namibiahockey.data.model.PlayerProfileStats
 import com.map711s.namibiahockey.data.model.PlayerStats
 import com.map711s.namibiahockey.data.model.Team
 import com.map711s.namibiahockey.data.repository.AuthRepository
+import com.map711s.namibiahockey.data.states.PlayerListState
+import com.map711s.namibiahockey.data.states.PlayerProfileState
+import com.map711s.namibiahockey.data.states.PlayerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,30 +24,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Date
 import javax.inject.Inject
-
-// State for a single Player
-data class PlayerState(
-    val isLoading: Boolean = false,
-    val isSuccess: Boolean = false,
-    val player: Player? = null,
-    val playerId: String? = null,
-    val error: String? = null
-)
-
-// State for a list of Players
-data class PlayerListState(
-    val isLoading: Boolean = false,
-    val players: List<Player> = emptyList(),
-    val playerListItems: List<PlayerListItem> = emptyList(),
-    val error: String? = null
-)
-
-// State for player profile details
-data class PlayerProfileState(
-    val isLoading: Boolean = false,
-    val playerProfile: PlayerProfile? = null,
-    val error: String? = null
-)
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(

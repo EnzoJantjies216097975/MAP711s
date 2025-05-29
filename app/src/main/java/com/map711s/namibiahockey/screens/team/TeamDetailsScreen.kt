@@ -68,6 +68,7 @@ fun TeamDetailsScreen(
     teamId: String,
     onNavigateBack: () -> Unit,
     onNavigateToPlayerManagement: (String) -> Unit,
+    viewModel: TeamDetailsViewModel = hiltViewModel(),
     teamViewModel: TeamViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
@@ -76,6 +77,9 @@ fun TeamDetailsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var showJoinDialog by remember { mutableStateOf(false) }
     var hasRequestedToJoin by remember { mutableStateOf(false) }
+    val playersState by viewModel.playersState.collectAsState()
+    val requestsState by viewModel.requestsState.collectAsState()
+    val userProfile by viewModel.userProfile.collectAsState()
 
     // Load team details when screen is displayed
     LaunchedEffect(teamId) {
@@ -86,6 +90,14 @@ fun TeamDetailsScreen(
             // teamViewModel.setTeam(nationalTeam)
         } else {
             teamViewModel.getTeam(teamId)
+        }
+    }
+
+    LaunchedEffect(teamId) {
+        viewModel.loadTeamDetails(teamId)
+        viewModel.loadTeamPlayers(teamId)
+        if (userProfile?.role in listOf(UserRole.COACH, UserRole.MANAGER, UserRole.ADMIN)) {
+            viewModel.loadPendingRequests(teamId)
         }
     }
 
@@ -406,6 +418,28 @@ fun TeamDetailsScreen(
 
     // Join team request dialog would be implemented here
     // if (showJoinDialog) { ... }
+
+
+    TeamPlayersSection(
+        players = playersState.players,
+        canManage = userProfile?.role in listOf(UserRole.COACH, UserRole.MANAGER, UserRole.ADMIN),
+        onRemovePlayer = { playerId ->
+            viewModel.removePlayerFromTeam(playerId)
+        }
+    )
+
+    // Pending requests section (visible to coaches/managers/admins)
+    if (userProfile?.role in listOf(UserRole.COACH, UserRole.MANAGER, UserRole.ADMIN)) {
+        PendingRequestsSection(
+            requests = requestsState.requests,
+            onApproveRequest = { requestId ->
+                viewModel.approveRequest(requestId)
+            },
+            onRejectRequest = { requestId ->
+                viewModel.rejectRequest(requestId)
+            }
+        )
+    }
 }
 
 @Composable
