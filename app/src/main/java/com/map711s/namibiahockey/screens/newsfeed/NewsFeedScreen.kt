@@ -1,37 +1,25 @@
 package com.map711s.namibiahockey.screens.newsfeed
 
 import android.content.Intent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,11 +40,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,11 +53,11 @@ import com.map711s.namibiahockey.viewmodel.NewsViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsFeedScreen(
+    hockeyType: HockeyType,
     onNavigateBack: () -> Unit,
     onNavigateToAddNews: () -> Unit,
     onNavigateToNewsDetails: (String) -> Unit,
-    viewModel: NewsViewModel = hiltViewModel(),
-    hockeyType: HockeyType,
+    viewModel: NewsViewModel = hiltViewModel()
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -81,6 +66,14 @@ fun NewsFeedScreen(
     val newsItems = newsListState.newsPieces.toMutableList()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+
+
+    //val tabs = listOf("All", "Tournament", "Team", "Player", "General")
+
+    // Load news when screen is displayed
+    LaunchedEffect(hockeyType) {
+        viewModel.loadNewsPiecesByType(hockeyType)
+    }
 
     LaunchedEffect(key1 = true) {
         viewModel.loadAllNewsPieces()
@@ -109,20 +102,20 @@ fun NewsFeedScreen(
     }
 
     // Filtered news based on search and tab
-    val filteredNews = if (searchQuery.isBlank()) { // Fixed typo: seachQuery -> searchQuery
+    val filteredNews = if (searchQuery.isBlank()) {
         when (selectedTabIndex) {
-            0 -> newsItems // All
-            1 -> newsItems.filter { it.category == NewsCategory.TOURNAMENT }
-            2 -> newsItems.filter { it.category == NewsCategory.LEAGUE }
-            3 -> newsItems.filter { it.category == NewsCategory.TEAM }
-            4 -> newsItems.filter { it.category == NewsCategory.PLAYER }
-            else -> newsItems
+            0 -> newsListState.newsPieces // All
+            1 -> newsListState.newsPieces.filter { it.category == NewsCategory.TOURNAMENT }
+            2 -> newsListState.newsPieces.filter { it.category == NewsCategory.TEAM }
+            3 -> newsListState.newsPieces.filter { it.category == NewsCategory.PLAYER }
+            4 -> newsListState.newsPieces.filter { it.category == NewsCategory.GENERAL }
+            else -> newsListState.newsPieces
         }
     } else {
-        newsItems.filter {
-            it.title.contains(searchQuery, ignoreCase = true) || // Fixed typo: seachQuery -> searchQuery
-                    it.content.contains(searchQuery, ignoreCase = true) || // Fixed typo: seachQuery -> searchQuery
-                    it.authorName.contains(searchQuery, ignoreCase = true) // Fixed typo: seachQuery -> searchQuery
+        newsListState.newsPieces.filter { news ->
+            news.title.contains(searchQuery, ignoreCase = true) ||
+                    news.content.contains(searchQuery, ignoreCase = true) ||
+                    news.authorName.contains(searchQuery, ignoreCase = true)
         }
     }
 
@@ -257,151 +250,151 @@ fun NewsFeedScreen(
 
 
 
-@Composable
-fun NewsCard(
-    news: NewsPiece,
-    onNewsClick: (String) -> Unit,
-    onBookmarkClick: (String, Boolean) -> Unit,
-    onShareClick: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var isBookmarked by remember { mutableStateOf(news.isBookmarked) }
-
-    // Update local state when news changes
-    LaunchedEffect(news.isBookmarked) {
-        isBookmarked = news.isBookmarked
-    }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onNewsClick(news.id) },
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            // News category tag
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-            ) {
-                Text(
-                    text = news.category.name,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            //News title
-            Text(
-                text = news.title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            //Author and date
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Author avatar (placeholder)
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = news.authorName.firstOrNull()?.toString() ?: "A",
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Text(
-                    text = news.authorName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = news.publishDate,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // News content preview (shortened)
-            Text(
-                text = news.content,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            HorizontalDivider()
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Action Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = { onShareClick(news.id) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = "Share",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    )
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                // Read more text
-                Text(
-                    text = "Read more",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable { onNewsClick(news.id) }
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                IconButton(
-                    onClick = {
-                        isBookmarked = !isBookmarked
-                        onBookmarkClick(news.id, isBookmarked)
-                    }
-                ) {
-                    Icon(
-                        imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                        contentDescription = if (isBookmarked) "Remove Bookmark" else "Add Bookmark",
-                        tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                }
-            }
-        }
-    }
-}
+//@Composable
+//fun NewsCard(
+//    news: NewsPiece,
+//    onNewsClick: (String) -> Unit,
+//    onBookmarkClick: (String, Boolean) -> Unit,
+//    onShareClick: (String) -> Unit,
+//    modifier: Modifier = Modifier
+//) {
+//    var isBookmarked by remember { mutableStateOf(news.isBookmarked) }
+//
+//    // Update local state when news changes
+//    LaunchedEffect(news.isBookmarked) {
+//        isBookmarked = news.isBookmarked
+//    }
+//
+//    Card(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .clickable { onNewsClick(news.id) },
+//        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+//    ) {
+//        Column(
+//            modifier = Modifier.padding(16.dp)
+//        ) {
+//            // News category tag
+//            Box(
+//                modifier = Modifier
+//                    .clip(RoundedCornerShape(16.dp))
+//                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+//                    .padding(horizontal = 12.dp, vertical = 4.dp)
+//            ) {
+//                Text(
+//                    text = news.category.name,
+//                    style = MaterialTheme.typography.bodySmall,
+//                    color = MaterialTheme.colorScheme.primary
+//                )
+//            }
+//
+//            Spacer(modifier = Modifier.height(12.dp))
+//
+//            //News title
+//            Text(
+//                text = news.title,
+//                style = MaterialTheme.typography.titleLarge,
+//                fontWeight = FontWeight.Bold
+//            )
+//
+//            Spacer(modifier = Modifier.height(8.dp))
+//
+//            //Author and date
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                // Author avatar (placeholder)
+//                Box(
+//                    modifier = Modifier
+//                        .size(24.dp)
+//                        .clip(CircleShape)
+//                        .background(MaterialTheme.colorScheme.primary),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    Text(
+//                        text = news.authorName.firstOrNull()?.toString() ?: "A",
+//                        color = Color.White,
+//                        style = MaterialTheme.typography.bodySmall
+//                    )
+//                }
+//
+//                Spacer(modifier = Modifier.width(8.dp))
+//
+//                Text(
+//                    text = news.authorName,
+//                    style = MaterialTheme.typography.bodyMedium,
+//                    fontWeight = FontWeight.Medium,
+//                )
+//
+//                Spacer(modifier = Modifier.width(16.dp))
+//
+//                Text(
+//                    text = news.publishDate,
+//                    style = MaterialTheme.typography.bodySmall,
+//                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+//                )
+//            }
+//
+//            Spacer(modifier = Modifier.height(12.dp))
+//
+//            // News content preview (shortened)
+//            Text(
+//                text = news.content,
+//                style = MaterialTheme.typography.bodyMedium,
+//                maxLines = 3,
+//                overflow = TextOverflow.Ellipsis
+//            )
+//
+//            Spacer(modifier = Modifier.height(20.dp))
+//
+//            HorizontalDivider()
+//
+//            Spacer(modifier = Modifier.height(8.dp))
+//
+//            // Action Buttons
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                IconButton(
+//                    onClick = { onShareClick(news.id) }
+//                ) {
+//                    Icon(
+//                        imageVector = Icons.Default.Share,
+//                        contentDescription = "Share",
+//                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+//                    )
+//                }
+//
+//                Spacer(modifier = Modifier.weight(1f))
+//
+//                // Read more text
+//                Text(
+//                    text = "Read more",
+//                    style = MaterialTheme.typography.labelMedium,
+//                    color = MaterialTheme.colorScheme.primary,
+//                    fontWeight = FontWeight.Medium,
+//                    modifier = Modifier.clickable { onNewsClick(news.id) }
+//                )
+//
+//                Spacer(modifier = Modifier.width(16.dp))
+//
+//                IconButton(
+//                    onClick = {
+//                        isBookmarked = !isBookmarked
+//                        onBookmarkClick(news.id, isBookmarked)
+//                    }
+//                ) {
+//                    Icon(
+//                        imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+//                        contentDescription = if (isBookmarked) "Remove Bookmark" else "Add Bookmark",
+//                        tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
 
 
 //@Preview(showBackground = true)

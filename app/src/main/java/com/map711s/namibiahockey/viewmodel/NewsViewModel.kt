@@ -47,6 +47,11 @@ class NewsViewModel @Inject constructor(
     private val _imageUploadState = MutableStateFlow(ImageUploadState())
     val imageUploadState: StateFlow<ImageUploadState> = _imageUploadState.asStateFlow()
 
+
+    init {
+        loadAllNewsPieces()
+    }
+
     /**
      * Upload news image to Firebase Storage
      */
@@ -228,6 +233,8 @@ class NewsViewModel @Inject constructor(
                 }
         }
     }
+
+
 
     // Get a news piece by ID
     fun getNewsPiece(newsId: String) {

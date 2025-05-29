@@ -40,11 +40,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.map711s.namibiahockey.components.LiveGameDisplay
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.screens.events.EventCard
 import com.map711s.namibiahockey.screens.newsfeed.NewsCard
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
 import com.map711s.namibiahockey.viewmodel.EventViewModel
+import com.map711s.namibiahockey.viewmodel.LiveGameViewModel
 import com.map711s.namibiahockey.viewmodel.NewsViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -62,17 +64,24 @@ fun HomeScreen(
     onViewAllNews: () -> Unit = {},
     authViewModel: AuthViewModel = hiltViewModel(),
     eventViewModel: EventViewModel = hiltViewModel(),
-    newsViewModel: NewsViewModel = hiltViewModel()
+    newsViewModel: NewsViewModel = hiltViewModel(),
+    liveGameViewModel: LiveGameViewModel = hiltViewModel()
 ) {
     val userProfileState by authViewModel.userProfileState.collectAsState()
     val eventListState by eventViewModel.eventListState.collectAsState()
     val newsListState by newsViewModel.newsListState.collectAsState()
+    val liveGames by liveGameViewModel.liveGames.collectAsState()
     var selectedHockeyType by remember { mutableStateOf(hockeyType) }
 
     // Load events and news for the selected hockey type
     LaunchedEffect(selectedHockeyType) {
         eventViewModel.loadEventsByType(selectedHockeyType)
         newsViewModel.loadNewsPiecesByType(selectedHockeyType)
+    }
+
+    // Filter live games by hockey type
+    val filteredLiveGames = liveGames.filter { game ->
+        game.hockeyType == selectedHockeyType || selectedHockeyType == HockeyType.BOTH
     }
 
     Column(
@@ -147,6 +156,16 @@ fun HomeScreen(
                 } else {
                     val userName = userProfileState.user?.name ?: "Hockey Enthusiast"
                     WelcomeSection(userName = userName)
+                }
+            }
+
+            // Live games section - only show if there are live games
+            if (filteredLiveGames.isNotEmpty()) {
+                item {
+                    LiveGameDisplay(
+                        games = filteredLiveGames,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
                 }
             }
 
@@ -245,43 +264,44 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
+                        )
                     }
-                }
-            } else if (newsListState.newsPieces.isEmpty()) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No news for ${selectedHockeyType.name.lowercase()} hockey",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                } else if (newsListState.newsPieces.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No news for ${selectedHockeyType.name.lowercase()} hockey",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                } else {
+                    // Show recent news (limited to 3)
+                    items(newsListState.newsPieces.take(3)) { newsPiece ->
+                        NewsCard(
+                            news = newsPiece,
+                            onNewsClick = { onNavigateToNewsDetails(newsPiece.id) },
+                            onBookmarkClick = { newsId, isBookmarked ->
+                                newsViewModel.toggleBookmark(newsId, isBookmarked)
+                            },
+                            onShareClick = { newsId ->
+                                // Handle share
+                            },
+                            modifier = Modifier.padding(horizontal = 16.dp)
                         )
                     }
                 }
-            } else {
-                // Show recent news (limited to 3)
-                items(newsListState.newsPieces.take(3)) { newsPiece ->
-                    NewsCard(
-                        news = newsPiece,
-                        onNewsClick = { onNavigateToNewsDetails(newsPiece.id) },
-                        onBookmarkClick = { newsId, isBookmarked ->
-                            newsViewModel.toggleBookmark(newsId, isBookmarked)
-                        },
-                        onShareClick = { newsId ->
-                            // Handle share
-                        },
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
-            }
 
-            // Add some space at the bottom for the bottom navigation
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
+                // Add some space at the bottom for the bottom navigation
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
     }

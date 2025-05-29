@@ -1,5 +1,6 @@
 package com.map711s.namibiahockey.screens.events
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -79,6 +81,17 @@ fun EventEntriesScreen(
     var selectedHockeyType by remember { mutableStateOf(hockeyType) }
     val snackbarHostState = remember { SnackbarHostState() }
     var loadingEventId by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+
+    // Team selection dialog state
+    val showTeamSelection by viewModel.showTeamSelection.collectAsState()
+    val availableTeams by viewModel.availableTeams.collectAsState()
+    val registrationMessage by viewModel.registrationMessage.collectAsState()
+    var pendingEventId by remember { mutableStateOf<String?>(null) }
+
+    // Show game results dialog
+    var showGameResults by remember { mutableStateOf(false) }
+    var selectedEventForResults by remember { mutableStateOf<EventEntry?>(null) }
 
     // Observe event state to update loading
     LaunchedEffect(viewModel.eventState.collectAsState().value) {
@@ -86,6 +99,21 @@ fun EventEntriesScreen(
         if (!eventState.isLoading) {
             // If no longer loading, clear the loading event ID
             loadingEventId = null
+        }
+    }
+
+    // Handle registration messages
+    LaunchedEffect(registrationMessage) {
+        registrationMessage?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+            viewModel.clearRegistrationMessage()
+        }
+    }
+
+    // Effect to show error messages
+    LaunchedEffect(eventsEntriesState.error) {
+        eventsEntriesState.error?.let {
+            snackbarHostState.showSnackbar(it)
         }
     }
 
@@ -121,12 +149,9 @@ fun EventEntriesScreen(
         try {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val currentDate = Date() // Get current date
-
-            // Parse the end date of the event
-            val endDate = event.endDate.let {
+            val endDate = event.endDate.let {  // Parse the end date of the event
                 if (it.isNotEmpty()) dateFormat.parse(it) else null
             } ?: return false // If no end date, consider it upcoming
-
             // Compare with current date
             return endDate.before(currentDate)
         } catch (e: Exception) {
@@ -134,6 +159,9 @@ fun EventEntriesScreen(
             return false
         }
     }
+
+    // Get my registered events
+    val myRegisteredEvents = viewModel.getMyRegisteredEvents()
 
     // Filtered events based on search, tab, and hockey type
     val filteredEvents = if (searchQuery.isBlank()) {
