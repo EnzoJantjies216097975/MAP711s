@@ -82,7 +82,8 @@ fun NamibiaHockeyNavHost(
             route = Routes.MAIN_APP,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
-            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyTypeStr =
+                backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
@@ -126,7 +127,8 @@ fun NamibiaHockeyNavHost(
             route = Routes.TEAM_REGISTRATION,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
-            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyTypeStr =
+                backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
@@ -143,7 +145,8 @@ fun NamibiaHockeyNavHost(
             route = Routes.EVENT_ENTRIES,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
-            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyTypeStr =
+                backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
@@ -166,7 +169,8 @@ fun NamibiaHockeyNavHost(
             route = Routes.EVENT_ENTRIES,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
-            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyTypeStr =
+                backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
@@ -189,7 +193,8 @@ fun NamibiaHockeyNavHost(
             route = Routes.ADD_EVENT,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
-            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyTypeStr =
+                backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
@@ -211,7 +216,8 @@ fun NamibiaHockeyNavHost(
             route = Routes.PLAYER_MANAGEMENT,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
-            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyTypeStr =
+                backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
@@ -228,7 +234,8 @@ fun NamibiaHockeyNavHost(
             route = Routes.NEWS_FEED,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
-            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyTypeStr =
+                backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
@@ -263,7 +270,8 @@ fun NamibiaHockeyNavHost(
             route = Routes.ADD_NEWS,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
-            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyTypeStr =
+                backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
@@ -364,7 +372,8 @@ fun NamibiaHockeyNavHost(
             route = Routes.PLAYER_MANAGEMENT,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
-            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyTypeStr =
+                backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {
@@ -385,7 +394,8 @@ fun NamibiaHockeyNavHost(
             route = Routes.TEAM_MANAGEMENT,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
-            val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyTypeStr =
+                backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
                 HockeyType.valueOf(hockeyTypeStr)
             } catch (e: Exception) {

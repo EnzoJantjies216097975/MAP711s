@@ -1,4 +1,4 @@
-package com.map711s.namibiahockey.data.states
+ package com.map711s.namibiahockey.data.states
 
 import com.map711s.namibiahockey.data.model.NewsPiece
 
