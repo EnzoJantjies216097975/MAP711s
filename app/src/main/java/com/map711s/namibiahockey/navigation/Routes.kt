@@ -50,6 +50,10 @@ object Routes {
     const val PLAYER_PROFILE_DETAILS = "player_profile_details/{playerId}"
     const val TEAM_MANAGEMENT = "team_management/{hockeyType}"
 
+    // Role management routes
+    const val ROLE_CHANGE_REQUESTS = "role_change_requests"
+    const val USER_ROLE_REQUESTS = "user_role_requests/{userId}"
+
     // Navigation helpers
     fun mainApp(hockeyType: String) = "main_app/$hockeyType"
     fun homeWithType(hockeyType: String) = "home/$hockeyType"
@@ -64,4 +68,5 @@ object Routes {
     fun newsFeed(hockeyType: String) = "news_feed/$hockeyType"
     fun playerProfileDetails(playerId: String) = "player_profile_details/$playerId"
     fun teamManagement(hockeyType: String) = "team_management/$hockeyType"
+    fun userRoleRequests(userId: String) = "user_role_requests/$userId"
 }

@@ -76,14 +76,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.map711s.namibiahockey.components.RoleChangeRequestDialog
+import com.map711s.namibiahockey.components.getRoleIcon
 import com.map711s.namibiahockey.data.model.ProfileInfoItem
+import com.map711s.namibiahockey.data.model.RequestStatus
+import com.map711s.namibiahockey.data.model.RoleChangeRequest
 import com.map711s.namibiahockey.data.model.SettingsItem
 import com.map711s.namibiahockey.data.model.StatItem
+import com.map711s.namibiahockey.data.model.User
 import com.map711s.namibiahockey.data.model.UserRole
+import com.map711s.namibiahockey.utils.DateUtils
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
+import com.map711s.namibiahockey.viewmodel.RoleChangeViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -97,7 +105,10 @@ fun ProfileScreen(
     onNavigateToPlayerManagement: () -> Unit = {},
     onNavigateToTeamManagement: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
-    viewModel: AuthViewModel = hiltViewModel()
+    viewModel: AuthViewModel = hiltViewModel(),
+    onNavigateToRoleChangeRequests: () -> Unit = {},
+    authViewModel: AuthViewModel = hiltViewModel(),
+    roleChangeViewModel: RoleChangeViewModel = hiltViewModel()
 ) {
     val userProfileState by viewModel.userProfileState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -108,6 +119,13 @@ fun ProfileScreen(
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var isUploading by remember { mutableStateOf(false) }
     var uploadProgress by remember { mutableStateOf(0f) }
+
+    val roleChangeUiState by roleChangeViewModel.uiState.collectAsState()
+    val userRequests by roleChangeViewModel.userRequests.collectAsState()
+    val pendingRequestsCount by roleChangeViewModel.pendingRequestsCount.collectAsState()
+
+    // Dialog states
+    var showRoleChangeDialog by remember { mutableStateOf(false) }
 
     // Image selection launcher
     val imageLauncher = rememberLauncherForActivityResult(
@@ -160,9 +178,27 @@ fun ProfileScreen(
         }
     }
 
+    LaunchedEffect(userProfileState.user?.id) {
+        userProfileState.user?.id?.let { userId ->
+            roleChangeViewModel.loadUserRequests(userId)
+        }
+    }
+
     // Load user profile when screen is displayed
     LaunchedEffect(Unit) {
         // Profile is loaded automatically in the AuthViewModel
+    }
+
+    // Handle role change request results
+    LaunchedEffect(roleChangeUiState.error, roleChangeUiState.successMessage) {
+        roleChangeUiState.error?.let {
+            snackbarHostState.showSnackbar(it)
+            roleChangeViewModel.resetUiState()
+        }
+        roleChangeUiState.successMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            roleChangeViewModel.resetUiState()
+        }
     }
 
     Scaffold(
@@ -183,6 +219,39 @@ fun ProfileScreen(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Edit Profile"
                         )
+                    }
+
+                    // Admin badge with notification for pending requests
+                    if (userProfileState.user?.role == UserRole.ADMIN && pendingRequestsCount > 0) {
+                        Box {
+                            IconButton(onClick = onNavigateToRoleChangeRequests) {
+                                Icon(
+                                    imageVector = Icons.Default.Badge,
+                                    contentDescription = "Role Change Requests"
+                                )
+                            }
+
+                            // Notification badge
+                            if (pendingRequestsCount > 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .background(
+                                            MaterialTheme.colorScheme.error,
+                                            CircleShape
+                                        )
+                                        .align(Alignment.TopEnd),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = if (pendingRequestsCount > 9) "9+" else pendingRequestsCount.toString(),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color.White,
+                                        fontSize = 8.sp
+                                    )
+                                }
+                            }
+                        }
                     }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
@@ -214,7 +283,7 @@ fun ProfileScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp)
             ) {
-                // Enhanced Profile Header
+                // Profile Header
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -475,6 +544,18 @@ fun ProfileScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Add Role Management Section
+                if (userProfileState.user != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    RoleManagementSection(
+                        user = userProfileState.user!!,
+                        userRequests = userRequests,
+                        onRequestRoleChange = { showRoleChangeDialog = true },
+                        isAdmin = userProfileState.user?.role == UserRole.ADMIN
+                    )
+                }
+
                 // Personal Information
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -595,7 +676,21 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
+
+        // Role Change Request Dialog
+        if (showRoleChangeDialog && userProfileState.user != null) {
+            RoleChangeRequestDialog(
+                currentRole = userProfileState.user!!.role,
+                onDismiss = { showRoleChangeDialog = false },
+                onSubmitRequest = { requestedRole, reason ->
+                    roleChangeViewModel.requestRoleChange(requestedRole, reason)
+                    showRoleChangeDialog = false
+                },
+                isLoading = roleChangeUiState.isLoading
+            )
+        }
     }
+
 }
 
 @Composable
@@ -670,4 +765,148 @@ private fun simulateImageUpload(
     }
 
     handler.postDelayed(progressRunnable, updateInterval)
+}
+
+@Composable
+private fun RoleManagementSection(
+    user: User,
+    userRequests: List<RoleChangeRequest>,
+    onRequestRoleChange: () -> Unit,
+    isAdmin: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Role Management",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // Current Role Display
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = getRoleIcon(user.role),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Current Role",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = user.role.name.lowercase().replaceFirstChar { it.uppercase() },
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                // Request Role Change Button (not for admins)
+                if (!isAdmin) {
+                    Button(
+                        onClick = onRequestRoleChange,
+                        enabled = !userRequests.any { it.status == RequestStatus.PENDING }
+                    ) {
+                        Text("Request Change")
+                    }
+                }
+            }
+
+            // Show pending/recent requests
+            if (userRequests.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Recent Requests",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                userRequests.take(3).forEach { request ->
+                    RoleRequestStatusItem(request = request)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RoleRequestStatusItem(request: RoleChangeRequest) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = when (request.status) {
+            RequestStatus.PENDING -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
+            RequestStatus.APPROVED -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            RequestStatus.REJECTED -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+            else -> MaterialTheme.colorScheme.surfaceVariant
+        },
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = request.getRoleChangeDescription(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Surface(
+                    color = when (request.status) {
+                        RequestStatus.PENDING -> MaterialTheme.colorScheme.secondary
+                        RequestStatus.APPROVED -> MaterialTheme.colorScheme.primary
+                        RequestStatus.REJECTED -> MaterialTheme.colorScheme.error
+                        else -> MaterialTheme.colorScheme.outline
+                    },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = request.status.name.lowercase().replaceFirstChar { it.uppercase() },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Text(
+                text = DateUtils.formatDisplayDate(request.requestedAt),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier.padding(top = 4.dp)
+            )
+
+            if (request.adminResponse.isNotBlank()) {
+                Text(
+                    text = "Admin: ${request.adminResponse}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+    }
 }

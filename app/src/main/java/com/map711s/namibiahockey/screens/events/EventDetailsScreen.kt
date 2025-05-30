@@ -79,6 +79,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventDetailsScreen(
+    eventId: String,
     onNavigateBack: () -> Unit,
     viewModel: EventViewModel = hiltViewModel(),
     onNavigateToAddEvent: () -> Unit,
@@ -86,9 +87,9 @@ fun EventDetailsScreen(
     hockeyType: HockeyType,
 ) {
     val eventState by viewModel.eventState.collectAsState()
-    val event = eventState.event
+    val event  by viewModel.event.collectAsState()
     val isLoading = eventState.isLoading
-    val isRegistered = eventState.isRegistered
+    val isRegistered by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
@@ -96,15 +97,22 @@ fun EventDetailsScreen(
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Upcoming", "Past", "My Entries")
 
+    val user by userViewModel.currentUser.collectAsState()
+    val registrationState by viewModel.registrationState.collectAsState()
+
+    var selectedTeam by remember { mutableStateOf<String?>(null) }
+
+    // Fetch event details
+    LaunchedEffect(eventId) {
+        viewModel.loadEvent(eventId)
+        viewModel.checkIfUserIsRegistered(eventId, user?.uid ?: "")
+    }
+
+    isRegistered = registrationState.isRegistered
+
     // Load events when screen opens
     LaunchedEffect(Unit) {
         viewModel.loadAllEvents()
-    }
-
-
-    // Load event details when screen is first displayed
-    LaunchedEffect(eventId) {
-        viewModel.getEvent(eventId)
     }
 
     LaunchedEffect(eventState.successMessage, eventState.error) {

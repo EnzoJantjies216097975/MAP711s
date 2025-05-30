@@ -1,7 +1,5 @@
 package com.map711s.namibiahockey.screens.profile
 
-import androidx.compose.ui.unit.sp
-
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -12,7 +10,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,24 +27,22 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -73,6 +68,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -80,9 +76,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.map711s.namibiahockey.components.getRoleIcon
 import com.map711s.namibiahockey.data.model.User
 import com.map711s.namibiahockey.data.model.UserRole
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
@@ -105,8 +103,8 @@ fun EditProfileScreen(
     var email by remember { mutableStateOf(userProfileState.user?.email ?: "") }
     var phone by remember { mutableStateOf(userProfileState.user?.phone ?: "") }
     var role by remember { mutableStateOf(userProfileState.user?.role ?: UserRole.PLAYER) }
-    var location by remember { mutableStateOf("Windhoek, Namibia") } // Mock field
-    var bio by remember { mutableStateOf("") } // Mock field
+    var location by remember { mutableStateOf("Windhoek, Namibia") }
+    var bio by remember { mutableStateOf("") }
 
     // Image handling
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -139,6 +137,15 @@ fun EditProfileScreen(
             email = user.email
             phone = user.phone
             role = user.role
+        }
+    }
+
+    LaunchedEffect(userProfileState.user) {
+        userProfileState.user?.let { user ->
+            name = user.name
+            email = user.email
+            phone = user.phone
+            // REMOVED role initialization
         }
     }
 
@@ -230,7 +237,7 @@ fun EditProfileScreen(
             name = name.trim(),
             email = email.trim(),
             phone = phone.trim(),
-            role = role
+            role = userProfileState.user?.role ?: UserRole.PLAYER // Keep existing role
         )
 
         // In a real app, you would call viewModel.updateUserProfile(updatedUser)
@@ -541,7 +548,6 @@ fun EditProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Role and Additional Information
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -550,67 +556,143 @@ fun EditProfileScreen(
                     modifier = Modifier.padding(20.dp)
                 ) {
                     Text(
-                        text = "Professional Information",
+                        text = "Role Information",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    // Role dropdown (only for admins to change)
-                    val currentUser = userProfileState.user
-                    val canChangeRole = currentUser?.role == UserRole.ADMIN
-
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedTextField(
-                            value = role.name.lowercase().replaceFirstChar { it.uppercase() },
-                            onValueChange = { },
-                            label = { Text("Role") },
-                            modifier = Modifier.fillMaxWidth(),
-                            readOnly = true,
-                            enabled = canChangeRole,
-                            trailingIcon = if (canChangeRole) {
-                                {
-                                    IconButton(onClick = { roleExpanded = true }) {
-                                        Icon(
-                                            imageVector = Icons.Default.ArrowDropDown,
-                                            contentDescription = "Select Role"
-                                        )
-                                    }
-                                }
-                            } else null,
-                            supportingText = if (!canChangeRole) {
-                                { Text("Contact admin to change role", style = MaterialTheme.typography.bodySmall) }
-                            } else null
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = getRoleIcon(userProfileState.user?.role ?: UserRole.PLAYER),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
                         )
 
-                        if (canChangeRole) {
-                            DropdownMenu(
-                                expanded = roleExpanded,
-                                onDismissRequest = { roleExpanded = false }
-                            ) {
-                                UserRole.entries.forEach { userRole ->
-                                    DropdownMenuItem(
-                                        text = { Text(userRole.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                                        onClick = {
-                                            if (userRole != role) {
-                                                showRoleChangeDialog = true
-                                            }
-                                            role = userRole
-                                            roleExpanded = false
-                                        },
-                                        trailingIcon = {
-                                            if (role == userRole) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Check,
-                                                    contentDescription = "Selected"
-                                                )
-                                            }
-                                        }
-                                    )
-                                }
-                            }
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Current Role",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                            Text(
+                                text = userProfileState.user?.role?.name?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "Unknown",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "To change your role, please use the 'Request Role Change' option in your profile settings. All role changes must be approved by an administrator.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Bio/Description - moved here from Professional Information
+                    OutlinedTextField(
+                        value = bio,
+                        onValueChange = { bio = it },
+                        label = { Text("Bio") },
+                        placeholder = { Text("Tell us about yourself") },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences,
+                            imeAction = ImeAction.Done
+                        ),
+                        minLines = 3,
+                        maxLines = 5
+                    )
+                }
+            }
+
+            // Role and Additional Information
+//            Card(
+//                modifier = Modifier.fillMaxWidth(),
+//                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+//            ) {
+//                Column(
+//                    modifier = Modifier.padding(20.dp)
+//                ) {
+//                    Text(
+//                        text = "Professional Information",
+//                        style = MaterialTheme.typography.titleLarge,
+//                        fontWeight = FontWeight.Bold,
+//                        modifier = Modifier.padding(bottom = 16.dp)
+//                    )
+//
+//                    // Role dropdown (only for admins to change)
+//                    val currentUser = userProfileState.user
+//                    val canChangeRole = currentUser?.role == UserRole.ADMIN
+//
+//                    Box(modifier = Modifier.fillMaxWidth()) {
+//                        OutlinedTextField(
+//                            value = role.name.lowercase().replaceFirstChar { it.uppercase() },
+//                            onValueChange = { },
+//                            label = { Text("Role") },
+//                            modifier = Modifier.fillMaxWidth(),
+//                            readOnly = true,
+//                            enabled = canChangeRole,
+//                            trailingIcon = if (canChangeRole) {
+//                                {
+//                                    IconButton(onClick = { roleExpanded = true }) {
+//                                        Icon(
+//                                            imageVector = Icons.Default.ArrowDropDown,
+//                                            contentDescription = "Select Role"
+//                                        )
+//                                    }
+//                                }
+//                            } else null,
+//                            supportingText = if (!canChangeRole) {
+//                                { Text("Contact admin to change role", style = MaterialTheme.typography.bodySmall) }
+//                            } else null
+//                        )
+//
+//                        if (canChangeRole) {
+//                            DropdownMenu(
+//                                expanded = roleExpanded,
+//                                onDismissRequest = { roleExpanded = false }
+//                            ) {
+//                                UserRole.entries.forEach { userRole ->
+//                                    DropdownMenuItem(
+//                                        text = { Text(userRole.name.lowercase().replaceFirstChar { it.uppercase() }) },
+//                                        onClick = {
+//                                            if (userRole != role) {
+//                                                showRoleChangeDialog = true
+//                                            }
+//                                            role = userRole
+//                                            roleExpanded = false
+//                                        },
+//                                        trailingIcon = {
+//                                            if (role == userRole) {
+//                                                Icon(
+//                                                    imageVector = Icons.Default.Check,
+//                                                    contentDescription = "Selected"
+//                                                )
+//                                            }
+//                                        }
+//                                    )
+//                                }
+//                            }
+//                        }
+//                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -674,8 +756,7 @@ fun EditProfileScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
+
 
     // Discard Changes Dialog
     if (showDiscardDialog) {
@@ -752,4 +833,13 @@ private fun simulateImageUpload(
     }
 
     handler.postDelayed(progressRunnable, updateInterval)
+}
+
+private fun getRoleIcon(role: UserRole): ImageVector {
+    return when (role) {
+        UserRole.ADMIN -> Icons.Default.Shield
+        UserRole.COACH -> Icons.Default.SportsSoccer
+        UserRole.MANAGER -> Icons.Default.Badge
+        UserRole.PLAYER -> Icons.Default.Person
+    }
 }

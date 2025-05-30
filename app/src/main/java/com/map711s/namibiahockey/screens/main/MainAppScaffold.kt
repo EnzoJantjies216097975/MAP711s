@@ -9,7 +9,10 @@ import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,6 +26,7 @@ import com.map711s.namibiahockey.screens.home.HomeScreen
 import com.map711s.namibiahockey.screens.newsfeed.NewsFeedScreen
 import com.map711s.namibiahockey.screens.player.PlayerManagementScreen
 import com.map711s.namibiahockey.screens.team.TeamsScreen
+import com.map711s.namibiahockey.viewmodel.RoleChangeViewModel
 
 @Composable
 fun MainAppScaffold(
@@ -35,8 +39,10 @@ fun MainAppScaffold(
     onNavigateToNewsDetails: (String) -> Unit,
     onNavigateToTeamRegistration: () -> Unit,
     onNavigateToTeamDetails: (String) -> Unit,
-    onSwitchHockeyType: (HockeyType) -> Unit
+    onSwitchHockeyType: (HockeyType) -> Unit,
+    roleChangeViewModel: RoleChangeViewModel = hiltViewModel()
 ) {
+    val pendingRequestsCount by roleChangeViewModel.pendingRequestsCount.collectAsState()
     // Create a SEPARATE NavController for bottom navigation
     val bottomNavController = rememberNavController()
 
@@ -135,3 +141,22 @@ fun MainAppScaffold(
         }
     }
 }
+
+
+
+//// In your profile button or admin section, you can show the notification badge:
+///*
+//if (currentUser?.role == UserRole.ADMIN && pendingRequestsCount > 0) {
+//    Box {
+//        IconButton(onClick = { navController.navigate(Routes.ROLE_CHANGE_REQUESTS) }) {
+//            Icon(Icons.Default.Badge, contentDescription = "Role Requests")
+//        }
+//        if (pendingRequestsCount > 0) {
+//            Badge(
+//                modifier = Modifier.align(Alignment.TopEnd)
+//            ) {
+//                Text(pendingRequestsCount.toString())
+//            }
+//        }
+//    }
+//}

@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.map711s.namibiahockey.data.model.HockeyType
+import com.map711s.namibiahockey.screens.admin.RoleChangeRequestsManagementScreen
 import com.map711s.namibiahockey.screens.auth.LoginScreen
 import com.map711s.namibiahockey.screens.auth.RegisterScreen
 import com.map711s.namibiahockey.screens.events.AddEventScreen
@@ -21,6 +22,7 @@ import com.map711s.namibiahockey.screens.player.PlayerManagementScreen
 import com.map711s.namibiahockey.screens.player.PlayerProfileDetailsScreen
 import com.map711s.namibiahockey.screens.profile.EditProfileScreen
 import com.map711s.namibiahockey.screens.profile.ProfileScreen
+import com.map711s.namibiahockey.screens.profile.UserRoleRequestsScreen
 import com.map711s.namibiahockey.screens.splash.SplashScreen
 import com.map711s.namibiahockey.screens.team.TeamDetailsScreen
 import com.map711s.namibiahockey.screens.team.TeamManagementScreen
@@ -288,7 +290,30 @@ fun NamibiaHockeyNavHost(
                 },
                 onNavigateToTeamManagement = {
                     navController.navigate(Routes.teamManagement("OUTDOOR"))
+                },
+                onNavigateToRoleChangeRequests = {
+                    navController.navigate(Routes.ROLE_CHANGE_REQUESTS)
                 }
+            )
+        }
+
+        // Role Change Requests Management Screen (Admin only)
+        composable(Routes.ROLE_CHANGE_REQUESTS) {
+            RoleChangeRequestsManagementScreen(
+                onNavigateBack = { navController.navigateUp() }
+            )
+        }
+
+        // User Role Requests Screen
+        composable(
+            route = Routes.USER_ROLE_REQUESTS,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+
+            UserRoleRequestsScreen(
+                userId = userId,
+                onNavigateBack = { navController.navigateUp() }
             )
         }
 

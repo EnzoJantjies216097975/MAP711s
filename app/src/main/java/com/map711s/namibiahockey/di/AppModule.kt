@@ -8,6 +8,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
+import com.map711s.namibiahockey.data.repository.RoleChangeRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,6 +42,12 @@ object AppModule {
     @Singleton
     fun provideContext(@ApplicationContext context: Context): Context {
         return context
+    }
+
+    @Provides
+    @Singleton
+    fun provideRoleChangeRepository(firestore: FirebaseFirestore): RoleChangeRepository {
+        return RoleChangeRepository(firestore)
     }
 
 
