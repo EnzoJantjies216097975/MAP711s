@@ -29,9 +29,8 @@ data class Team(
     val draws: Int = 0,
     val points: Int = 0,
     val ranking: Int = 0,
+    val statistics: TeamStatistics = TeamStatistics()
 ) {
-    val statistics:
-
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf(
             "id" to id,

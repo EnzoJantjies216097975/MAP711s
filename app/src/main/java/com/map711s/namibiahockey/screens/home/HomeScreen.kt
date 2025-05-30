@@ -264,44 +264,43 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
-
                     }
-                } else if (newsListState.newsPieces.isEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "No news for ${selectedHockeyType.name.lowercase()} hockey",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
-                } else {
-                    // Show recent news (limited to 3)
-                    items(newsListState.newsPieces.take(3)) { newsPiece ->
-                        NewsCard(
-                            news = newsPiece,
-                            onNewsClick = { onNavigateToNewsDetails(newsPiece.id) },
-                            onBookmarkClick = { newsId, isBookmarked ->
-                                newsViewModel.toggleBookmark(newsId, isBookmarked)
-                            },
-                            onShareClick = { newsId ->
-                                // Handle share
-                            },
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                }
+            } else if (newsListState.newsPieces.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No news for ${selectedHockeyType.name.lowercase()} hockey",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
                 }
-
-                // Add some space at the bottom for the bottom navigation
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
+            } else {
+                // Show recent news (limited to 3)
+                items(newsListState.newsPieces.take(3)) { newsPiece ->
+                    NewsCard(
+                        news = newsPiece,
+                        onNewsClick = { onNavigateToNewsDetails(newsPiece.id) },
+                        onBookmarkClick = { newsId, isBookmarked ->
+                            newsViewModel.toggleBookmark(newsId, isBookmarked)
+                        },
+                        onShareClick = { newsId ->
+                            // Handle share
+                        },
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
                 }
+            }
+
+            // Add some space at the bottom for the bottom navigation
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

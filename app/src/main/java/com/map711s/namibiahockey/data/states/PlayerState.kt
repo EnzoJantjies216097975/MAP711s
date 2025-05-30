@@ -1,6 +1,7 @@
 package com.map711s.namibiahockey.data.states
 
 import com.map711s.namibiahockey.data.model.Player
+import com.map711s.namibiahockey.data.model.PlayerListItem
 import com.map711s.namibiahockey.data.model.PlayerProfile
 
 // State for a single Player
@@ -16,6 +17,7 @@ data class PlayerState(
 data class PlayerListState(
     val isLoading: Boolean = false,
     val players: List<Player> = emptyList(),
+    val playerListItems: List<PlayerListItem> = emptyList(),
     val error: String? = null
 )
 

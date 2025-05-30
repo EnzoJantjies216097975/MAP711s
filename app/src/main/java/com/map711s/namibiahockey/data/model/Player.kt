@@ -47,7 +47,7 @@ data class Player(
 
     // Get display name
     fun getDisplayName(): String {
-        return if (name.ifBlank()) name else "Player #$jerseyNumber"
+        return if (name.isNotBlank()) name else "Player #$jerseyNumber"
     }
 
     // Check if player can play in age category
@@ -166,8 +166,7 @@ companion object {
 
         if (position.isBlank()) errors.add("Position is required")
 
-        val jerseyNum = jerseyNumber.toIntOrNull()
-        if (jerseyNum == null || jerseyNum < 1 || jerseyNum > 99) {
+        if (jerseyNumber < 1 || jerseyNumber > 99) {
             errors.add("Jersey number must be between 1 and 99")
         }
 

@@ -264,6 +264,11 @@ class GameResultsRepository @Inject constructor(
             } catch (e: Exception) {
                 GameStatus.COMPLETED
             },
+            hockeyType = try {
+                HockeyType.valueOf(data["hockeyType"] as? String ?: "OUTDOOR")
+            } catch (e: Exception) {
+                HockeyType.OUTDOOR
+            },
             team1Stats = team1Stats,
             team2Stats = team2Stats,
             notablePlayerId = data["notablePlayerId"] as? String ?: "",
