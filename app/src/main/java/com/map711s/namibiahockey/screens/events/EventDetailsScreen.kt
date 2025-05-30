@@ -134,6 +134,29 @@ fun EventDetailsScreen(
         }
     }
 
+    // Handle registration success/error messages
+    LaunchedEffect(registrationState.isSuccess, registrationState.error, registrationState.message) {
+        when {
+            registrationState.isSuccess && registrationState.message != null -> {
+                Toast.makeText(context, registrationState.message, Toast.LENGTH_SHORT).show()
+                viewModel.resetRegistrationState()
+                // Reload event to get updated registration status
+                viewModel.getEvent(eventId)
+            }
+            registrationState.error != null -> {
+                Toast.makeText(context, registrationState.error, Toast.LENGTH_LONG).show()
+                viewModel.resetRegistrationState()
+            }
+        }
+    }
+
+    // Show error message if any
+    LaunchedEffect(eventState.error) {
+        eventState.error?.let {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
+
     val currentEvents = when (selectedTabIndex) {
         0 -> eventListState.upcomingEvents.filter {
             it.hockeyType == hockeyType || hockeyType == HockeyType.BOTH
