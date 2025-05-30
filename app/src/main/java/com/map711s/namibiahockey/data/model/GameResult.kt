@@ -3,6 +3,7 @@ package com.map711s.namibiahockey.data.model
 import java.util.Date
 
 data class GameResult(
+    val id: String = "",
     val gameId: String = "",
     val eventId: String = "",
     val eventName: String = "",

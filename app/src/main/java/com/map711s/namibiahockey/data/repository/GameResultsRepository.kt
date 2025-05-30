@@ -186,11 +186,11 @@ class GameResultsRepository @Inject constructor(
     }
 
     // Update game result
-    suspend fun updateGameResult(gameResult: GameResult): Result<Unit> {
+    suspend fun updateGameResult(gameResultId: String, gameResult: GameResult): Result<Unit> {
         return try {
-            Log.d(TAG, "Updating game result: ${gameResult.id}")
+            Log.d(TAG, "Updating game result: $gameResultId")
 
-            gameResultsCollection.document(gameResult.id)
+            gameResultsCollection.document(gameResultId)
                 .set(gameResult.toHashMap())
                 .await()
 

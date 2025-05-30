@@ -298,7 +298,7 @@ data class TeamStatistics(
     val biggestLoss: String = "",
     val currentForm: List<String> = emptyList(), // Last 5 games: W, L, D
     val topScorer: String = "",
-    val topScorerGoals: Int = 0
+    val topScorerGoals: Int = 0,
 ) {
     // Calculate goal difference
     fun getGoalDifference(): Int = goalsFor - goalsAgainst
@@ -343,6 +343,8 @@ data class TeamStatistics(
         )
     }
 }
+
+
 
 data class PlayerRequest(
     val id: String = "",

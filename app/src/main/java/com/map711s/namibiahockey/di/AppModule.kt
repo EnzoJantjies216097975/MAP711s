@@ -8,7 +8,11 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
+import com.map711s.namibiahockey.data.repository.AuthRepository
+import com.map711s.namibiahockey.data.repository.PlayerRepository
+import com.map711s.namibiahockey.data.repository.PlayerRequestRepository
 import com.map711s.namibiahockey.data.repository.RoleChangeRepository
+import com.map711s.namibiahockey.data.repository.StatisticsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -46,9 +50,34 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideAuthRepository(
+        firebaseAuth: FirebaseAuth,
+        firestore: FirebaseFirestore
+    ): AuthRepository {
+        return AuthRepository(firebaseAuth, firestore)
+    }
+
+    @Provides
+    @Singleton
     fun provideRoleChangeRepository(firestore: FirebaseFirestore): RoleChangeRepository {
         return RoleChangeRepository(firestore)
     }
 
+    @Provides
+    @Singleton
+    fun provideStatisticsRepository(firestore: FirebaseFirestore): StatisticsRepository {
+        return StatisticsRepository(firestore)
+    }
 
+    @Provides
+    @Singleton
+    fun providePlayerRepository(firestore: FirebaseFirestore): PlayerRepository {
+        return PlayerRepository(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun providePlayerRequestRepository(firestore: FirebaseFirestore): PlayerRequestRepository {
+        return PlayerRequestRepository(firestore)
+    }
 }

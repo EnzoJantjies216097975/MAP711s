@@ -65,8 +65,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.data.model.PlayerProfile
 import com.map711s.namibiahockey.data.model.PlayerProfileStats
-import com.map711s.namibiahockey.data.model.ProfileInfoItem
-import com.map711s.namibiahockey.data.model.StatItem
 import com.map711s.namibiahockey.data.model.UserRole
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
 
@@ -623,5 +621,64 @@ private fun CareerHighlightItem(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
         }
+    }
+}
+
+@Composable
+private fun ProfileInfoItem(
+    icon: ImageVector,
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
+        )
+
+        Column(
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .weight(1f)
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatItem(
+    label: String,
+    value: String
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
     }
 }

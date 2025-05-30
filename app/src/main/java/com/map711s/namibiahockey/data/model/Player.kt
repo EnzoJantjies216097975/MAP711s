@@ -36,7 +36,18 @@ data class Player(
 
     // Timestamps
     val createdAt: Date = Date(),
-    val updatedAt: Date = Date()
+    val updatedAt: Date = Date(),
+
+    val phone: String = "",
+
+    val teamIds: List<String> = emptyList(),
+
+    val profileImageUrl: String = "",
+
+    val joinedDate: Date = Date(),
+
+    val medicalInfo: String = "",
+    val statistics: PlayerStatistics = PlayerStatistics()
 ) {
     // Calculate age
     fun getAge(): Int {
@@ -112,7 +123,14 @@ data class Player(
             "achievements" to achievements,
             "preferredFoot" to preferredFoot,
             "createdAt" to createdAt,
-            "updatedAt" to updatedAt
+            "updatedAt" to updatedAt,
+            "id" to id,
+            "phone" to phone,
+            "teamIds" to teamIds,
+            "profileImageUrl" to profileImageUrl,
+            "joinedDate" to joinedDate,
+            "medicalInfo" to medicalInfo,
+            "statistics" to statistics.toHashMap()
         )
     }
 
@@ -185,5 +203,30 @@ companion object {
             val cleanPhone = phone.replace(Regex("[\\s-()]"), "")
             return cleanPhone.matches(Regex("^(\\+264|264)?[0-9]{8,9}$"))
         }
+    }
+}
+
+
+data class PlayerStatistics(
+    val playerId: String = "",
+    val gamesPlayed: Int = 0,
+    val goals: Int = 0,
+    val assists: Int = 0,
+    val yellowCards: Int = 0,
+    val redCards: Int = 0,
+    val saves: Int = 0,
+    val minutesPlayed: Int = 0
+) {
+    fun toHashMap(): HashMap<String, Any> {
+        return hashMapOf(
+            "playerId" to playerId,
+            "gamesPlayed" to gamesPlayed,
+            "goals" to goals,
+            "assists" to assists,
+            "yellowCards" to yellowCards,
+            "redCards" to redCards,
+            "saves" to saves,
+            "minutesPlayed" to minutesPlayed
+        )
     }
 }

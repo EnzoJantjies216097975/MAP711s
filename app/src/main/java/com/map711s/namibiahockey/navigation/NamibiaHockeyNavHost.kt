@@ -11,7 +11,6 @@ import com.map711s.namibiahockey.screens.admin.RoleChangeRequestsManagementScree
 import com.map711s.namibiahockey.screens.auth.LoginScreen
 import com.map711s.namibiahockey.screens.auth.RegisterScreen
 import com.map711s.namibiahockey.screens.events.AddEventScreen
-import com.map711s.namibiahockey.screens.events.EventDetailsScreen
 import com.map711s.namibiahockey.screens.events.EventEntriesScreen
 import com.map711s.namibiahockey.screens.hockey.HockeyTypeSelectionScreen
 import com.map711s.namibiahockey.screens.main.MainAppScaffold
@@ -164,11 +163,8 @@ fun NamibiaHockeyNavHost(
         }
 
         composable(
-            route = Routes.EVENT_DETAILS,
-            arguments = listOf(
-                navArgument("hockeyType") { type = NavType.StringType },
-                navArgument("eventId") { type = NavType.StringType }
-            )
+            route = Routes.EVENT_ENTRIES,
+            arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
         ) { backStackEntry ->
             val hockeyTypeStr = backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
             val hockeyType = try {
@@ -176,12 +172,16 @@ fun NamibiaHockeyNavHost(
             } catch (e: Exception) {
                 HockeyType.OUTDOOR
             }
-            val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
 
-            EventDetailsScreen(
-                eventId = eventId,
+            EventEntriesScreen(
                 hockeyType = hockeyType,
-                onNavigateBack = { navController.navigateUp() }
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToAddEvent = { // ADD THIS MISSING PARAMETER
+                    navController.navigate(Routes.addEvent(hockeyType.name))
+                },
+                onNavigateToEventDetails = { eventId, eventHockeyType ->
+                    navController.navigate(Routes.eventDetails(eventHockeyType.name, eventId))
+                }
             )
         }
 

@@ -398,7 +398,7 @@ class EventRepository @Inject constructor(
                 .await()
 
             val gameResults = querySnapshot.documents.mapNotNull { doc ->
-                doc.toObject(GameResult::class.java)?.copy(id = doc.id)
+                doc.toObject(GameResult::class.java)?.copy(eventId = doc.id)
             }
 
             Result.success(gameResults)

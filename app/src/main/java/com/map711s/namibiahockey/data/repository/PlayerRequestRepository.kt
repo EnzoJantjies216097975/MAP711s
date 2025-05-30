@@ -1,59 +1,53 @@
+// Replace your PlayerRequestRepository.kt with this implementation:
+
 package com.map711s.namibiahockey.data.repository
 
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.map711s.namibiahockey.data.model.PlayerRequest
+import com.map711s.namibiahockey.data.model.RequestStatus
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
-interface PlayerRequestRepository {
-
-    suspend fun createRequest(request: PlayerRequest): Result<Unit>
-
-
-    suspend fun respondToRequest(
-        requestId: String,
-        approved: Boolean,
-        respondedBy: String
-    ): Result<Unit>
-}
-
 @Singleton
-class PlayerRequestRepositoryImpl @Inject constructor(
+class PlayerRequestRepository @Inject constructor(
     private val firestore: FirebaseFirestore
-) : PlayerRequestRepository {
-
-    private val requestsCollection = firestore.collection("player_requests")
-
-    override suspend fun createRequest(request: PlayerRequest): Result<Unit> {
+) {
+    suspend fun getPendingRequests(teamId: String): List<PlayerRequest> {
         return try {
-            // Let Firestore generate a new document ID
-            requestsCollection.add(request).await()
-            Result.success(Unit)
+            val querySnapshot = firestore.collection("player_requests")
+                .whereEqualTo("teamId", teamId)
+                .whereEqualTo("status", RequestStatus.PENDING.name)
+                .get()
+                .await()
+
+            querySnapshot.documents.mapNotNull { document ->
+                document.toObject(PlayerRequest::class.java)
+            }
         } catch (e: Exception) {
-            Result.failure(e)
+            emptyList()
         }
     }
 
-    override suspend fun respondToRequest(
-        requestId: String,
-        approved: Boolean,
-        respondedBy: String
-    ): Result<Unit> {
-        return try {
-            val updateData = mapOf(
-                "approved" to approved,
-                "respondedBy" to respondedBy,
-                "responseDate" to Timestamp.now()
-            )
-            requestsCollection
+    suspend fun approveRequest(requestId: String) {
+        try {
+            firestore.collection("player_requests")
                 .document(requestId)
-                .update(updateData)
+                .update("status", RequestStatus.APPROVED.name)
                 .await()
-            Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            // Handle error
+        }
+    }
+
+    suspend fun rejectRequest(requestId: String) {
+        try {
+            firestore.collection("player_requests")
+                .document(requestId)
+                .update("status", RequestStatus.REJECTED.name)
+                .await()
+        } catch (e: Exception) {
+            // Handle error
         }
     }
 }

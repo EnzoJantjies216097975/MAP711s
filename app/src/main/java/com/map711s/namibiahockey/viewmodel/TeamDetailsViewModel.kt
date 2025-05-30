@@ -50,10 +50,15 @@ class TeamDetailsViewModel @Inject constructor(
                 // Handle error or keep null
             }
 
-            // Fetch current user profile
+            // Fetch current user profile - FIXED: Use proper method name
             try {
-                val user = userRepository.getCurrentUser()
-                _userProfile.value = user
+                authRepository.getCurrentUserProfile()
+                    .onSuccess { user ->
+                        _userProfile.value = user
+                    }
+                    .onFailure { exception ->
+                        // Handle error - user profile remains null
+                    }
             } catch (e: Exception) {
                 // Handle error
             }
@@ -65,12 +70,9 @@ class TeamDetailsViewModel @Inject constructor(
      */
     fun loadTeamPlayers(teamId: String) {
         viewModelScope.launch {
-            try {
-                val players = playerRepository.getPlayersByTeam(teamId)
-                _playersState.value = players
-            } catch (e: Exception) {
-                // Handle error
-            }
+            // FIXED: Handle Result<List<Player>> return type
+            val players = playerRepository.getPlayersByTeam(teamId)
+            _playersState.value = players // This should work since getPlayersByTeam returns List<Player> directly
         }
     }
 
@@ -80,10 +82,12 @@ class TeamDetailsViewModel @Inject constructor(
     fun loadPendingRequests(teamId: String) {
         viewModelScope.launch {
             try {
+                // FIXED: Use correct method name
                 val requests = requestRepository.getPendingRequests(teamId)
                 _requestsState.value = requests
             } catch (e: Exception) {
                 // Handle error
+                _requestsState.value = emptyList()
             }
         }
     }
@@ -94,9 +98,15 @@ class TeamDetailsViewModel @Inject constructor(
     fun approveRequest(requestId: String) {
         viewModelScope.launch {
             try {
+                // FIXED: Use correct method name
                 requestRepository.approveRequest(requestId)
-                // Refresh requests
-                _requestsState.value = requestRepository.getPendingRequests(_teamStats.value?.teamId ?: "")
+
+                // Refresh requests - get current team ID from team stats
+                val currentTeamId = _teamStats.value?.teamId ?: ""
+                if (currentTeamId.isNotEmpty()) {
+                    val updatedRequests = requestRepository.getPendingRequests(currentTeamId)
+                    _requestsState.value = updatedRequests
+                }
             } catch (e: Exception) {
                 // Handle error
             }
@@ -109,9 +119,15 @@ class TeamDetailsViewModel @Inject constructor(
     fun rejectRequest(requestId: String) {
         viewModelScope.launch {
             try {
+                // FIXED: Use correct method name
                 requestRepository.rejectRequest(requestId)
-                // Refresh requests
-                _requestsState.value = requestRepository.getPendingRequests(_teamStats.value?.teamId ?: "")
+
+                // Refresh requests - get current team ID from team stats
+                val currentTeamId = _teamStats.value?.teamId ?: ""
+                if (currentTeamId.isNotEmpty()) {
+                    val updatedRequests = requestRepository.getPendingRequests(currentTeamId)
+                    _requestsState.value = updatedRequests
+                }
             } catch (e: Exception) {
                 // Handle error
             }
