@@ -6,10 +6,10 @@ import com.map711s.namibiahockey.data.model.Player
 import com.map711s.namibiahockey.data.model.PlayerRequest
 import com.map711s.namibiahockey.data.model.TeamStatistics
 import com.map711s.namibiahockey.data.model.User
+import com.map711s.namibiahockey.data.repository.AuthRepository
 import com.map711s.namibiahockey.data.repository.PlayerRepository
 import com.map711s.namibiahockey.data.repository.PlayerRequestRepository
 import com.map711s.namibiahockey.data.repository.StatisticsRepository
-import com.map711s.namibiahockey.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,7 +50,7 @@ class TeamDetailsViewModel @Inject constructor(
                 // Handle error or keep null
             }
 
-            // Fetch current user profile - FIXED: Use proper method name
+            // Fetch current user profile - FIXED: Use correct method name
             try {
                 authRepository.getCurrentUserProfile()
                     .onSuccess { user ->
@@ -70,9 +70,15 @@ class TeamDetailsViewModel @Inject constructor(
      */
     fun loadTeamPlayers(teamId: String) {
         viewModelScope.launch {
-            // FIXED: Handle Result<List<Player>> return type
-            val players = playerRepository.getPlayersByTeam(teamId)
-            _playersState.value = players // This should work since getPlayersByTeam returns List<Player> directly
+            // FIXED: Handle Result<List<Player>> return type properly
+            playerRepository.getPlayersByTeam(teamId)
+                .onSuccess { players ->
+                    _playersState.value = players
+                }
+                .onFailure { exception ->
+                    // Handle error - keep empty list
+                    _playersState.value = emptyList()
+                }
         }
     }
 
@@ -82,7 +88,7 @@ class TeamDetailsViewModel @Inject constructor(
     fun loadPendingRequests(teamId: String) {
         viewModelScope.launch {
             try {
-                // FIXED: Use correct method name
+                // Get pending requests
                 val requests = requestRepository.getPendingRequests(teamId)
                 _requestsState.value = requests
             } catch (e: Exception) {
@@ -98,15 +104,19 @@ class TeamDetailsViewModel @Inject constructor(
     fun approveRequest(requestId: String) {
         viewModelScope.launch {
             try {
-                // FIXED: Use correct method name
+                // Approve the request
                 requestRepository.approveRequest(requestId)
-
-                // Refresh requests - get current team ID from team stats
-                val currentTeamId = _teamStats.value?.teamId ?: ""
-                if (currentTeamId.isNotEmpty()) {
-                    val updatedRequests = requestRepository.getPendingRequests(currentTeamId)
-                    _requestsState.value = updatedRequests
-                }
+                    .onSuccess {
+                        // Refresh requests - get current team ID from team stats
+                        val currentTeamId = _teamStats.value?.teamId ?: ""
+                        if (currentTeamId.isNotEmpty()) {
+                            val updatedRequests = requestRepository.getPendingRequests(currentTeamId)
+                            _requestsState.value = updatedRequests
+                        }
+                    }
+                    .onFailure { exception ->
+                        // Handle error
+                    }
             } catch (e: Exception) {
                 // Handle error
             }
@@ -119,15 +129,19 @@ class TeamDetailsViewModel @Inject constructor(
     fun rejectRequest(requestId: String) {
         viewModelScope.launch {
             try {
-                // FIXED: Use correct method name
+                // Reject the request
                 requestRepository.rejectRequest(requestId)
-
-                // Refresh requests - get current team ID from team stats
-                val currentTeamId = _teamStats.value?.teamId ?: ""
-                if (currentTeamId.isNotEmpty()) {
-                    val updatedRequests = requestRepository.getPendingRequests(currentTeamId)
-                    _requestsState.value = updatedRequests
-                }
+                    .onSuccess {
+                        // Refresh requests - get current team ID from team stats
+                        val currentTeamId = _teamStats.value?.teamId ?: ""
+                        if (currentTeamId.isNotEmpty()) {
+                            val updatedRequests = requestRepository.getPendingRequests(currentTeamId)
+                            _requestsState.value = updatedRequests
+                        }
+                    }
+                    .onFailure { exception ->
+                        // Handle error
+                    }
             } catch (e: Exception) {
                 // Handle error
             }

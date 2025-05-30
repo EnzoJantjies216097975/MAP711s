@@ -1,7 +1,5 @@
 package com.map711s.namibiahockey.data.model
 
-import java.util.Date
-
 // PlayerListItem for displaying players in lists
 data class PlayerListItem(
     val id: String = "",
@@ -13,9 +11,25 @@ data class PlayerListItem(
     val hockeyType: HockeyType = HockeyType.OUTDOOR,
     val contactEmail: String = "",
     val contactPhone: String = "",
+    val isNationalPlayer: Boolean = false,
+    val nationality: String = "",
     val experienceYears: Int = 0,
     val rating: Float = 0f
 )
+
+//data class PlayerListItem(
+//    val id: String = "",
+//    val name: String = "",
+//    val position: String = "",
+//    val teamName: String = "",
+//    val jerseyNumber: Int = 0,
+//    val age: Int = 0,
+//    val hockeyType: HockeyType = HockeyType.OUTDOOR,
+//    val contactEmail: String = "",
+//    val contactPhone: String = "",
+//    val experienceYears: Int = 0,
+//    val rating: Float = 0f
+//)
 
 // RENAMED: ProfileStatItem to avoid conflict with @Composable StatItem
 data class ProfileStatItem(

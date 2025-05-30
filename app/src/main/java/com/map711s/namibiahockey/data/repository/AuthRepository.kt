@@ -34,6 +34,15 @@ class AuthRepository @Inject constructor(
         return auth.currentUser?.uid
     }
 
+    suspend fun getCurrentUserProfile(): Result<User> {
+        val userId = getCurrentUserId()
+        return if (userId != null) {
+            getUserProfile(userId)
+        } else {
+            Result.failure(Exception("No current user"))
+        }
+    }
+
     // Register a new user
     suspend fun registerUser(
         email: String,

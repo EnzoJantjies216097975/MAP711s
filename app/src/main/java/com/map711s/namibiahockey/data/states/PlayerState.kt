@@ -13,7 +13,7 @@ data class PlayerState(
     val error: String? = null
 )
 
-// State for a list of Players
+// State for a list of Players - FIXED: Added playerListItems
 data class PlayerListState(
     val isLoading: Boolean = false,
     val players: List<Player> = emptyList(),

@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// FIXED: Add missing UI state data class
+// UI state data class
 data class PlayerRequestUiState(
     val isLoading: Boolean = false,
     val requests: List<PlayerRequest> = emptyList(),
@@ -28,7 +28,6 @@ class PlayerRequestViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    // FIXED: Add missing _uiState property
     private val _uiState = MutableStateFlow(PlayerRequestUiState())
     val uiState: StateFlow<PlayerRequestUiState> = _uiState.asStateFlow()
 
@@ -39,23 +38,36 @@ class PlayerRequestViewModel @Inject constructor(
     fun sendJoinRequest(teamId: String, message: String = "") {
         viewModelScope.launch {
             val currentUserId = authRepository.getCurrentUserId() ?: return@launch
-            val userProfile = authRepository.getUserProfile(currentUserId).getOrNull() ?: return@launch
 
-            val request = PlayerRequest(
-                playerId = currentUserId,
-                playerName = userProfile.name,
-                teamId = teamId,
-                requestType = RequestType.JOIN,
-                requestedBy = currentUserId,
-                message = message
-            )
+            // FIXED: Handle Result type properly and provide explicit types
+            authRepository.getUserProfile(currentUserId)
+                .onSuccess { userProfile ->
+                    val request = PlayerRequest(
+                        playerId = currentUserId,
+                        playerName = userProfile.name,
+                        teamId = teamId,
+                        requestType = RequestType.JOIN,
+                        requestedBy = currentUserId,
+                        message = message
+                    )
 
-            playerRequestRepository.createRequest(request)
-                .onSuccess {
-                    _uiState.update { it.copy(showSuccessMessage = "Join request sent!") }
+                    // FIXED: Use correct method name and handle Result
+                    playerRequestRepository.createRequest(request)
+                        .onSuccess {
+                            _uiState.update { state ->
+                                state.copy(showSuccessMessage = "Join request sent!")
+                            }
+                        }
+                        .onFailure { exception ->
+                            _uiState.update { state ->
+                                state.copy(errorMessage = exception.message)
+                            }
+                        }
                 }
                 .onFailure { exception ->
-                    _uiState.update { it.copy(errorMessage = exception.message) }
+                    _uiState.update { state ->
+                        state.copy(errorMessage = "Failed to get user profile: ${exception.message}")
+                    }
                 }
         }
     }
@@ -64,28 +76,34 @@ class PlayerRequestViewModel @Inject constructor(
         viewModelScope.launch {
             val currentUserId = authRepository.getCurrentUserId() ?: return@launch
 
+            // FIXED: Handle Result type properly
             playerRequestRepository.respondToRequest(requestId, approved, currentUserId)
                 .onSuccess {
                     loadPendingRequests()
-                    _uiState.update {
-                        it.copy(showSuccessMessage = if (approved) "Request approved!" else "Request rejected!")
+                    _uiState.update { state ->
+                        state.copy(
+                            showSuccessMessage = if (approved) "Request approved!" else "Request rejected!"
+                        )
                     }
                 }
                 .onFailure { exception ->
-                    _uiState.update { it.copy(errorMessage = exception.message) }
+                    _uiState.update { state ->
+                        state.copy(errorMessage = exception.message)
+                    }
                 }
         }
     }
 
-    // FIXED: Add missing loadPendingRequests method
     private fun loadPendingRequests() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { state ->
+                state.copy(isLoading = true)
+            }
 
-            // This would need to be implemented in the repository
+            // This would need to be implemented based on your app's requirements
             // For now, just update loading state
-            _uiState.update {
-                it.copy(
+            _uiState.update { state ->
+                state.copy(
                     isLoading = false,
                     requests = emptyList() // Placeholder
                 )
@@ -94,8 +112,8 @@ class PlayerRequestViewModel @Inject constructor(
     }
 
     fun clearMessages() {
-        _uiState.update {
-            it.copy(
+        _uiState.update { state ->
+            state.copy(
                 errorMessage = null,
                 showSuccessMessage = null
             )

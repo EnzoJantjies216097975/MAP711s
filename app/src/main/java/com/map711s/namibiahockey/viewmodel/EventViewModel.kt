@@ -800,12 +800,6 @@ class EventViewModel @Inject constructor(
         _showTeamSelection.value = true
     }
 
-    // Register team for event
-    fun registerForEvent(eventId: String, teamId: String) {
-        Log.d(TAG, "Registering team $teamId for event $eventId")
-        registerTeamForEvent(eventId, teamId)
-    }
-
     private fun registerTeamForEvent(eventId: String, teamId: String) {
         _registrationState.update { it.copy(isLoading = true, error = null) }
 
