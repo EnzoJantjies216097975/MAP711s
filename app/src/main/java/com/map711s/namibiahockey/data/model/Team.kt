@@ -30,6 +30,8 @@ data class Team(
     val points: Int = 0,
     val ranking: Int = 0,
 ) {
+    val statistics:
+
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf(
             "id" to id,

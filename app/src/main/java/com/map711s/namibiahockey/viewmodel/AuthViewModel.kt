@@ -1,26 +1,21 @@
 package com.map711s.namibiahockey.viewmodel
 
+
 import androidx.lifecycle.ViewModel
-import com.map711s.namibiahockey.data.states.LoginState
+import androidx.lifecycle.viewModelScope
+import com.map711s.namibiahockey.data.model.User
+import com.map711s.namibiahockey.data.model.UserRole
 import com.map711s.namibiahockey.data.repository.AuthRepository
+import com.map711s.namibiahockey.data.states.LoginState
 import com.map711s.namibiahockey.data.states.RegisterState
 import com.map711s.namibiahockey.data.states.UserProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
-
-
-import androidx.lifecycle.viewModelScope
-import com.map711s.namibiahockey.data.model.User
-import com.map711s.namibiahockey.data.model.UserRole
-
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-
-
+import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
@@ -44,6 +39,34 @@ class AuthViewModel @Inject constructor(
         if (authRepository.isUserLoggedIn()) {
             loadUserProfile()
         }
+        loadCurrentUser()
+    }
+
+    private fun loadCurrentUser() {
+        viewModelScope.launch {
+            val userId = authRepository.getCurrentUserId()
+            if (userId != null) {
+                _userProfileState.value = _userProfileState.value.copy(isLoading = true)
+
+                authRepository.getUserProfile(userId)
+                    .onSuccess { user ->
+                        _userProfileState.value = _userProfileState.value.copy(
+                            isLoading = false,
+                            user = user
+                        )
+                    }
+                    .onFailure { exception ->
+                        _userProfileState.value = _userProfileState.value.copy(
+                            isLoading = false,
+                            error = exception.message
+                        )
+                    }
+            }
+        }
+    }
+
+    fun refreshUser() {
+        loadCurrentUser()
     }
 
     // Login function

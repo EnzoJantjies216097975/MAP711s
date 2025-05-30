@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.map711s.namibiahockey.data.model.GameResult
+import com.map711s.namibiahockey.data.model.StatItem
 import com.map711s.namibiahockey.data.model.TeamSeasonStats
 
 @Composable
@@ -471,26 +472,6 @@ private fun StatisticsTab(gameResults: List<GameResult>) {
         }
 
         // Add more detailed statistics as needed
-    }
-}
-
-@Composable
-private fun StatItem(label: String, value: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-            textAlign = TextAlign.Center
-        )
     }
 }
 

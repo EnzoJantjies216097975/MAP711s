@@ -2,7 +2,9 @@ package com.map711s.namibiahockey.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.map711s.namibiahockey.data.model.GameResult
 import com.map711s.namibiahockey.data.model.LiveGame
+import com.map711s.namibiahockey.data.repository.GameResultsRepository
 import com.map711s.namibiahockey.data.repository.TeamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -27,7 +29,7 @@ class GameResultsViewModel @Inject constructor(
                 team2Id = game.team2Id,
                 team1Score = game.team1Score,
                 team2Score = game.team2Score,
-                date = game.startTime,
+                gameDate = game.startTime,
                 venue = game.venue,
                 hockeyType = game.hockeyType
             )

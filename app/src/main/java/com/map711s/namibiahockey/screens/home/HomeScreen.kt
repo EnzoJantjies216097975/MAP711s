@@ -264,7 +264,7 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
-                        )
+
                     }
                 } else if (newsListState.newsPieces.isEmpty()) {
                     item {

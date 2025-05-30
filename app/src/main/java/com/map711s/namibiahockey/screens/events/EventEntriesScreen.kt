@@ -58,6 +58,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.map711s.namibiahockey.data.model.EventEntry
 import com.map711s.namibiahockey.data.model.HockeyType
+import com.map711s.namibiahockey.data.model.UserRole
+import com.map711s.namibiahockey.viewmodel.AuthViewModel
 import com.map711s.namibiahockey.viewmodel.EventViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -66,11 +68,13 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventEntriesScreen(
-    onNavigateBack: () -> Unit,
     viewModel: EventViewModel = hiltViewModel(),
-    onNavigateToAddEvent: () -> Unit,
-    onNavigateToEventDetails: (String, HockeyType) -> Unit = { _, _ -> },
     hockeyType: HockeyType,
+    onNavigateBack: () -> Unit,
+    onNavigateToAddEvent: () -> Unit,
+    onNavigateToEventDetails: (String, HockeyType) -> Unit,
+    eventViewModel: EventViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -84,14 +88,23 @@ fun EventEntriesScreen(
     val context = LocalContext.current
 
     // Team selection dialog state
-    val showTeamSelection by viewModel.showTeamSelection.collectAsState()
-    val availableTeams by viewModel.availableTeams.collectAsState()
-    val registrationMessage by viewModel.registrationMessage.collectAsState()
+    val showTeamSelection by eventViewModel.showTeamSelection.collectAsState()
+    val availableTeams by eventViewModel.availableTeams.collectAsState()
+    val registrationMessage by eventViewModel.registrationMessage.collectAsState()
     var pendingEventId by remember { mutableStateOf<String?>(null) }
 
     // Show game results dialog
     var showGameResults by remember { mutableStateOf(false) }
     var selectedEventForResults by remember { mutableStateOf<EventEntry?>(null) }
+
+    val tabs = listOf("Upcoming", "Past", "My Entries")
+    val eventListState by eventViewModel.eventListState.collectAsState()
+    val userProfileState by authViewModel.userProfileState.collectAsState()
+
+    // Load events when screen opens
+    LaunchedEffect(hockeyType) {
+        eventViewModel.loadEventsByType(hockeyType)
+    }
 
     // Observe event state to update loading
     LaunchedEffect(viewModel.eventState.collectAsState().value) {
@@ -106,14 +119,14 @@ fun EventEntriesScreen(
     LaunchedEffect(registrationMessage) {
         registrationMessage?.let { message ->
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-            viewModel.clearRegistrationMessage()
+            eventViewModel.clearRegistrationMessage()
         }
     }
 
-    // Effect to show error messages
-    LaunchedEffect(eventsEntriesState.error) {
-        eventsEntriesState.error?.let {
-            snackbarHostState.showSnackbar(it)
+    // Handle error messages
+    LaunchedEffect(eventListState.error) {
+        eventListState.error?.let { error ->
+            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -128,35 +141,17 @@ fun EventEntriesScreen(
         viewModel.loadAllEvents()
     }
 
-    // Hockey Type Selector
-    TabRow(
-        selectedTabIndex = if (selectedHockeyType == HockeyType.OUTDOOR) 0 else 1
-    ) {
-        Tab(
-            selected = selectedHockeyType == HockeyType.OUTDOOR,
-            onClick = { selectedHockeyType = HockeyType.OUTDOOR },
-            text = { Text("Outdoor Hockey") }
-        )
-        Tab(
-            selected = selectedHockeyType == HockeyType.INDOOR,
-            onClick = { selectedHockeyType = HockeyType.INDOOR },
-            text = { Text("Indoor Hockey") }
-        )
-    }
-
     // Helper function to determine if an event is in the past
     fun isEventInPast(event: EventEntry): Boolean {
-        try {
+        return try {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val currentDate = Date() // Get current date
-            val endDate = event.endDate.let {  // Parse the end date of the event
+            val currentDate = Date()
+            val endDate = event.endDate.let {
                 if (it.isNotEmpty()) dateFormat.parse(it) else null
-            } ?: return false // If no end date, consider it upcoming
-            // Compare with current date
-            return endDate.before(currentDate)
+            } ?: return false
+            endDate.before(currentDate)
         } catch (e: Exception) {
-            // If there's any error in parsing, consider it as an upcoming event
-            return false
+            false
         }
     }
 
@@ -182,6 +177,26 @@ fun EventEntriesScreen(
                             it.description.contains(searchQuery, ignoreCase = true) ||
                             it.location.contains(searchQuery, ignoreCase = true))
         }
+    }
+
+    // Check if user can add events
+    val canAddEvents = userProfileState.user?.role in listOf(UserRole.ADMIN, UserRole.MANAGER, UserRole.COACH)
+
+
+    // Hockey Type Selector
+    TabRow(
+        selectedTabIndex = if (selectedHockeyType == HockeyType.OUTDOOR) 0 else 1
+    ) {
+        Tab(
+            selected = selectedHockeyType == HockeyType.OUTDOOR,
+            onClick = { selectedHockeyType = HockeyType.OUTDOOR },
+            text = { Text("Outdoor Hockey") }
+        )
+        Tab(
+            selected = selectedHockeyType == HockeyType.INDOOR,
+            onClick = { selectedHockeyType = HockeyType.INDOOR },
+            text = { Text("Indoor Hockey") }
+        )
     }
 
     Scaffold(

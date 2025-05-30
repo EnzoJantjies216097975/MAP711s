@@ -1,8 +1,6 @@
 package com.map711s.namibiahockey.screens.events
 
 import android.widget.Toast
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,43 +9,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sports
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -59,18 +43,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.map711s.namibiahockey.components.TeamSelectionDialog
 import com.map711s.namibiahockey.components.GameResultsDisplay
 import com.map711s.namibiahockey.components.TeamSelectionDialog
-import com.map711s.namibiahockey.data.model.EventEntry
 import com.map711s.namibiahockey.data.model.HockeyType
+import com.map711s.namibiahockey.viewmodel.AuthViewModel
 import com.map711s.namibiahockey.viewmodel.EventViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -82,12 +62,15 @@ fun EventDetailsScreen(
     eventId: String,
     onNavigateBack: () -> Unit,
     viewModel: EventViewModel = hiltViewModel(),
+
     onNavigateToAddEvent: () -> Unit,
     onNavigateToEventDetails: (String, HockeyType) -> Unit = { _, _ -> },
     hockeyType: HockeyType,
+    eventViewModel: EventViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val eventState by viewModel.eventState.collectAsState()
-    val event  by viewModel.event.collectAsState()
+    val event by viewModel.event.collectAsState()
     val isLoading = eventState.isLoading
     val isRegistered by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -97,23 +80,17 @@ fun EventDetailsScreen(
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Upcoming", "Past", "My Entries")
 
-    val user by userViewModel.currentUser.collectAsState()
     val registrationState by viewModel.registrationState.collectAsState()
 
     var selectedTeam by remember { mutableStateOf<String?>(null) }
 
-    // Fetch event details
-    LaunchedEffect(eventId) {
-        viewModel.loadEvent(eventId)
-        viewModel.checkIfUserIsRegistered(eventId, user?.uid ?: "")
-    }
+    val showTeamSelection by eventViewModel.showTeamSelection.collectAsState()
+    val availableTeams by eventViewModel.availableTeams.collectAsState()
+    val registrationMessage by eventViewModel.registrationMessage.collectAsState()
+    val gameResults by eventViewModel.gameResults.collectAsState()
+    val teamStats by eventViewModel.teamStats.collectAsState()
+    val userProfileState by authViewModel.userProfileState.collectAsState()
 
-    isRegistered = registrationState.isRegistered
-
-    // Load events when screen opens
-    LaunchedEffect(Unit) {
-        viewModel.loadAllEvents()
-    }
 
     LaunchedEffect(eventState.successMessage, eventState.error) {
         eventState.successMessage?.let { message ->
@@ -157,29 +134,60 @@ fun EventDetailsScreen(
         }
     }
 
-    val currentEvents = when (selectedTabIndex) {
-        0 -> eventListState.upcomingEvents.filter {
-            it.hockeyType == hockeyType || hockeyType == HockeyType.BOTH
+    // Load event when screen opens
+    LaunchedEffect(eventId) {
+        eventViewModel.loadEvent(eventId)
+
+        // Check registration status if user is logged in
+        userProfileState.user?.id?.let { userId ->
+            eventViewModel.checkIfUserIsRegistered(eventId, userId)
         }
-        1 -> eventListState.pastEvents.filter {
-            it.hockeyType == hockeyType || hockeyType == HockeyType.BOTH
-        }
-        2 -> eventListState.myRegisteredEvents.filter {
-            it.hockeyType == hockeyType || hockeyType == HockeyType.BOTH
-        }
-        else -> emptyList()
     }
 
-    // Apply search filter
-    val filteredEvents = if (searchQuery.isBlank()) {
-        currentEvents
-    } else {
-        currentEvents.filter { event ->
-            event.title.contains(searchQuery, ignoreCase = true) ||
-                    event.description.contains(searchQuery, ignoreCase = true) ||
-                    event.location.contains(searchQuery, ignoreCase = true)
+    // Handle registration messages
+    LaunchedEffect(registrationMessage) {
+        registrationMessage?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+            eventViewModel.clearRegistrationMessage()
         }
     }
+
+    // Handle event state messages
+    LaunchedEffect(eventState.error, eventState.successMessage) {
+        eventState.error?.let { error ->
+            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            eventViewModel.clearMessages()
+        }
+
+        eventState.successMessage?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            eventViewModel.clearMessages()
+        }
+    }
+
+//    val currentEvents = when (selectedTabIndex) {
+//        0 -> eventListState.upcomingEvents.filter {
+//            it.hockeyType == hockeyType || hockeyType == HockeyType.BOTH
+//        }
+//        1 -> eventListState.pastEvents.filter {
+//            it.hockeyType == hockeyType || hockeyType == HockeyType.BOTH
+//        }
+//        2 -> eventListState.myRegisteredEvents.filter {
+//            it.hockeyType == hockeyType || hockeyType == HockeyType.BOTH
+//        }
+//        else -> emptyList()
+//    }
+
+//    // Apply search filter
+//    val filteredEvents = if (searchQuery.isBlank()) {
+//        currentEvents
+//    } else {
+//        currentEvents.filter { event ->
+//            event.title.contains(searchQuery, ignoreCase = true) ||
+//                    event.description.contains(searchQuery, ignoreCase = true) ||
+//                    event.location.contains(searchQuery, ignoreCase = true)
+//        }
+//    }
 
     Scaffold(
         topBar = {
@@ -221,7 +229,7 @@ fun EventDetailsScreen(
                 ) {
                     // Event Title
                     Text(
-                        text = event.title,
+                        text = event!!.title,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -231,7 +239,7 @@ fun EventDetailsScreen(
                     // Hockey Type Badge
                     Surface(
                         modifier = Modifier.padding(vertical = 8.dp),
-                        color = when (event.hockeyType) {
+                        color = when (event!!.hockeyType) {
                             HockeyType.OUTDOOR -> MaterialTheme.colorScheme.primaryContainer
                             HockeyType.INDOOR -> MaterialTheme.colorScheme.secondaryContainer
                             else -> MaterialTheme.colorScheme.tertiaryContainer
@@ -239,9 +247,9 @@ fun EventDetailsScreen(
                         shape = MaterialTheme.shapes.small
                     ) {
                         Text(
-                            text = "${event.hockeyType.name.lowercase().replaceFirstChar { it.uppercase() }} Hockey",
+                            text = "${event!!.hockeyType.name.lowercase().replaceFirstChar { it.uppercase() }} Hockey",
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                            color = when (event.hockeyType) {
+                            color = when (event!!.hockeyType) {
                                 HockeyType.OUTDOOR -> MaterialTheme.colorScheme.onPrimaryContainer
                                 HockeyType.INDOOR -> MaterialTheme.colorScheme.onSecondaryContainer
                                 else -> MaterialTheme.colorScheme.onTertiaryContainer
@@ -266,7 +274,7 @@ fun EventDetailsScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = event.description,
+                                text = event!!.description,
                                 style = MaterialTheme.typography.bodyLarge
                             )
 
@@ -291,7 +299,7 @@ fun EventDetailsScreen(
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = "${event.startDate} - ${event.endDate}",
+                                        text = "${event!!.startDate} - ${event!!.endDate}",
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
@@ -316,7 +324,7 @@ fun EventDetailsScreen(
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = event.location,
+                                        text = event!!.location,
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
@@ -341,15 +349,15 @@ fun EventDetailsScreen(
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = event.registrationDeadline,
+                                        text = event!!.registrationDeadline,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = if (isRegistrationClosed(event.registrationDeadline)) {
+                                        color = if (isRegistrationClosed(event!!.registrationDeadline)) {
                                             MaterialTheme.colorScheme.error
                                         } else {
                                             MaterialTheme.colorScheme.onSurface
                                         }
                                     )
-                                    if (isRegistrationClosed(event.registrationDeadline)) {
+                                    if (isRegistrationClosed(event!!.registrationDeadline)) {
                                         Text(
                                             text = "Registration Closed",
                                             style = MaterialTheme.typography.bodySmall,
@@ -372,7 +380,7 @@ fun EventDetailsScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Registered Teams: ${event.registeredTeams}",
+                                    text = "Registered Teams: ${event!!.registeredTeams}",
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -383,7 +391,7 @@ fun EventDetailsScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     // Registration Button (only if registration is still open)
-                    if (!isRegistrationClosed(event.registrationDeadline)) {
+                    if (!isRegistrationClosed(event!!.registrationDeadline)) {
                         if (isRegistered) {
                             OutlinedButton(
                                 onClick = {
@@ -408,7 +416,7 @@ fun EventDetailsScreen(
                         } else {
                             Button(
                                 onClick = {
-                                    viewModel.iniinitiateRegistration(eventId)
+                                    viewModel.initiateRegistration(eventId)
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 enabled = !isLoading
@@ -427,7 +435,7 @@ fun EventDetailsScreen(
                     }
 
                     // Show game results if this is a past event
-                    if (isPastEvent(event) && eventState.gameResults.isNotEmpty()) {
+                    if (isPastEvent(event!!) && eventState.gameResults.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(24.dp))
 
                         Text(

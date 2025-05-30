@@ -4,11 +4,14 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.data.model.GameResult
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.data.model.Team
+import com.map711s.namibiahockey.data.model.TeamSeasonStats
 import com.map711s.namibiahockey.data.model.UserRole
 import com.map711s.namibiahockey.data.repository.AuthRepository
 import com.map711s.namibiahockey.data.repository.EventRepository
+import com.map711s.namibiahockey.data.repository.GameResultsRepository
 import com.map711s.namibiahockey.data.repository.PlayerRepository
 import com.map711s.namibiahockey.data.repository.TeamRepository
 import com.map711s.namibiahockey.data.states.EventListState
@@ -22,6 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
@@ -31,8 +35,12 @@ class EventViewModel @Inject constructor(
     private val eventRepository: EventRepository,
     private val authRepository: AuthRepository,
     private val teamRepository: TeamRepository,
-    private val playerRepository: PlayerRepository
+    private val playerRepository: PlayerRepository,
+    private val gameResultsRepository: GameResultsRepository
+
 ) : ViewModel() {
+
+
 
     // Event creation/update state
     private val _eventState = MutableStateFlow(EventState())
@@ -49,6 +57,33 @@ class EventViewModel @Inject constructor(
     // Registration state
     private val _registrationState = MutableStateFlow(RegistrationState())
     val registrationState: StateFlow<RegistrationState> = _registrationState.asStateFlow()
+
+    private val TAG = "EventViewModel"
+
+    // Single event for details
+    private val _event = MutableStateFlow<EventEntry?>(null)
+    val event: StateFlow<EventEntry?> = _event.asStateFlow()
+
+    // Team selection state
+    private val _showTeamSelection = MutableStateFlow(false)
+    val showTeamSelection: StateFlow<Boolean> = _showTeamSelection.asStateFlow()
+
+    private val _availableTeams = MutableStateFlow<List<Team>>(emptyList())
+    val availableTeams: StateFlow<List<Team>> = _availableTeams.asStateFlow()
+
+    private val _registrationMessage = MutableStateFlow<String?>(null)
+    val registrationMessage: StateFlow<String?> = _registrationMessage.asStateFlow()
+
+    // Game results
+    private val _gameResults = MutableStateFlow<List<GameResult>>(emptyList())
+    val gameResults: StateFlow<List<GameResult>> = _gameResults.asStateFlow()
+
+    private val _teamStats = MutableStateFlow<List<TeamSeasonStats>>(emptyList())
+    val teamStats: StateFlow<List<TeamSeasonStats>> = _teamStats.asStateFlow()
+
+    // Currently pending registration event ID
+    private var _pendingEventId: String? = null
+
 
     // Create a new event
     fun createEvent(event: EventEntry) {
@@ -71,7 +106,8 @@ class EventViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             isSuccess = true,
-                            eventId = eventId
+                            eventId = eventId,
+                            successMessage = "Event created successfully!"
                         )
                     }
                     loadAllEvents()
@@ -465,6 +501,7 @@ class EventViewModel @Inject constructor(
         }
     }
 
+
     private fun updateEventInList(eventId: String, isRegistered: Boolean) {
         val currentEvents = _eventListState.value.events.toMutableList()
         val eventIndex = currentEvents.indexOfFirst { it.id == eventId }
@@ -502,8 +539,9 @@ class EventViewModel @Inject constructor(
         }
     }
 
+    // Dismiss team selection dialog
     fun dismissTeamSelection() {
-        _teamSelectionState.update { it.copy(showTeamSelection = false) }
+        _showTeamSelection.value = false
         _registrationState.update { it.copy(isLoading = false) }
     }
 
@@ -555,87 +593,77 @@ class EventViewModel @Inject constructor(
         }
     }
 
-    // Load all events
-    fun loadAllEvents() {
-        _eventListState.update { it.copy(isLoading = true, error = null) }
+    // Load a specific event
+    fun loadEvent(eventId: String) {
+        _eventState.update { it.copy(isLoading = true, error = null, eventId = eventId) }
+
         viewModelScope.launch {
-            eventRepository.getAllEvents()
-                .onSuccess { events ->
-                    // Check registration status for current user
-                    val userId = authRepository.getCurrentUserId()
-                    val eventsWithRegistrationStatus = events.map { event ->
-                        val isRegistered = userId?.let { event.registeredUserIds.contains(it) } ?: false
-                        event.copy(isRegistered = isRegistered)
+            eventRepository.getEvent(eventId)
+                .onSuccess { event ->
+                    _event.value = event
+                    _eventState.update {
+                        it.copy(
+                            isLoading = false,
+                            event = event,
+                            isRegistered = event.isRegistered
+                        )
                     }
 
-                    _eventListState.update {
-                        it.copy(
-                            isLoading = false,
-                            events = eventsWithRegistrationStatus
-                        )
+                    // Load game results if it's a past event
+                    if (isPastEvent(event)) {
+                        loadGameResults(eventId)
                     }
-                    Log.i("EventViewModel", "Loaded ${events.size} events")
                 }
                 .onFailure { exception ->
-                    _eventListState.update {
+                    _eventState.update {
                         it.copy(
                             isLoading = false,
-                            error = exception.message ?: "Failed to load events"
+                            error = exception.message ?: "Failed to load event"
                         )
                     }
-                    Log.e("EventViewModel", "Error loading events: ${exception.message}")
                 }
         }
     }
 
-    // Load events by hockey type
-    fun loadEventsByType(hockeyType: HockeyType) {
-        _eventListState.update { it.copy(isLoading = true, error = null) }
-        viewModelScope.launch {
-            eventRepository.getEventsByType(hockeyType)
-                .onSuccess { events ->
-                    val userId = authRepository.getCurrentUserId()
-                    val eventsWithRegistrationStatus = events.map { event ->
-                        val isRegistered = userId?.let { event.registeredUserIds.contains(it) } ?: false
-                        event.copy(isRegistered = isRegistered)
-                    }
+    // Check if user is registered for an event
+    fun checkIfUserIsRegistered(eventId: String, userId: String) {
+        if (userId.isEmpty()) return
 
-                    _eventListState.update {
-                        it.copy(
-                            isLoading = false,
-                            events = eventsWithRegistrationStatus
-                        )
-                    }
+        viewModelScope.launch {
+            try {
+                val event = eventRepository.getEvent(eventId).getOrNull()
+                val isRegistered = event?.registeredUserIds?.contains(userId) ?: false
+
+                _registrationState.update {
+                    it.copy(isRegistered = isRegistered)
                 }
-                .onFailure { exception ->
-                    _eventListState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = exception.message ?: "Failed to load events"
-                        )
-                    }
-                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking registration status", e)
+            }
         }
     }
 
     // Reset states
     fun resetEventState() {
-        _eventState.update { EventState() }
+        _eventState.value = EventState()
     }
 
     fun resetRegistrationState() {
-        _registrationState.update { RegistrationState() }
+        _registrationState.value = RegistrationState()
     }
 
+    // Update event
     fun updateEvent(event: EventEntry) {
         _eventState.update { it.copy(isLoading = true, error = null) }
+
         viewModelScope.launch {
             eventRepository.updateEvent(event)
                 .onSuccess {
                     _eventState.update {
                         it.copy(
                             isLoading = false,
-                            isSuccess = true
+                            isSuccess = true,
+                            successMessage = "Event updated successfully!"
                         )
                     }
                     loadAllEvents()
@@ -651,15 +679,18 @@ class EventViewModel @Inject constructor(
         }
     }
 
+    // Delete event
     fun deleteEvent(eventId: String) {
         _eventState.update { it.copy(isLoading = true, error = null) }
+
         viewModelScope.launch {
             eventRepository.deleteEvent(eventId)
                 .onSuccess {
                     _eventState.update {
                         it.copy(
                             isLoading = false,
-                            isSuccess = true
+                            isSuccess = true,
+                            successMessage = "Event deleted successfully!"
                         )
                     }
                     loadAllEvents()
@@ -674,4 +705,324 @@ class EventViewModel @Inject constructor(
                 }
         }
     }
+
+    // Initiate registration process
+    fun initiateRegistration(eventId: String) {
+        Log.d(TAG, "Initiating registration for event: $eventId")
+        _pendingEventId = eventId
+
+        viewModelScope.launch {
+            val userId = authRepository.getCurrentUserId()
+            if (userId == null) {
+                _registrationMessage.value = "You must be logged in to register for events"
+                return@launch
+            }
+
+            // Get user profile to determine role
+            val userProfile = authRepository.getUserProfile(userId).getOrNull()
+            if (userProfile == null) {
+                _registrationMessage.value = "Could not load user profile"
+                return@launch
+            }
+
+            Log.d(TAG, "User role: ${userProfile.role}")
+
+            when (userProfile.role) {
+                UserRole.PLAYER -> handlePlayerRegistration(eventId, userId)
+                UserRole.COACH -> handleCoachRegistration(eventId, userId)
+                UserRole.MANAGER -> handleManagerRegistration(eventId, userId)
+                UserRole.ADMIN -> handleAdminRegistration(eventId, userId)
+            }
+        }
+    }
+
+    private suspend fun handlePlayerRegistration(eventId: String, userId: String) {
+        Log.d(TAG, "Handling player registration")
+
+        // Get teams the player is part of
+        val playerTeams = getUserTeams(userId).getOrNull() ?: emptyList()
+        Log.d(TAG, "Player teams found: ${playerTeams.size}")
+
+        if (playerTeams.isEmpty()) {
+            _registrationMessage.value = "You must be part of a team to register for events"
+            return
+        }
+
+        if (playerTeams.size == 1) {
+            // Auto-register with the only team
+            registerTeamForEvent(eventId, playerTeams.first().id)
+        } else {
+            // Show team selection dialog
+            _availableTeams.value = playerTeams
+            _showTeamSelection.value = true
+        }
+    }
+
+    private suspend fun handleCoachRegistration(eventId: String, userId: String) {
+        Log.d(TAG, "Handling coach registration")
+
+        // Get teams the coach manages
+        val coachTeams = getUserTeams(userId).getOrNull() ?: emptyList()
+        Log.d(TAG, "Coach teams found: ${coachTeams.size}")
+
+        if (coachTeams.isEmpty()) {
+            _registrationMessage.value = "No teams found that you manage"
+            return
+        }
+
+        if (coachTeams.size == 1) {
+            // Auto-register with the only team
+            registerTeamForEvent(eventId, coachTeams.first().id)
+        } else {
+            // Show team selection dialog
+            _availableTeams.value = coachTeams
+            _showTeamSelection.value = true
+        }
+    }
+
+    private suspend fun handleManagerRegistration(eventId: String, userId: String) {
+        Log.d(TAG, "Handling manager registration")
+        // Same logic as coach
+        handleCoachRegistration(eventId, userId)
+    }
+
+    private suspend fun handleAdminRegistration(eventId: String, userId: String) {
+        Log.d(TAG, "Handling admin registration")
+
+        // Admin can register any team
+        val allTeams = teamRepository.getAllTeams().getOrNull() ?: emptyList()
+        if (allTeams.isEmpty()) {
+            _registrationMessage.value = "No teams available for registration"
+            return
+        }
+
+        _availableTeams.value = allTeams
+        _showTeamSelection.value = true
+    }
+
+    // Register team for event
+    fun registerForEvent(eventId: String, teamId: String) {
+        Log.d(TAG, "Registering team $teamId for event $eventId")
+        registerTeamForEvent(eventId, teamId)
+    }
+
+    private fun registerTeamForEvent(eventId: String, teamId: String) {
+        _registrationState.update { it.copy(isLoading = true, error = null) }
+
+        viewModelScope.launch {
+            try {
+                // Check for event conflicts first
+                val event = eventRepository.getEvent(eventId).getOrNull()
+                if (event != null) {
+                    val conflicts = eventRepository.checkEventConflicts(teamId, event.startDate)
+                    if (conflicts.isNotEmpty()) {
+                        _eventState.update {
+                            it.copy(conflictingEvents = conflicts)
+                        }
+                        _registrationMessage.value = "Warning: Team has conflicts on ${event.startDate}: ${conflicts.joinToString(", ")}"
+                        // Still allow registration but warn user
+                    }
+                }
+
+                eventRepository.registerForEvent(eventId, teamId)
+                    .onSuccess {
+                        _registrationState.update {
+                            it.copy(
+                                isLoading = false,
+                                isSuccess = true,
+                                isRegistered = true
+                            )
+                        }
+
+                        _registrationMessage.value = "Successfully registered for event!"
+
+                        // Update event state
+                        updateEventRegistrationState(eventId, true)
+
+                        // Hide team selection
+                        _showTeamSelection.value = false
+
+                        // Reload events to get updated counts
+                        loadAllEvents()
+                    }
+                    .onFailure { exception ->
+                        _registrationState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = exception.message
+                            )
+                        }
+                        _registrationMessage.value = "Registration failed: ${exception.message}"
+                    }
+            } catch (e: Exception) {
+                Log.e(TAG, "Registration error", e)
+                _registrationState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = e.message
+                    )
+                }
+                _registrationMessage.value = "Registration failed: ${e.message}"
+            }
+        }
+    }
+
+    private fun updateEventRegistrationState(eventId: String, isRegistered: Boolean) {
+        // Update single event
+        _event.value?.let { currentEvent ->
+            if (currentEvent.id == eventId) {
+                val updatedEvent = currentEvent.copy(
+                    isRegistered = isRegistered,
+                    registeredTeams = if (isRegistered) {
+                        currentEvent.registeredTeams + 1
+                    } else {
+                        maxOf(0, currentEvent.registeredTeams - 1)
+                    }
+                )
+                _event.value = updatedEvent
+                _eventState.update { it.copy(event = updatedEvent, isRegistered = isRegistered) }
+            }
+        }
+
+        // Update events list
+        val currentEvents = _eventListState.value.events.toMutableList()
+        val eventIndex = currentEvents.indexOfFirst { it.id == eventId }
+
+        if (eventIndex != -1) {
+            val currentEvent = currentEvents[eventIndex]
+            val updatedEvent = currentEvent.copy(
+                isRegistered = isRegistered,
+                registeredTeams = if (isRegistered) {
+                    currentEvent.registeredTeams + 1
+                } else {
+                    maxOf(0, currentEvent.registeredTeams - 1)
+                }
+            )
+            currentEvents[eventIndex] = updatedEvent
+            _eventListState.update { it.copy(events = currentEvents) }
+        }
+    }
+
+    // Load all events
+    fun loadAllEvents() {
+        _eventListState.update { it.copy(isLoading = true, error = null) }
+
+        viewModelScope.launch {
+            eventRepository.getAllEvents()
+                .onSuccess { events ->
+                    _eventListState.update {
+                        it.copy(
+                            isLoading = false,
+                            events = events,
+                            upcomingEvents = events.filter { event -> !isPastEvent(event) },
+                            pastEvents = events.filter { event -> isPastEvent(event) },
+                            myRegisteredEvents = events.filter { event -> event.isRegistered }
+                        )
+                    }
+                    Log.d(TAG, "Loaded ${events.size} events")
+                }
+                .onFailure { exception ->
+                    _eventListState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = exception.message ?: "Failed to load events"
+                        )
+                    }
+                    Log.e(TAG, "Error loading events: ${exception.message}")
+                }
+        }
+    }
+
+    // Load events by hockey type
+    fun loadEventsByType(hockeyType: HockeyType) {
+        _eventListState.update { it.copy(isLoading = true, error = null) }
+
+        viewModelScope.launch {
+            eventRepository.getEventsByType(hockeyType)
+                .onSuccess { events ->
+                    _eventListState.update {
+                        it.copy(
+                            isLoading = false,
+                            events = events,
+                            upcomingEvents = events.filter { event -> !isPastEvent(event) },
+                            pastEvents = events.filter { event -> isPastEvent(event) },
+                            myRegisteredEvents = events.filter { event -> event.isRegistered }
+                        )
+                    }
+                }
+                .onFailure { exception ->
+                    _eventListState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = exception.message ?: "Failed to load events"
+                        )
+                    }
+                }
+        }
+    }
+
+    // Load game results for past events
+    fun loadGameResults(eventId: String) {
+        viewModelScope.launch {
+            gameResultsRepository.getGameResultsForEvent(eventId)
+                .onSuccess { results ->
+                    _gameResults.value = results
+                    _eventState.update { it.copy(gameResults = results) }
+                }
+                .onFailure { exception ->
+                    Log.e(TAG, "Error loading game results: ${exception.message}")
+                }
+        }
+    }
+
+    // Load team season statistics
+    fun loadTeamStats(season: String = "2024") {
+        viewModelScope.launch {
+            gameResultsRepository.getTeamSeasonStats(season)
+                .onSuccess { stats ->
+                    _teamStats.value = stats
+                    Log.d(TAG, "Loaded ${stats.size} team statistics")
+                }
+                .onFailure { exception ->
+                    Log.e(TAG, "Error loading team stats: ${exception.message}")
+                }
+        }
+    }
+
+    // Get user teams based on role
+    private suspend fun getUserTeams(userId: String): Result<List<Team>> {
+        return eventRepository.getUserTeams(userId)
+    }
+
+    // Get registered events for current user
+    fun getMyRegisteredEvents(): List<EventEntry> {
+        return _eventListState.value.myRegisteredEvents
+    }
+
+    // Clear messages
+    fun clearMessages() {
+        _eventState.update {
+            it.copy(error = null, successMessage = null)
+        }
+        _registrationState.update {
+            it.copy(error = null, message = null)
+        }
+    }
+
+    fun clearRegistrationMessage() {
+        _registrationMessage.value = null
+    }
+
+    // Helper function to check if event is in the past
+    private fun isPastEvent(event: EventEntry): Boolean {
+        return try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val eventEndDate = dateFormat.parse(event.endDate)
+            val today = Date()
+            eventEndDate?.before(today) == true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
 }

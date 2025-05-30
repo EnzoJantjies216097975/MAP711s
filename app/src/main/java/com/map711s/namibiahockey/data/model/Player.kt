@@ -47,7 +47,7 @@ data class Player(
 
     // Get display name
     fun getDisplayName(): String {
-        return if (name.isNotBlank()) name else "Player #$jerseyNumber"
+        return if (name.ifBlank()) name else "Player #$jerseyNumber"
     }
 
     // Check if player can play in age category

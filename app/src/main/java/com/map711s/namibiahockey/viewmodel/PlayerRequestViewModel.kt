@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.map711s.namibiahockey.data.model.PlayerRequest
 import com.map711s.namibiahockey.data.model.RequestType
 import com.map711s.namibiahockey.data.repository.AuthRepository
+import com.map711s.namibiahockey.data.repository.PlayerRequestRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

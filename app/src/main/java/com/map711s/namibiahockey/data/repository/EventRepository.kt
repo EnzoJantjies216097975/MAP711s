@@ -48,6 +48,8 @@ class EventRepository @Inject constructor(
         }
     }
 
+
+
     // Get events filtered by hockey type
     suspend fun getEventsByType(hockeyType: HockeyType): Result<List<EventEntry>> {
         return try {
@@ -65,7 +67,8 @@ class EventRepository @Inject constructor(
                         id = document.id,
                         isRegistered = if (userId != null) {
                             checkUserRegistration(document.id, userId)
-                        } else false
+                        } else false,
+                        registeredTeams = getEventRegistrationCount(document.id)
                     )
                 } catch (e: Exception) {
                     Log.e(TAG, "Error mapping document ${document.id}", e)
@@ -133,6 +136,42 @@ class EventRepository @Inject constructor(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error getting event: $eventId", e)
+            Result.failure(e)
+        }
+    }
+
+    // Update an existing event
+    suspend fun updateEvent(event: EventEntry): Result<Unit> {
+        return try {
+            val eventMap = event.toHashMap()
+            eventsCollection.document(event.id).set(eventMap).await()
+            Log.d(TAG, "Event updated: ${event.id}")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating event", e)
+            Result.failure(e)
+        }
+    }
+
+    // Delete an event
+    suspend fun deleteEvent(eventId: String): Result<Unit> {
+        return try {
+            // Delete all registrations for this event first
+            val registrations = registrationsCollection
+                .whereEqualTo("eventId", eventId)
+                .get()
+                .await()
+
+            for (registration in registrations.documents) {
+                registration.reference.delete().await()
+            }
+
+            // Delete the event
+            eventsCollection.document(eventId).delete().await()
+            Log.d(TAG, "Event deleted: $eventId")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error deleting event", e)
             Result.failure(e)
         }
     }
@@ -465,4 +504,5 @@ class EventRepository @Inject constructor(
             false
         }
     }
+
 }

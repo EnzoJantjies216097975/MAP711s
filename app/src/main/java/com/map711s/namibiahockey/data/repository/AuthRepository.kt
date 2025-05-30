@@ -101,7 +101,7 @@ class AuthRepository @Inject constructor(
     }
 
     //Logout user
-    suspend fun logoutUser(): Result<Unit> {
+    fun logoutUser(): Result<Unit> {
         return try {
             Log.d(TAG, "Attempting to logout user")
             auth.signOut()
