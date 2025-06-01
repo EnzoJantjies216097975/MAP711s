@@ -35,6 +35,7 @@ fun MainAppScaffold(
     onNavigateToProfile: () -> Unit,
     onNavigateToAddEvent: () -> Unit,
     onNavigateToAddNews: () -> Unit,
+    onNavigatetoEventEntries: (HockeyType) -> Unit,
     onNavigateToEventDetails: (String, HockeyType) -> Unit,
     onNavigateToNewsDetails: (String) -> Unit,
     onNavigateToTeamRegistration: () -> Unit,
@@ -117,7 +118,11 @@ fun MainAppScaffold(
                     onNavigateToProfile = onNavigateToProfile,
                     onNavigateToEventDetails = onNavigateToEventDetails,
                     onNavigateToNewsDetails = onNavigateToNewsDetails,
-                    onSwitchHockeyType = onSwitchHockeyType
+                    onSwitchHockeyType = onSwitchHockeyType,
+                    onViewAllEvents = {
+                        onNavigatetoEventEntries(hockeyType)
+                    }
+
                 )
             }
 

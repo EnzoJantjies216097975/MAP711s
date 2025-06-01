@@ -62,10 +62,7 @@ fun EventDetailsScreen(
     eventId: String,
     onNavigateBack: () -> Unit,
     viewModel: EventViewModel = hiltViewModel(),
-
     onNavigateToAddEvent: () -> Unit,
-    onNavigateToEventDetails: (String, HockeyType) -> Unit = { _, _ -> },
-    hockeyType: HockeyType,
     eventViewModel: EventViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel()
 ) {

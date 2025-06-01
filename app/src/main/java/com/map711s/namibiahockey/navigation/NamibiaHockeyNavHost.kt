@@ -11,6 +11,7 @@ import com.map711s.namibiahockey.screens.admin.RoleChangeRequestsManagementScree
 import com.map711s.namibiahockey.screens.auth.LoginScreen
 import com.map711s.namibiahockey.screens.auth.RegisterScreen
 import com.map711s.namibiahockey.screens.events.AddEventScreen
+import com.map711s.namibiahockey.screens.events.EventDetailsScreen
 import com.map711s.namibiahockey.screens.events.EventEntriesScreen
 import com.map711s.namibiahockey.screens.hockey.HockeyTypeSelectionScreen
 import com.map711s.namibiahockey.screens.main.MainAppScaffold
@@ -96,6 +97,9 @@ fun NamibiaHockeyNavHost(
                 onNavigateToProfile = {
                     navController.navigate(Routes.PROFILE)
                 },
+                onNavigatetoEventEntries = {
+                    navController.navigate((Routes.eventEntries(hockeyType.name)))
+                },
                 onNavigateToAddEvent = {
                     navController.navigate(Routes.addEvent(hockeyType.name))
                 },
@@ -103,7 +107,7 @@ fun NamibiaHockeyNavHost(
                     navController.navigate(Routes.addNews(hockeyType.name))
                 },
                 onNavigateToEventDetails = { eventId, eventHockeyType ->
-                    navController.navigate(Routes.eventDetails(eventHockeyType.name, eventId))
+                    navController.navigate(Routes.eventDetails(eventId))
                 },
                 onNavigateToNewsDetails = { newsId ->
                     navController.navigate(Routes.newsDetails(newsId))
@@ -141,6 +145,28 @@ fun NamibiaHockeyNavHost(
             )
         }
 
+        composable (
+            route = Routes.EVENT_DETAILS,
+            arguments = listOf(navArgument ( "eventId" ){type = NavType.StringType})
+            ){
+            backStackEntry ->
+            val eventID = backStackEntry.arguments?.getString("eventId")
+            val hockeyTypeStr =
+                backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
+            val hockeyType = try {
+                HockeyType.valueOf(hockeyTypeStr)
+            } catch (e: Exception) {
+                HockeyType.OUTDOOR
+            }
+            EventDetailsScreen(
+                eventId = eventID.toString(),
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToAddEvent = {
+                    navController.navigate(Routes.addEvent(hockeyType.name))
+                }
+
+            )
+        }
         composable(
             route = Routes.EVENT_ENTRIES,
             arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
@@ -160,7 +186,7 @@ fun NamibiaHockeyNavHost(
                     navController.navigate(Routes.addEvent(hockeyType.name))
                 },
                 onNavigateToEventDetails = { eventId, eventHockeyType ->
-                    navController.navigate(Routes.eventDetails(eventHockeyType.name, eventId))
+                    navController.navigate(Routes.eventDetails(eventId))
                 }
             )
         }
@@ -184,7 +210,7 @@ fun NamibiaHockeyNavHost(
                     navController.navigate(Routes.addEvent(hockeyType.name))
                 },
                 onNavigateToEventDetails = { eventId, eventHockeyType ->
-                    navController.navigate(Routes.eventDetails(eventHockeyType.name, eventId))
+                    navController.navigate(Routes.eventDetails(eventId))
                 }
             )
         }

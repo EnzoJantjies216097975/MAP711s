@@ -60,7 +60,7 @@ fun HomeScreen(
     onNavigateToEventDetails: (String, HockeyType) -> Unit,
     onNavigateToNewsDetails: (String) -> Unit,
     onSwitchHockeyType: (HockeyType) -> Unit,
-    onViewAllEvents: () -> Unit = {},
+    onViewAllEvents: (HockeyType) -> Unit ,
     onViewAllNews: () -> Unit = {},
     authViewModel: AuthViewModel = hiltViewModel(),
     eventViewModel: EventViewModel = hiltViewModel(),
@@ -184,7 +184,7 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold
                     )
 
-                    TextButton(onClick = { /* Navigate to events tab */ }) {
+                    TextButton(onClick = { onViewAllEvents(hockeyType) }) {
                         Text("View All")
                     }
                 }

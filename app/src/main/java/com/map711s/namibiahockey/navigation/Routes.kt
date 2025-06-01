@@ -30,7 +30,7 @@ object Routes {
     const val BOTTOM_PLAYERS = "bottom_players"
 
     // Detail screens
-    const val EVENT_DETAILS = "event_details/{hockeyType}/{eventId}"
+    const val EVENT_DETAILS = "event_details/{eventId}"
     const val NEWS_DETAILS = "news_details/{newsId}"
     const val TEAM_DETAILS = "team_details/{teamId}"
 
@@ -60,7 +60,7 @@ object Routes {
     fun addEvent(hockeyType: String) = "add_event/$hockeyType"
     fun addNews(hockeyType: String) = "add_news/$hockeyType"
     fun teamRegistration(hockeyType: String) = "team_registration/$hockeyType"
-    fun eventDetails(hockeyType: String, eventId: String) = "event_details/$hockeyType/$eventId"
+    fun eventDetails(eventId: String) = "event_details/$eventId"
     fun newsDetails(newsId: String) = "news_details/$newsId"
     fun teamDetails(teamId: String) = "team_details/$teamId"
     fun eventEntries(hockeyType: String) = "event_entries/$hockeyType"
