@@ -90,7 +90,7 @@ import kotlinx.coroutines.launch
 fun PlayerManagementScreen(
     onNavigateBack: () -> Unit,
     hockeyType: HockeyType,
-    onNavigateToPlayerDetails: (String) -> Unit = {},
+    onNavigateToPlayerDetails: (String) -> Unit,
     authViewModel: AuthViewModel = hiltViewModel(),
     playerViewModel: PlayerViewModel = hiltViewModel()
 ){
@@ -1069,7 +1069,7 @@ private fun PlayerDetailsDialog(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Button(onClick = onNavigateToFullDetails) {
+                    Button(onClick =  onNavigateToFullDetails ) {
                         Text("View Full Profile")
                     }
                 }

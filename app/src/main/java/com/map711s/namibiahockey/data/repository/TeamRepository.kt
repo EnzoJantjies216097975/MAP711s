@@ -25,8 +25,9 @@ class TeamRepository @Inject constructor(
         return try {
             val documentSnapshot = firestore.collection("teams").document(teamId).get().await()
             if (documentSnapshot.exists()) {
-                val team = documentSnapshot.toObject(Team::class.java)
+                var team = documentSnapshot.toObject(Team::class.java)
                     ?: return Result.failure(Exception("Failed to parse team data"))
+                team.id = documentSnapshot.id.toString()
                 Result.success(team)
             } else {
                 Result.failure(Exception("Team not found"))
@@ -60,7 +61,9 @@ class TeamRepository @Inject constructor(
     suspend fun getAllTeams(): Result<List<Team>> {
         return try {
             val querySnapshot = firestore.collection("teams").get().await()
-            val teams = querySnapshot.documents.mapNotNull { it.toObject(Team::class.java) }
+            val teams = querySnapshot.documents.mapNotNull {doc->
+                doc.toObject(Team::class.java).also { it?.id = doc.id}
+            }
             Result.success(teams)
         } catch (e: Exception) {
             Result.failure(e)

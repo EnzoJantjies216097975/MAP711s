@@ -1,5 +1,6 @@
 package com.map711s.namibiahockey.screens.team
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -432,7 +433,9 @@ fun TeamsScreen(
                     items(filteredTeams) { team ->
                         TeamCard(
                             team = team,
-                            onTeamClick = { onNavigateToTeamDetails(team.id) },
+                            onTeamClick = {
+                                Log.d("TAG in screen", team.id)
+                                onNavigateToTeamDetails(team.id) },
                             onManagePlayersClick = { onNavigateToPlayerManagement(team.id) },
                             onEditClick = {
                                 if (isAdmin || isCoachOrManager) {

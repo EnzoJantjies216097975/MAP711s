@@ -71,11 +71,8 @@ fun NewsFeedScreen(
     //val tabs = listOf("All", "Tournament", "Team", "Player", "General")
 
     // Load news when screen is displayed
-    LaunchedEffect(hockeyType) {
-        viewModel.loadNewsPiecesByType(hockeyType)
-    }
 
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(tabs) {
         viewModel.loadAllNewsPieces()
     }
 

@@ -35,11 +35,13 @@ fun MainAppScaffold(
     onNavigateToProfile: () -> Unit,
     onNavigateToAddEvent: () -> Unit,
     onNavigateToAddNews: () -> Unit,
+    onNavigateToALlNews: () -> Unit,
     onNavigatetoEventEntries: (HockeyType) -> Unit,
     onNavigateToEventDetails: (String, HockeyType) -> Unit,
     onNavigateToNewsDetails: (String) -> Unit,
     onNavigateToTeamRegistration: () -> Unit,
     onNavigateToTeamDetails: (String) -> Unit,
+    onNavigateToPlayerDetails: (String) -> Unit,
     onSwitchHockeyType: (HockeyType) -> Unit,
     roleChangeViewModel: RoleChangeViewModel = hiltViewModel()
 ) {
@@ -122,7 +124,8 @@ fun MainAppScaffold(
                     onViewAllEvents = {
                         onNavigatetoEventEntries(hockeyType)
                     }
-
+                    ,
+                    onViewAllNews = onNavigateToALlNews
                 )
             }
 
@@ -130,7 +133,9 @@ fun MainAppScaffold(
             composable(Routes.BOTTOM_PLAYERS) {
                 PlayerManagementScreen(
                     hockeyType = hockeyType,
-                    onNavigateBack = { } // No back button in bottom nav
+                    onNavigateBack = { } // No back button in bottom nav,
+                    , onNavigateToPlayerDetails = onNavigateToPlayerDetails
+
                 )
             }
 

@@ -3,7 +3,7 @@ package com.map711s.namibiahockey.data.model
 import java.util.Date
 
 data class Team(
-    val id: String = "",
+    var id: String = "",
     val name: String = "",
     val hockeyType: HockeyType = HockeyType.OUTDOOR,
     val category: String = "", // e.g., Men's, Women's, Junior

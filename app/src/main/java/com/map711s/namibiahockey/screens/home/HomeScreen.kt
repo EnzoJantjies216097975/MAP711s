@@ -76,7 +76,7 @@ fun HomeScreen(
     // Load events and news for the selected hockey type
     LaunchedEffect(selectedHockeyType) {
         eventViewModel.loadEventsByType(selectedHockeyType)
-        newsViewModel.loadNewsPiecesByType(selectedHockeyType)
+        newsViewModel.loadAllNewsPieces()
     }
 
     // Filter live games by hockey type
@@ -248,7 +248,7 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold
                     )
 
-                    TextButton(onClick = { /* Navigate to news tab */ }) {
+                    TextButton(onClick = { onViewAllNews}) {
                         Text("View All")
                     }
                 }

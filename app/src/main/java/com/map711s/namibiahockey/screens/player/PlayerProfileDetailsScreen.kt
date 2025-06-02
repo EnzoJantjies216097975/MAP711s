@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,7 +38,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -49,6 +47,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -67,6 +66,7 @@ import com.map711s.namibiahockey.data.model.PlayerProfile
 import com.map711s.namibiahockey.data.model.PlayerProfileStats
 import com.map711s.namibiahockey.data.model.UserRole
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
+import com.map711s.namibiahockey.viewmodel.PlayerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,9 +74,12 @@ fun PlayerProfileDetailsScreen(
     playerId: String,
     onNavigateBack: () -> Unit,
     onNavigateToEdit: () -> Unit = {},
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    playerViewModel: PlayerViewModel = hiltViewModel()
 ) {
     val userProfileState by authViewModel.userProfileState.collectAsState()
+    val playerState by playerViewModel.playerState.collectAsState()
+    val player = playerState.player
     val currentUser = userProfileState.user
     val canEdit = currentUser?.role == UserRole.ADMIN ||
             currentUser?.role == UserRole.COACH ||
@@ -85,8 +88,11 @@ fun PlayerProfileDetailsScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(playerId) {
+        playerViewModel.getPlayer(playerId)
+    }
     // Mock player data - in real app, this would come from a ViewModel
-    val player = remember {
+    val players = remember {
         PlayerProfile(
             id = playerId,
             name = "John Doe",
@@ -178,7 +184,7 @@ fun PlayerProfileDetailsScreen(
                         Box(
                             modifier = Modifier.size(120.dp)
                         ) {
-                            if (player.photoUrl.isNotEmpty()) {
+                            if (player?.photoUrl?.isNotEmpty() ?: false) {
                                 Image(
                                     painter = rememberAsyncImagePainter(player.photoUrl),
                                     contentDescription = "Player Photo",
@@ -207,7 +213,7 @@ fun PlayerProfileDetailsScreen(
                             }
 
                             // National player badge
-                            if (player.isNationalPlayer) {
+                            if (player?.isNationalPlayer ?: false) {
                                 Box(
                                     modifier = Modifier
                                         .size(32.dp)
@@ -237,7 +243,7 @@ fun PlayerProfileDetailsScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "${player.jerseyNumber}",
+                                    text = "${player?.jerseyNumber}",
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
@@ -249,14 +255,14 @@ fun PlayerProfileDetailsScreen(
 
                         // Player Name and Position
                         Text(
-                            text = player.name,
+                            text = player?.name ?: "John",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
 
                         Text(
-                            text = player.position,
+                            text = player?.position ?:"attack",
                             style = MaterialTheme.typography.titleLarge,
                             color = Color.White.copy(alpha = 0.9f)
                         )
@@ -274,14 +280,14 @@ fun PlayerProfileDetailsScreen(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = player.teamName,
+                                text = player?.teamName ?: "",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = Color.White,
                                 fontWeight = FontWeight.Medium
                             )
                         }
 
-                        if (player.isNationalPlayer) {
+                        if (player?.isNationalPlayer ?: false) {
                             Surface(
                                 color = Color.White.copy(alpha = 0.2f),
                                 shape = RoundedCornerShape(12.dp),
@@ -324,20 +330,17 @@ fun PlayerProfileDetailsScreen(
                     ) {
                         StatItem(
                             label = "Games",
-                            value = player.stats.gamesPlayed.toString()
+                            value = player?.stats?.gamesPlayed?.toString() ?: ""
                         )
                         StatItem(
                             label = "Goals",
-                            value = player.stats.goalsScored.toString()
+                            value = player?.stats?.goalsScored?.toString() ?: ""
                         )
                         StatItem(
                             label = "Assists",
-                            value = player.stats.assists.toString()
+                            value = player?.stats?.assists?.toString() ?: ""
                         )
-                        StatItem(
-                            label = "Points",
-                            value = player.stats.totalPoints.toString()
-                        )
+
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -364,14 +367,14 @@ fun PlayerProfileDetailsScreen(
                                         imageVector = Icons.Default.Star,
                                         contentDescription = null,
                                         modifier = Modifier.size(16.dp),
-                                        tint = if (index < player.stats.averageRating.toInt())
+                                        tint = if (index < (player?.rating?.toInt() ?: 5))
                                             MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                                     )
                                 }
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "${player.stats.averageRating}",
+                                    text = "${player?.rating}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -388,14 +391,14 @@ fun PlayerProfileDetailsScreen(
                             )
                             Row {
                                 Text(
-                                    text = "${player.stats.yellowCards}",
+                                    text = "${player?.stats?.yellowCards}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFFFFEB3B) // Yellow
                                 )
                                 Text(text = " / ")
                                 Text(
-                                    text = "${player.stats.redCards}",
+                                    text = "${player?.stats?.redCards}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.error
@@ -406,33 +409,6 @@ fun PlayerProfileDetailsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Goals per game progress
-                    Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Goals per Game",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = "${String.format("%.1f", player.stats.goalsScored.toFloat() / player.stats.gamesPlayed)}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-
-                        LinearProgressIndicator(
-                            progress = { (player.stats.goalsScored.toFloat() / player.stats.gamesPlayed).coerceAtMost(1f) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 4.dp),
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    }
                 }
             }
 
@@ -456,7 +432,7 @@ fun PlayerProfileDetailsScreen(
                     ProfileInfoItem(
                         icon = Icons.Default.CalendarMonth,
                         label = "Age",
-                        value = "${player.age} years"
+                        value = "${player?.age} years"
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -464,7 +440,7 @@ fun PlayerProfileDetailsScreen(
                     ProfileInfoItem(
                         icon = Icons.Default.Flag,
                         label = "Nationality",
-                        value = player.nationality
+                        value = player?.nationality ?: ""
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -472,15 +448,7 @@ fun PlayerProfileDetailsScreen(
                     ProfileInfoItem(
                         icon = Icons.Default.SportsSoccer,
                         label = "Hockey Type",
-                        value = player.hockeyType.name.lowercase().replaceFirstChar { it.uppercase() }
-                    )
-
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-                    ProfileInfoItem(
-                        icon = Icons.Default.Timeline,
-                        label = "Seasons Played",
-                        value = "${player.stats.seasonsPlayed} seasons"
+                        value = player?.hockeyType?.name?.lowercase()?.replaceFirstChar { it.uppercase() } ?: ""
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -488,7 +456,7 @@ fun PlayerProfileDetailsScreen(
                     ProfileInfoItem(
                         icon = Icons.Default.Badge,
                         label = "Player ID",
-                        value = player.id.take(8).uppercase()
+                        value = player?.id?.take(8)?.uppercase() ?: ""
                     )
                 }
             }

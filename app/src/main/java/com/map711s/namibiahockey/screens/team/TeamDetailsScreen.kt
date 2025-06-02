@@ -1,5 +1,6 @@
 package com.map711s.namibiahockey.screens.team
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -114,6 +115,7 @@ fun TeamDetailsScreen(
             // You would need to add this method to TeamViewModel
             // teamViewModel.setTeam(nationalTeam)
         } else {
+            Log.d("TAG", teamId)
             teamViewModel.getTeam(teamId)
         }
     }

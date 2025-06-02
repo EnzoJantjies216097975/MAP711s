@@ -118,6 +118,12 @@ fun NamibiaHockeyNavHost(
                 onNavigateToTeamDetails = { teamId ->
                     navController.navigate(Routes.teamDetails(teamId))
                 },
+                onNavigateToALlNews = {
+                    navController.navigate(Routes.NEWS_FEED)
+                },
+                onNavigateToPlayerDetails = {
+                    navController.navigate(Routes.playerProfileDetails(it))
+                },
                 onSwitchHockeyType = { newHockeyType ->
                     navController.navigate(Routes.mainApp(newHockeyType.name)) {
                         popUpTo(Routes.MAIN_APP) { inclusive = true }
@@ -252,7 +258,10 @@ fun NamibiaHockeyNavHost(
 
             PlayerManagementScreen(
                 hockeyType = hockeyType,
-                onNavigateBack = { navController.navigateUp() }
+                onNavigateBack = { navController.navigateUp() },
+                onNavigateToPlayerDetails = {
+                    navController.navigate(Routes.playerProfileDetails(it))
+                }
             )
         }
 
