@@ -17,6 +17,9 @@ data class Player(
     val photoUrl: String = "",
     val stats: PlayerStats = PlayerStats(),
     val experienceYears: Int = 0,
+    val teamName: String = "",
+    val rating: Float = 0f,
+val age: Int = 0,
 
     // Additional player info
     val height: Int = 0, // in cm
@@ -50,7 +53,7 @@ data class Player(
     val statistics: PlayerStatistics = PlayerStatistics()
 ) {
     // Calculate age
-    fun getAge(): Int {
+    fun getPlayerAge(): Int {
         val now = Date()
         val diffInMillis = now.time - dateOfBirth.time
         return (diffInMillis / (365.25 * 24 * 60 * 60 * 1000)).toInt()
@@ -63,7 +66,7 @@ data class Player(
 
     // Check if player can play in age category
     fun canPlayInAgeCategory(ageCategory: String): Boolean {
-        val age = getAge()
+        val age = getPlayerAge()
         return when (ageCategory.uppercase()) {
             "U14" -> age < 14
             "U16" -> age < 16

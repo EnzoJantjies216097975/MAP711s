@@ -36,6 +36,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,6 +56,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -76,9 +78,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.map711s.namibiahockey.data.model.HockeyType
+import com.map711s.namibiahockey.data.model.Player
 import com.map711s.namibiahockey.data.model.PlayerListItem
 import com.map711s.namibiahockey.data.model.UserRole
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
+import com.map711s.namibiahockey.viewmodel.PlayerViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,12 +91,14 @@ fun PlayerManagementScreen(
     onNavigateBack: () -> Unit,
     hockeyType: HockeyType,
     onNavigateToPlayerDetails: (String) -> Unit = {},
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    playerViewModel: PlayerViewModel = hiltViewModel()
 ){
     var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf("All Players", "My Team", "National Teams", "Free Agents")
-
+    val playerListState by playerViewModel.playerListState.collectAsState()
+    val players = playerListState.players
     val userProfileState by authViewModel.userProfileState.collectAsState()
     val currentUser = userProfileState.user
     val isAdmin = currentUser?.role == UserRole.ADMIN
@@ -101,16 +107,19 @@ fun PlayerManagementScreen(
     // Dialog states
     var showAddPlayerDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-    var playerToDelete by remember { mutableStateOf<PlayerListItem?>(null) }
+    var playerToDelete by remember { mutableStateOf<Player?>(null) }
     var showPlayerDetailsDialog by remember { mutableStateOf(false) }
-    var selectedPlayer by remember { mutableStateOf<PlayerListItem?>(null) }
+    var selectedPlayer by remember { mutableStateOf<Player?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    LaunchedEffect(playerViewModel.playerListState.collectAsState().value) {
+        playerViewModel.loadAllPlayers()
+    }
 
     // Enhanced sample players with more details
-    val players = remember {
+    val playerss = remember {
         listOf(
             PlayerListItem(
                 id = "1",
@@ -322,9 +331,15 @@ fun PlayerManagementScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(25.dp)
             )
-
-            // Player list
-            if (filteredPlayers.isEmpty()) {
+// Player list
+            if (playerListState.isLoading && filteredPlayers.isEmpty()){
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (filteredPlayers.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -762,7 +777,7 @@ private fun AddPlayerDialog(
 
 @Composable
 private fun PlayerCard(
-    player: PlayerListItem,
+    player: Player,
     onEditClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit,
     onViewClick: (String) -> Unit,
@@ -941,7 +956,7 @@ private fun PlayerCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Age: ${player.age}",
+                    text = "Age: ${player.getPlayerAge()}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -963,7 +978,7 @@ private fun PlayerCard(
 
 @Composable
 private fun PlayerDetailsDialog(
-    player: PlayerListItem,
+    player: Player,
     onDismiss: () -> Unit,
     onNavigateToFullDetails: () -> Unit
 ) {
@@ -1034,11 +1049,11 @@ private fun PlayerDetailsDialog(
                 // Quick info
                 Column {
                     DetailRow("Team", if (player.teamName.isNotEmpty()) player.teamName else "No Team")
-                    DetailRow("Age", "${player.age} years")
+                    DetailRow("Age", "${player.getPlayerAge()} years")
                     DetailRow("Experience", "${player.experienceYears} years")
                     DetailRow("Hockey Type", player.hockeyType.name)
-                    DetailRow("Contact", player.contactEmail)
-                    DetailRow("Phone", player.contactPhone)
+//                    DetailRow("Contact", player.contactEmail)
+//                    DetailRow("Phone", player.contactPhone)
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))

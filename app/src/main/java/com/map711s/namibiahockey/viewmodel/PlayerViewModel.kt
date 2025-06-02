@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.data.model.Player
-import com.map711s.namibiahockey.data.model.PlayerListItem
 import com.map711s.namibiahockey.data.model.PlayerProfile
 import com.map711s.namibiahockey.data.model.PlayerProfileStats
 import com.map711s.namibiahockey.data.model.PlayerStats
@@ -361,7 +360,7 @@ class PlayerViewModel @Inject constructor(
                 }
 
                 // Convert Players to PlayerListItems with team names
-                val playerListItems = mutableListOf<PlayerListItem>()
+                val playerListItems = mutableListOf<Player>()
 
                 for (player in players) {
                     // Get team name if player is on a team
@@ -402,7 +401,7 @@ class PlayerViewModel @Inject constructor(
                     }
 
                     // Create PlayerListItem
-                    val playerListItem = PlayerListItem(
+                    val playerListItem = Player(
                         id = player.id,
                         name = player.name,
                         position = player.position,
@@ -410,8 +409,6 @@ class PlayerViewModel @Inject constructor(
                         jerseyNumber = player.jerseyNumber,
                         age = age,
                         hockeyType = player.hockeyType,
-                        contactEmail = player.email,
-                        contactPhone = player.contactNumber,
                         experienceYears = 0, // Not stored in Player model
                         rating = 0f // Not stored in Player model
                     )
@@ -466,7 +463,7 @@ class PlayerViewModel @Inject constructor(
 
                 // Convert to PlayerListItems (same as in loadAllPlayers)
                 // ...similar code to loadAllPlayers for converting to PlayerListItems...
-                val playerListItems = mutableListOf<PlayerListItem>()
+                val playerListItems = mutableListOf<Player>()
 
                 for (player in players) {
                     // Get team name if player is on a team
@@ -507,7 +504,7 @@ class PlayerViewModel @Inject constructor(
                     }
 
                     // Create PlayerListItem
-                    val playerListItem = PlayerListItem(
+                    val playerListItem = Player(
                         id = player.id,
                         name = player.name,
                         position = player.position,
@@ -515,8 +512,8 @@ class PlayerViewModel @Inject constructor(
                         jerseyNumber = player.jerseyNumber,
                         age = age,
                         hockeyType = player.hockeyType,
-                        contactEmail = player.email,
-                        contactPhone = player.contactNumber,
+//                        contactEmail = player.email,
+//                        contactPhone = player.contactNumber,
                         experienceYears = 0, // Not stored in Player model
                         rating = 0f // Not stored in Player model
                     )
@@ -604,7 +601,7 @@ class PlayerViewModel @Inject constructor(
                         0
                     }
 
-                    PlayerListItem(
+                    Player(
                         id = player.id,
                         name = player.name,
                         position = player.position,
@@ -612,8 +609,8 @@ class PlayerViewModel @Inject constructor(
                         jerseyNumber = player.jerseyNumber,
                         age = age,
                         hockeyType = player.hockeyType,
-                        contactEmail = player.email,
-                        contactPhone = player.contactNumber,
+//                        contactEmail = player.email,
+//                        contactPhone = player.contactNumber,
                         experienceYears = 0, // Not stored in Player model
                         rating = 0f // Not stored in Player model
                     )

@@ -98,6 +98,7 @@ fun TeamsScreen(
     val tabs = listOf("All Teams", "My Teams", "National Teams", "Club Teams")
 
     val teamListState by teamViewModel.teamListState.collectAsState()
+    val enhancedTeams = teamListState.teams
     val userProfileState by authViewModel.userProfileState.collectAsState()
     val currentUser = userProfileState.user
     val isAdmin = currentUser?.role == UserRole.ADMIN
@@ -118,7 +119,7 @@ fun TeamsScreen(
     }
 
     // Enhanced sample teams with more details
-    val enhancedTeams = remember {
+    val enhancedTeam = remember {
         listOf(
             Team(
                 id = "1",
