@@ -94,50 +94,7 @@ data class User(
         return null
     }
 
-    // Helper function to check if user can play in specific age category
-    fun canPlayInAgeCategory(ageCategory: String): Boolean {
-        val age = getAge() ?: return false
-        return when (ageCategory.uppercase()) {
-            "U14" -> age < 14
-            "U16" -> age < 16
-            "U18" -> age < 18
-            "U21" -> age < 21
-            "SENIOR" -> age >= 18
-            else -> true
-        }
-    }
 
-    // Helper function to check if profile is complete
-    fun isProfileComplete(): Boolean {
-        return name.isNotBlank() &&
-                email.isNotBlank() &&
-                phone.isNotBlank() &&
-                dateOfBirth != null &&
-                gender != Gender.NOT_SPECIFIED &&
-                address.isValid() &&
-                emergencyContact.isValid()
-    }
-
-    // Helper function to get profile completion percentage
-    fun getProfileCompletionPercentage(): Int {
-        var completed = 0
-        val total = 12
-
-        if (name.isNotBlank()) completed++
-        if (email.isNotBlank()) completed++
-        if (phone.isNotBlank()) completed++
-        if (dateOfBirth != null) completed++
-        if (gender != Gender.NOT_SPECIFIED) completed++
-        if (nationality.isNotBlank()) completed++
-        if (address.isValid()) completed++
-        if (emergencyContact.isValid()) completed++
-        if (preferredPosition.isNotBlank()) completed++
-        if (profilePictureUrl.isNotBlank()) completed++
-        if (bio.isNotBlank()) completed++
-        if (idNumber.isNotBlank()) completed++
-
-        return (completed * 100) / total
-    }
 
     // Helper function to check if user has specific permission
     fun hasPermission(permission: Permission): Boolean {
@@ -201,96 +158,6 @@ data class User(
             "socialMedia" to socialMedia.toHashMap()
         )
     }
-
-    companion object {
-        // Common hockey positions
-        val HOCKEY_POSITIONS = listOf(
-            "Goalkeeper",
-            "Right Back",
-            "Left Back",
-            "Centre Back",
-            "Right Half",
-            "Left Half",
-            "Centre Half",
-            "Right Wing",
-            "Left Wing",
-            "Inside Right",
-            "Inside Left",
-            "Centre Forward",
-            "Striker",
-            "Midfielder",
-            "Defender"
-        )
-
-        // Validation function for user registration
-        fun validateUserRegistration(
-            name: String,
-            email: String,
-            phone: String,
-            password: String,
-            confirmPassword: String
-        ): List<String> {
-            val errors = mutableListOf<String>()
-
-            if (name.isBlank()) errors.add("Name is required")
-            if (name.length < 2) errors.add("Name must be at least 2 characters")
-
-            if (email.isBlank()) errors.add("Email is required")
-            if (!isValidEmail(email)) errors.add("Invalid email format")
-
-            if (phone.isBlank()) errors.add("Phone number is required")
-            if (!isValidPhoneNumber(phone)) errors.add("Invalid phone number format")
-
-            if (password.isBlank()) errors.add("Password is required")
-            if (password.length < 6) errors.add("Password must be at least 6 characters")
-
-            if (password != confirmPassword) errors.add("Passwords do not match")
-
-            return errors
-        }
-
-        // Validation function for profile update
-        fun validateProfileUpdate(
-            firstName: String,
-            lastName: String,
-            phone: String,
-            dateOfBirth: Date?,
-            emergencyContactName: String,
-            emergencyContactPhone: String
-        ): List<String> {
-            val errors = mutableListOf<String>()
-
-            if (firstName.isBlank()) errors.add("First name is required")
-            if (lastName.isBlank()) errors.add("Last name is required")
-            if (!isValidPhoneNumber(phone)) errors.add("Invalid phone number")
-            if (dateOfBirth == null) errors.add("Date of birth is required")
-            if (dateOfBirth != null && getAgeFromDate(dateOfBirth) < 5) {
-                errors.add("Age must be at least 5 years")
-            }
-            if (emergencyContactName.isBlank()) errors.add("Emergency contact name is required")
-            if (!isValidPhoneNumber(emergencyContactPhone)) {
-                errors.add("Invalid emergency contact phone number")
-            }
-
-            return errors
-        }
-
-        private fun isValidEmail(email: String): Boolean {
-            return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-        }
-
-        private fun isValidPhoneNumber(phone: String): Boolean {
-            // Namibian phone number format: +264 followed by 8-9 digits
-            val cleanPhone = phone.replace(Regex("[\\s-()]"), "")
-            return cleanPhone.matches(Regex("^(\\+264|264)?[0-9]{8,9}$"))
-        }
-
-        private fun getAgeFromDate(dateOfBirth: Date): Int {
-            val now = Date()
-            val diffInMillis = now.time - dateOfBirth.time
-            return (diffInMillis / (365.25 * 24 * 60 * 60 * 1000)).toInt()
-        }
-    }
 }
 
 // Supporting data classes
@@ -301,20 +168,7 @@ data class Address(
     val postalCode: String = "",
     val country: String = "Namibia"
 ) {
-    fun isValid(): Boolean {
-        return street.isNotBlank() && city.isNotBlank()
-    }
 
-    fun getFullAddress(): String {
-        val parts = listOfNotNull(
-            street.takeIf { it.isNotBlank() },
-            city.takeIf { it.isNotBlank() },
-            region.takeIf { it.isNotBlank() },
-            postalCode.takeIf { it.isNotBlank() },
-            country.takeIf { it.isNotBlank() }
-        )
-        return parts.joinToString(", ")
-    }
 
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf(

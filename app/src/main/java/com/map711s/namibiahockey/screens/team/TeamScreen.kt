@@ -19,12 +19,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MoreVert
@@ -119,116 +117,6 @@ fun TeamsScreen(
         teamViewModel.loadAllTeams()
     }
 
-    // Enhanced sample teams with more details
-    val enhancedTeam = remember {
-        listOf(
-            Team(
-                id = "1",
-                name = "Windhoek Warriors",
-                hockeyType = HockeyType.OUTDOOR,
-                category = "Men's",
-                division = "Premier League",
-                coach = "John Smith",
-                manager = "Sarah Johnson",
-                playerCount = 22,
-                isNationalTeam = false,
-                founded = 2010,
-                homeVenue = "Independence Stadium",
-                wins = 15,
-                losses = 3,
-                draws = 2,
-                points = 47,
-                ranking = 1,
-                logoUrl = "",
-                isActive = true,
-                description = "Premier men's outdoor hockey team based in Windhoek"
-            ),
-            Team(
-                id = "2",
-                name = "Namibia Men's National Team",
-                hockeyType = HockeyType.OUTDOOR,
-                category = "Men's",
-                division = "National",
-                coach = "Michael Brown",
-                manager = "David Wilson",
-                playerCount = 18,
-                isNationalTeam = true,
-                founded = 1990,
-                homeVenue = "National Hockey Stadium",
-                wins = 25,
-                losses = 8,
-                draws = 5,
-                points = 80,
-                ranking = 1,
-                logoUrl = "",
-                isActive = true,
-                description = "Official Namibia Men's National Hockey Team"
-            ),
-            Team(
-                id = "3",
-                name = "Swakopmund Seagulls",
-                hockeyType = HockeyType.OUTDOOR,
-                category = "Women's",
-                division = "First Division",
-                coach = "Lisa Anderson",
-                manager = "Emma Roberts",
-                playerCount = 20,
-                isNationalTeam = false,
-                founded = 2015,
-                homeVenue = "Swakopmund Sports Complex",
-                wins = 12,
-                losses = 6,
-                draws = 2,
-                points = 38,
-                ranking = 3,
-                logoUrl = "",
-                isActive = true,
-                description = "Coastal women's hockey team from Swakopmund"
-            ),
-            Team(
-                id = "4",
-                name = "Indoor Lions",
-                hockeyType = HockeyType.INDOOR,
-                category = "Mixed",
-                division = "Indoor Premier",
-                coach = "Alex Turner",
-                manager = "Jordan Lee",
-                playerCount = 16,
-                isNationalTeam = false,
-                founded = 2018,
-                homeVenue = "Indoor Sports Arena",
-                wins = 18,
-                losses = 4,
-                draws = 1,
-                points = 55,
-                ranking = 1,
-                logoUrl = "",
-                isActive = true,
-                description = "Top indoor hockey team specializing in fast-paced gameplay"
-            ),
-            Team(
-                id = "5",
-                name = "Youth Development FC",
-                hockeyType = HockeyType.OUTDOOR,
-                category = "Youth",
-                division = "Development League",
-                coach = "Mark Thompson",
-                manager = "Rachel Green",
-                playerCount = 25,
-                isNationalTeam = false,
-                founded = 2020,
-                homeVenue = "Youth Development Center",
-                wins = 8,
-                losses = 10,
-                draws = 4,
-                points = 28,
-                ranking = 5,
-                logoUrl = "",
-                isActive = true,
-                description = "Developing young talent for future hockey success"
-            )
-        )
-    }
 
 
     // Filter teams based on search and tab
@@ -268,23 +156,8 @@ fun TeamsScreen(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* Filter functionality */ }) {
-                        Icon(
-                            imageVector = Icons.Default.FilterList,
-                            contentDescription = "Filter"
-                        )
-                    }
                 }
+
             )
         },
         floatingActionButton = {

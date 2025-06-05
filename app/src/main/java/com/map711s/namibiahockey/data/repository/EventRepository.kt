@@ -3,7 +3,7 @@ package com.map711s.namibiahockey.data.repository
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
-import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.data.model.Event
 import com.map711s.namibiahockey.data.model.EventRegistration
 import com.map711s.namibiahockey.data.model.GameResult
 import com.map711s.namibiahockey.data.model.HockeyType
@@ -31,7 +31,7 @@ class EventRepository @Inject constructor(
     private val TAG = "EnhancedEventRepository"
 
     // Create a new event
-    suspend fun createEvent(event: EventEntry): Result<String> {
+    suspend fun createEvent(event: Event): Result<String> {
         return try {
             val userId = authRepository.getCurrentUserId()
                 ?: return Result.failure(Exception("User not authenticated"))
@@ -51,7 +51,7 @@ class EventRepository @Inject constructor(
 
 
     // Get events filtered by hockey type
-    suspend fun getEventsByType(hockeyType: HockeyType): Result<List<EventEntry>> {
+    suspend fun getEventsByType(hockeyType: HockeyType): Result<List<Event>> {
         return try {
             Log.d(TAG, "Fetching ${hockeyType.name} events from Firestore")
             val querySnapshot = eventsCollection
@@ -62,7 +62,7 @@ class EventRepository @Inject constructor(
             val userId = authRepository.getCurrentUserId()
             val events = querySnapshot.documents.mapNotNull { document ->
                 try {
-                    val event = document.toObject(EventEntry::class.java)
+                    val event = document.toObject(Event::class.java)
                     event?.copy(
                         id = document.id,
                         isRegistered = if (userId != null) {
@@ -84,7 +84,7 @@ class EventRepository @Inject constructor(
     }
 
     // Get all events with registration status
-    suspend fun getAllEvents(): Result<List<EventEntry>> {
+    suspend fun getAllEvents(): Result<List<Event>> {
         return try {
             Log.d(TAG, "Fetching all events from Firestore")
             val querySnapshot = eventsCollection.get().await()
@@ -92,7 +92,7 @@ class EventRepository @Inject constructor(
             val userId = authRepository.getCurrentUserId()
             val events = querySnapshot.documents.mapNotNull { document ->
                 try {
-                    val event = document.toObject(EventEntry::class.java)
+                    val event = document.toObject(Event::class.java)
                     event?.copy(
                         id = document.id,
                         isRegistered = if (userId != null) {
@@ -114,11 +114,11 @@ class EventRepository @Inject constructor(
     }
 
     // Get an event by ID
-    suspend fun getEvent(eventId: String): Result<EventEntry> {
+    suspend fun getEvent(eventId: String): Result<Event> {
         return try {
             val documentSnapshot = eventsCollection.document(eventId).get().await()
             if (documentSnapshot.exists()) {
-                val event = documentSnapshot.toObject(EventEntry::class.java)
+                val event = documentSnapshot.toObject(Event::class.java)
                     ?: return Result.failure(Exception("Failed to parse event data"))
 
                 val userId = authRepository.getCurrentUserId()
@@ -141,7 +141,7 @@ class EventRepository @Inject constructor(
     }
 
     // Update an existing event
-    suspend fun updateEvent(event: EventEntry): Result<Unit> {
+    suspend fun updateEvent(event: Event): Result<Unit> {
         return try {
             val eventMap = event.toHashMap()
             eventsCollection.document(event.id).set(eventMap).await()
@@ -342,7 +342,7 @@ class EventRepository @Inject constructor(
                 if (registration != null) {
                     // Get the event details
                     val eventDoc = eventsCollection.document(registration.eventId).get().await()
-                    val event = eventDoc.toObject(EventEntry::class.java)
+                    val event = eventDoc.toObject(Event::class.java)
 
                     if (event != null && isSameDate(event.startDate, eventDate)) {
                         conflictingEvents.add(event.title)
@@ -358,20 +358,20 @@ class EventRepository @Inject constructor(
     }
 
     // Get events registered by user/team (My Entries)
-    suspend fun getUserRegisteredEvents(userId: String): Result<List<EventEntry>> {
+    suspend fun getUserRegisteredEvents(userId: String): Result<List<Event>> {
         return try {
             val registrations = registrationsCollection
                 .whereEqualTo("userId", userId)
                 .get()
                 .await()
 
-            val events = mutableListOf<EventEntry>()
+            val events = mutableListOf<Event>()
 
             for (regDoc in registrations.documents) {
                 val registration = regDoc.toObject(EventRegistration::class.java)
                 if (registration != null) {
                     val eventDoc = eventsCollection.document(registration.eventId).get().await()
-                    val event = eventDoc.toObject(EventEntry::class.java)
+                    val event = eventDoc.toObject(Event::class.java)
 
                     if (event != null) {
                         events.add(event.copy(

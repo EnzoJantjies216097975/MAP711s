@@ -23,15 +23,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,7 +36,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -61,9 +57,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
-import com.map711s.namibiahockey.data.model.HockeyType
-import com.map711s.namibiahockey.data.model.PlayerProfile
-import com.map711s.namibiahockey.data.model.PlayerProfileStats
 import com.map711s.namibiahockey.data.model.UserRole
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
 import com.map711s.namibiahockey.viewmodel.PlayerViewModel
@@ -91,32 +84,6 @@ fun PlayerProfileDetailsScreen(
     LaunchedEffect(playerId) {
         playerViewModel.getPlayer(playerId)
     }
-    // Mock player data - in real app, this would come from a ViewModel
-    val players = remember {
-        PlayerProfile(
-            id = playerId,
-            name = "John Doe",
-            position = "Forward",
-            jerseyNumber = 10,
-            teamName = "Windhoek Warriors",
-            teamId = "team_1",
-            hockeyType = HockeyType.OUTDOOR,
-            age = 25,
-            nationality = "Namibian",
-            stats = PlayerProfileStats(
-                gamesPlayed = 45,
-                goalsScored = 23,
-                assists = 18,
-                totalPoints = 41,
-                yellowCards = 3,
-                redCards = 0,
-                averageRating = 4.5,
-                seasonsPlayed = 5
-            ),
-            isNationalPlayer = true,
-            photoUrl = ""
-        )
-    }
 
     Scaffold(
         topBar = {
@@ -128,16 +95,6 @@ fun PlayerProfileDetailsScreen(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
-                    }
-                },
-                actions = {
-                    if (canEdit) {
-                        IconButton(onClick = onNavigateToEdit) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit Profile"
-                            )
-                        }
                     }
                 }
             )
@@ -503,42 +460,6 @@ fun PlayerProfileDetailsScreen(
                         description = "Awarded Most Improved Player in 2022",
                         color = MaterialTheme.colorScheme.tertiary
                     )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Action buttons
-            if (canEdit) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = { /* Contact player */ },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Email,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Contact")
-                    }
-
-                    Button(
-                        onClick = onNavigateToEdit,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Edit Profile")
-                    }
                 }
             }
 

@@ -46,7 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.map711s.namibiahockey.components.DatePickerField
 import com.map711s.namibiahockey.components.HockeyTypeHeader
 import com.map711s.namibiahockey.components.HockeyTypeOptions
-import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.data.model.Event
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.viewmodel.EventViewModel
 import java.time.LocalDate
@@ -264,7 +264,7 @@ fun AddEventScreen(
 
             Button(
                 onClick = {
-                    val event = EventEntry(
+                    val event = Event(
                         title = title,
                         description = description,
                         location = location,

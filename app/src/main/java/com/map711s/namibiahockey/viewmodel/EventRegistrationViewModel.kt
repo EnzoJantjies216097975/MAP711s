@@ -2,7 +2,7 @@ package com.map711s.namibiahockey.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.data.model.Event
 import com.map711s.namibiahockey.data.model.Team
 import com.map711s.namibiahockey.data.model.UserRole
 import com.map711s.namibiahockey.data.repository.AuthRepository
@@ -117,7 +117,7 @@ class EventRegistrationViewModel @Inject constructor(
     }
 
     // FIXED: Add missing helper methods
-    private suspend fun getEventsByTeam(teamId: String): List<EventEntry> {
+    private suspend fun getEventsByTeam(teamId: String): List<Event> {
         // Get all events where this team is registered
         return try {
             eventRepository.getAllEvents().getOrNull()?.filter { event ->

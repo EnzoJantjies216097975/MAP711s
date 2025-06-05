@@ -18,8 +18,6 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,7 +25,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -40,7 +37,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -73,19 +69,12 @@ fun EventDetailsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedTabIndex by remember { mutableStateOf(0) }
-    val tabs = listOf("Upcoming", "Past", "My Entries")
-
     val registrationState by viewModel.registrationState.collectAsState()
 
-    var selectedTeam by remember { mutableStateOf<String?>(null) }
 
-    val showTeamSelection by eventViewModel.showTeamSelection.collectAsState()
-    val availableTeams by eventViewModel.availableTeams.collectAsState()
+
     val registrationMessage by eventViewModel.registrationMessage.collectAsState()
-    val gameResults by eventViewModel.gameResults.collectAsState()
-    val teamStats by eventViewModel.teamStats.collectAsState()
+
     val userProfileState by authViewModel.userProfileState.collectAsState()
 
 
@@ -161,30 +150,6 @@ fun EventDetailsScreen(
             eventViewModel.clearMessages()
         }
     }
-
-//    val currentEvents = when (selectedTabIndex) {
-//        0 -> eventListState.upcomingEvents.filter {
-//            it.hockeyType == hockeyType || hockeyType == HockeyType.BOTH
-//        }
-//        1 -> eventListState.pastEvents.filter {
-//            it.hockeyType == hockeyType || hockeyType == HockeyType.BOTH
-//        }
-//        2 -> eventListState.myRegisteredEvents.filter {
-//            it.hockeyType == hockeyType || hockeyType == HockeyType.BOTH
-//        }
-//        else -> emptyList()
-//    }
-
-//    // Apply search filter
-//    val filteredEvents = if (searchQuery.isBlank()) {
-//        currentEvents
-//    } else {
-//        currentEvents.filter { event ->
-//            event.title.contains(searchQuery, ignoreCase = true) ||
-//                    event.description.contains(searchQuery, ignoreCase = true) ||
-//                    event.location.contains(searchQuery, ignoreCase = true)
-//        }
-//    }
 
     Scaffold(
         topBar = {
@@ -387,49 +352,6 @@ fun EventDetailsScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Registration Button (only if registration is still open)
-                    if (!isRegistrationClosed(event!!.registrationDeadline)) {
-                        if (isRegistered) {
-                            OutlinedButton(
-                                onClick = {
-                                    viewModel.unregisterFromEvent(eventId)
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                enabled = !isLoading,
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.error
-                                )
-                            ) {
-                                if (isLoading) {
-                                    CircularProgressIndicator(modifier = Modifier.width(16.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                }
-                                Text(
-                                    text = "Unregister",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        } else {
-                            Button(
-                                onClick = {
-                                    viewModel.initiateRegistration(eventId)
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                enabled = !isLoading
-                            ) {
-                                if (isLoading) {
-                                    CircularProgressIndicator(modifier = Modifier.width(16.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                }
-                                Text(
-                                    text = "Register for Event",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
 
                     // Show game results if this is a past event
                     if (isPastEvent(event!!) && eventState.gameResults.isNotEmpty()) {
@@ -461,11 +383,8 @@ fun EventDetailsScreen(
             teams = eventState.availableTeams,
             eventDate = event?.startDate ?: "",
             conflictingEvents = eventState.conflictingEvents,
-            onTeamSelected = { teamId ->
-                viewModel.registerForEvent(eventId, teamId)
-            },
+            onTeamSelected = { },
             onDismiss = {
-                viewModel.dismissTeamSelection()
             }
         )
     }
@@ -484,7 +403,7 @@ private fun isRegistrationClosed(registrationDeadline: String): Boolean {
 }
 
 // Helper function to check if event is in the past
-private fun isPastEvent(event: com.map711s.namibiahockey.data.model.EventEntry): Boolean {
+private fun isPastEvent(event: com.map711s.namibiahockey.data.model.Event): Boolean {
     return try {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val eventDate = dateFormat.parse(event.endDate)

@@ -32,6 +32,7 @@ import com.map711s.namibiahockey.viewmodel.RoleChangeViewModel
 fun MainAppScaffold(
     navController: NavHostController, // This is the main nav controller from parent
     hockeyType: HockeyType,
+    onNavigateBack: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToAddEvent: () -> Unit,
     onNavigateToAddNews: () -> Unit,
@@ -143,7 +144,7 @@ fun MainAppScaffold(
             composable(Routes.BOTTOM_TEAMS) {
                 TeamsScreen(
                     hockeyType = hockeyType,
-                    onNavigateBack = { }, // No back button in bottom nav
+                    onNavigateBack = onNavigateBack, // No back button in bottom nav
                     onNavigateToCreateTeam = onNavigateToTeamRegistration,
                     onNavigateToTeamDetails = onNavigateToTeamDetails
                 )

@@ -9,14 +9,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 
 
-data class StatItem(
-    val label: String,
-    val value: String,
-    val icon: ImageVector? = null,
-    val description: String = ""
-)
-
-
 @Composable
 fun StatItemDisplay(
     label: String,

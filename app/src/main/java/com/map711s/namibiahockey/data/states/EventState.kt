@@ -1,6 +1,6 @@
 package com.map711s.namibiahockey.data.states
 
-import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.data.model.Event
 import com.map711s.namibiahockey.data.model.GameResult
 import com.map711s.namibiahockey.data.model.Team
 
@@ -8,7 +8,7 @@ import com.map711s.namibiahockey.data.model.Team
 data class EventState(
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false,
-    val event: EventEntry? = null,
+    val event: Event? = null,
     val eventId: String? = null,
     val error: String? = null,
     val isRegistered: Boolean = false,
@@ -22,11 +22,11 @@ data class EventState(
 // State for a list of EventEntry objects
 data class EventListState(
     val isLoading: Boolean = false,
-    val events: List<EventEntry> = emptyList(),
+    val events: List<Event> = emptyList(),
     val error: String? = null,
-    val myRegisteredEvents: List<EventEntry> = emptyList(),
-    val pastEvents: List<EventEntry> = emptyList(),
-    val upcomingEvents: List<EventEntry> = emptyList()
+    val myRegisteredEvents: List<Event> = emptyList(),
+    val pastEvents: List<Event> = emptyList(),
+    val upcomingEvents: List<Event> = emptyList()
 )
 
 data class TeamSelectionState(

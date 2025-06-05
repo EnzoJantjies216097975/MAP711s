@@ -12,17 +12,11 @@ import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
 @Singleton
 class LiveGameRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
-//    suspend fun createLiveGame(game: LiveGame): Result<String>
-//    suspend fun updateGameScore(gameId: String, team1Score: Int, team2Score: Int): Result<Unit>
-//    suspend fun addGameEvent(gameEvent: GameEvent): Result<Unit>
-//    suspend fun getCurrentLiveGames(): Result<List<LiveGame>>
-//    suspend fun endGame(gameId: String): Result<Unit>
-//    fun observeLiveGames(): Flow<List<LiveGame>>
+
     private val liveGamesCollection = firestore.collection("live_games")
     private val TAG = "LiveGameRepository"
     private val gameEventsCollection = firestore.collection("game_events")

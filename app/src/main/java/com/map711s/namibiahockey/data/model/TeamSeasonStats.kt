@@ -18,25 +18,6 @@ data class TeamSeasonStats(
     val goalDifference: Int = goalsFor - goalsAgainst,
     val totalPoints: Int = points + bonusPoints
 ) {
-    fun getWinPercentage(): Float {
-        return if (gamesPlayed > 0) (wins.toFloat() / gamesPlayed.toFloat()) * 100 else 0f
-    }
-
-    fun getPointsPerGame(): Float {
-        return if (gamesPlayed > 0) totalPoints.toFloat() / gamesPlayed.toFloat() else 0f
-    }
-
-    fun getGoalDifferencePerGame(): Float {
-        return if (gamesPlayed > 0) goalDifference.toFloat() / gamesPlayed.toFloat() else 0f
-    }
-
-    fun getAverageGoalsFor(): Float {
-        return if (gamesPlayed > 0) goalsFor.toFloat() / gamesPlayed.toFloat() else 0f
-    }
-
-    fun getAverageGoalsAgainst(): Float {
-        return if (gamesPlayed > 0) goalsAgainst.toFloat() / gamesPlayed.toFloat() else 0f
-    }
 
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf(

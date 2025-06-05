@@ -109,15 +109,8 @@ fun TeamDetailsScreen(
 
     // Load team details when screen is displayed
     LaunchedEffect(teamId) {
-        if (teamId.startsWith("national_")) {
-            // Load national team data
-            val nationalTeam = Team.getNationalTeams().find { it.id == teamId }
-            // You would need to add this method to TeamViewModel
-            // teamViewModel.setTeam(nationalTeam)
-        } else {
             Log.d("TAG", teamId)
             teamViewModel.getTeam(teamId)
-        }
     }
 
     LaunchedEffect(teamId) {

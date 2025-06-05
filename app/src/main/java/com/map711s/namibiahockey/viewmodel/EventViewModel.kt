@@ -3,7 +3,7 @@ package com.map711s.namibiahockey.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.data.model.Event
 import com.map711s.namibiahockey.data.model.GameResult
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.data.model.Team
@@ -61,8 +61,8 @@ class EventViewModel @Inject constructor(
     private val TAG = "EventViewModel"
 
     // Single event for details
-    private val _event = MutableStateFlow<EventEntry?>(null)
-    val event: StateFlow<EventEntry?> = _event.asStateFlow()
+    private val _event = MutableStateFlow<Event?>(null)
+    val event: StateFlow<Event?> = _event.asStateFlow()
 
     // Team selection state
     private val _showTeamSelection = MutableStateFlow(false)
@@ -86,7 +86,7 @@ class EventViewModel @Inject constructor(
 
 
     // Create a new event
-    fun createEvent(event: EventEntry) {
+    fun createEvent(event: Event) {
         _eventState.update { it.copy(isLoading = true, error = null) }
 
         if (authRepository.getCurrentUserId() == null) {
@@ -152,103 +152,6 @@ class EventViewModel @Inject constructor(
         }
     }
 
-    // Register for an event
-    fun registerForEvent(eventId: String) {
-        _eventState.update { it.copy(isLoading = true, error = null, eventId = eventId) }
-        viewModelScope.launch {
-            // Get current user ID
-            val userId = authRepository.getCurrentUserId()
-            if (userId == null) {
-                _eventState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "You must be logged in to register for events"
-                    )
-                }
-                return@launch
-            }
-
-            // Find the event in the list
-            val event = _eventListState.value.events.find { it.id == eventId }
-            if (event == null) {
-                _eventState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "Event not found"
-                    )
-                }
-                return@launch
-            }
-
-            if (event.isRegistered) {
-                // If already registered, unregister
-                eventRepository.unregisterFromEvent(eventId, userId)
-                    .onSuccess {
-                        // Update the event state
-                        _eventState.update {
-                            it.copy(
-                                isLoading = false,
-                                isSuccess = true,
-                                isRegistered = false
-                            )
-                        }
-
-                        // Update the event in the list
-                            val updatedEvents = _eventListState.value.events.map { e ->
-                                if (e.id == eventId) {
-                                    e.copy(
-                                        isRegistered = false,
-                                        registeredTeams = maxOf(0, e.registeredTeams - 1)
-                                    )
-                                } else e
-                            }
-                            _eventListState.update { it.copy(events = updatedEvents) }
-
-                    }
-                    .onFailure { exception ->
-                        _eventState.update {
-                            it.copy(
-                                isLoading = false,
-                                error = exception.message ?: "Failed to unregister from event"
-                            )
-                        }
-                    }
-            } else {
-                // If not registered, register
-                eventRepository.registerForEvent(eventId, userId)
-                    .onSuccess {
-                        // Update the event state
-                        _eventState.update {
-                            it.copy(
-                                isLoading = false,
-                                isSuccess = true,
-                                isRegistered = true
-                            )
-                        }
-
-                        // Update the event in the list
-                        val updatedEvents = _eventListState.value.events.map { e ->
-                            if (e.id == eventId) {
-                                e.copy(
-                                    isRegistered = true,
-                                    registeredTeams = e.registeredTeams + 1
-                                )
-                            } else e
-                        }
-                        _eventListState.update { it.copy(events = updatedEvents) }
-
-                    }
-                    .onFailure { exception ->
-                        _eventState.update {
-                            it.copy(
-                                isLoading = false,
-                                error = exception.message ?: "Failed to register for event"
-                            )
-                        }
-                    }
-            }
-        }
-    }
 
     // Register for an event - Enhanced with team selection
     fun registerForEvent(eventId: String, selectedTeamId: String? = null) {
@@ -571,7 +474,7 @@ class EventViewModel @Inject constructor(
         }
     }
 
-    private suspend fun checkEventClashes(event: EventEntry, teamId: String): Boolean {
+    private suspend fun checkEventClashes(event: Event, teamId: String): Boolean {
         return try {
             val allEvents = eventRepository.getAllEvents().getOrNull() ?: emptyList()
             val eventDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(event.startDate)
@@ -653,7 +556,7 @@ class EventViewModel @Inject constructor(
     }
 
     // Update event
-    fun updateEvent(event: EventEntry) {
+    fun updateEvent(event: Event) {
         _eventState.update { it.copy(isLoading = true, error = null) }
 
         viewModelScope.launch {
@@ -989,7 +892,7 @@ class EventViewModel @Inject constructor(
     }
 
     // Get registered events for current user
-    fun getMyRegisteredEvents(): List<EventEntry> {
+    fun getMyRegisteredEvents(): List<Event> {
         return _eventListState.value.myRegisteredEvents
     }
 
@@ -1008,7 +911,7 @@ class EventViewModel @Inject constructor(
     }
 
     // Helper function to check if event is in the past
-    private fun isPastEvent(event: EventEntry): Boolean {
+    private fun isPastEvent(event: Event): Boolean {
         return try {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val eventEndDate = dateFormat.parse(event.endDate)

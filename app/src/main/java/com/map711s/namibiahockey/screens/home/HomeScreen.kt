@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -40,13 +39,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.map711s.namibiahockey.components.LiveGameDisplay
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.screens.events.EventCard
 import com.map711s.namibiahockey.screens.newsfeed.NewsCard
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
 import com.map711s.namibiahockey.viewmodel.EventViewModel
-import com.map711s.namibiahockey.viewmodel.LiveGameViewModel
 import com.map711s.namibiahockey.viewmodel.NewsViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -65,12 +62,10 @@ fun HomeScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     eventViewModel: EventViewModel = hiltViewModel(),
     newsViewModel: NewsViewModel = hiltViewModel(),
-    liveGameViewModel: LiveGameViewModel = hiltViewModel()
 ) {
     val userProfileState by authViewModel.userProfileState.collectAsState()
     val eventListState by eventViewModel.eventListState.collectAsState()
     val newsListState by newsViewModel.newsListState.collectAsState()
-    val liveGames by liveGameViewModel.liveGames.collectAsState()
     var selectedHockeyType by remember { mutableStateOf(hockeyType) }
 
     // Load events and news for the selected hockey type
@@ -79,10 +74,6 @@ fun HomeScreen(
         newsViewModel.loadAllNewsPieces()
     }
 
-    // Filter live games by hockey type
-    val filteredLiveGames = liveGames.filter { game ->
-        game.hockeyType == selectedHockeyType || selectedHockeyType == HockeyType.BOTH
-    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -110,14 +101,6 @@ fun HomeScreen(
                         else
                             Icons.Default.Business,
                         contentDescription = "Switch Hockey Type",
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-
-                IconButton(onClick = { /* Notifications */ }) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications",
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
@@ -159,15 +142,6 @@ fun HomeScreen(
                 }
             }
 
-            // Live games section - only show if there are live games
-            if (filteredLiveGames.isNotEmpty()) {
-                item {
-                    LiveGameDisplay(
-                        games = filteredLiveGames,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
-            }
 
             // Upcoming events section
             item {
@@ -222,9 +196,6 @@ fun HomeScreen(
                 items(eventListState.events.take(3)) { event ->
                     EventCard(
                         event = event,
-                        onRegisterClick = { eventId ->
-                            eventViewModel.registerForEvent(eventId)
-                        },
                         onViewDetailsClick = { eventId ->
                             onNavigateToEventDetails(eventId, event.hockeyType)
                         },

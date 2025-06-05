@@ -25,7 +25,6 @@ import com.map711s.namibiahockey.screens.profile.ProfileScreen
 import com.map711s.namibiahockey.screens.profile.UserRoleRequestsScreen
 import com.map711s.namibiahockey.screens.splash.SplashScreen
 import com.map711s.namibiahockey.screens.team.TeamDetailsScreen
-import com.map711s.namibiahockey.screens.team.TeamManagementScreen
 import com.map711s.namibiahockey.screens.team.TeamRegistrationScreen
 
 @Composable
@@ -96,6 +95,9 @@ fun NamibiaHockeyNavHost(
                 hockeyType = hockeyType,
                 onNavigateToProfile = {
                     navController.navigate(Routes.PROFILE)
+                },
+                onNavigateBack = {
+                    navController.navigateUp()
                 },
                 onNavigatetoEventEntries = {
                     navController.navigate((Routes.eventEntries(hockeyType.name)))
@@ -385,22 +387,6 @@ fun NamibiaHockeyNavHost(
             )
         }
 
-        // Player Profile Details Screen
-        composable(
-            route = Routes.PLAYER_PROFILE_DETAILS,
-            arguments = listOf(navArgument("playerId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val playerId = backStackEntry.arguments?.getString("playerId") ?: ""
-
-            PlayerProfileDetailsScreen(
-                playerId = playerId,
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToEdit = {
-                    // Navigate to player edit screen (to be implemented)
-                    navController.navigate("edit_player/$playerId")
-                }
-            )
-        }
 
         // Enhanced Player Management Screen
         composable(
@@ -424,33 +410,6 @@ fun NamibiaHockeyNavHost(
             )
         }
 
-        // Enhanced Team Management Screen
-        composable(
-            route = Routes.TEAM_MANAGEMENT,
-            arguments = listOf(navArgument("hockeyType") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val hockeyTypeStr =
-                backStackEntry.arguments?.getString("hockeyType") ?: HockeyType.OUTDOOR.name
-            val hockeyType = try {
-                HockeyType.valueOf(hockeyTypeStr)
-            } catch (e: Exception) {
-                HockeyType.OUTDOOR
-            }
-
-            TeamManagementScreen(
-                hockeyType = hockeyType,
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToCreateTeam = {
-                    navController.navigate(Routes.teamRegistration(hockeyType.name))
-                },
-                onNavigateToTeamDetails = { teamId ->
-                    navController.navigate(Routes.teamDetails(teamId))
-                },
-                onNavigateToPlayerManagement = { teamId ->
-                    navController.navigate(Routes.playerManagement(hockeyType.name))
-                }
-            )
-        }
 
         composable(
             route = Routes.TEAM_DETAILS,

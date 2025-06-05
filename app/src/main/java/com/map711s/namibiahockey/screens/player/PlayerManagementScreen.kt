@@ -388,6 +388,7 @@ fun PlayerManagementScreen(
                             },
                             onDeleteClick = {
                                 if (isAdmin) {
+                                    playerViewModel.deletePlayer(player.id)
                                     playerToDelete = player
                                     showDeleteDialog = true
                                 }
@@ -415,9 +416,11 @@ fun PlayerManagementScreen(
         AddPlayerDialog(
             onDismiss = { showAddPlayerDialog = false },
             onConfirm = { playerData ->
+
+                playerViewModel.createPlayer(playerData)
                 // Handle adding player
                 scope.launch {
-                    snackbarHostState.showSnackbar("Player ${playerData["name"]} added successfully!")
+                    snackbarHostState.showSnackbar("Player ${playerData.name} added successfully!")
                 }
                 showAddPlayerDialog = false
             },
@@ -592,7 +595,7 @@ private fun PlayerStatItem(
 @Composable
 private fun AddPlayerDialog(
     onDismiss: () -> Unit,
-    onConfirm: (Map<String, String>) -> Unit,
+    onConfirm: (Player) -> Unit,
     hockeyType: HockeyType
 ) {
     var name by remember { mutableStateOf("") }
@@ -754,14 +757,14 @@ private fun AddPlayerDialog(
 
                     Button(
                         onClick = {
-                            val playerData = mapOf(
-                                "name" to name,
-                                "position" to position,
-                                "jerseyNumber" to jerseyNumber,
-                                "age" to age,
-                                "email" to email,
-                                "phone" to phone,
-                                "hockeyType" to hockeyType.name
+                            val playerData = Player(
+                                name = name,
+                                position = position,
+                                jerseyNumber = jerseyNumber.toInt(),
+                                age = age.toInt(),
+                                email = email,
+                                phone = phone,
+                                hockeyType = hockeyType
                             )
                             onConfirm(playerData)
                         },
@@ -917,18 +920,6 @@ private fun PlayerCard(
                             contentDescription = "View Player",
                             tint = MaterialTheme.colorScheme.primary
                         )
-                    }
-
-                    if (canEdit) {
-                        androidx.compose.material.IconButton(
-                            onClick = { onEditClick(player.id) }
-                        ) {
-                            androidx.compose.material.Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit Player",
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                        }
                     }
 
                     if (canDelete) {

@@ -22,8 +22,6 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,7 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.map711s.namibiahockey.data.model.EventEntry
+import com.map711s.namibiahockey.data.model.Event
 import com.map711s.namibiahockey.data.model.HockeyType
 import com.map711s.namibiahockey.data.model.UserRole
 import com.map711s.namibiahockey.viewmodel.AuthViewModel
@@ -68,7 +66,6 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventEntriesScreen(
-    viewModel: EventViewModel = hiltViewModel(),
     hockeyType: HockeyType,
     onNavigateBack: () -> Unit,
     onNavigateToAddEvent: () -> Unit,
@@ -79,23 +76,13 @@ fun EventEntriesScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedTabIndex by remember { mutableStateOf(0) }
     val topAppBarState = listOf("Upcoming", "Past", "My Entries")
-    val eventsEntriesState by viewModel.eventListState.collectAsState()
+    val eventsEntriesState by eventViewModel.eventListState.collectAsState()
     val eventsEntries = eventsEntriesState.events
     val isLoading = eventsEntriesState.isLoading
     var selectedHockeyType by remember { mutableStateOf(hockeyType) }
     val snackbarHostState = remember { SnackbarHostState() }
     var loadingEventId by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
-
-    // Team selection dialog state
-    val showTeamSelection by eventViewModel.showTeamSelection.collectAsState()
-    val availableTeams by eventViewModel.availableTeams.collectAsState()
-    val registrationMessage by eventViewModel.registrationMessage.collectAsState()
-    var pendingEventId by remember { mutableStateOf<String?>(null) }
-
-    // Show game results dialog
-    var showGameResults by remember { mutableStateOf(false) }
-    var selectedEventForResults by remember { mutableStateOf<EventEntry?>(null) }
 
     val tabs = listOf("Upcoming", "Past", "My Entries")
     val eventListState by eventViewModel.eventListState.collectAsState()
@@ -107,21 +94,15 @@ fun EventEntriesScreen(
     }
 
     // Observe event state to update loading
-    LaunchedEffect(viewModel.eventState.collectAsState().value) {
-        val eventState = viewModel.eventState.value
+    LaunchedEffect(eventViewModel.eventState.collectAsState().value) {
+        val eventState = eventViewModel.eventState.value
         if (!eventState.isLoading) {
             // If no longer loading, clear the loading event ID
             loadingEventId = null
         }
     }
 
-    // Handle registration messages
-    LaunchedEffect(registrationMessage) {
-        registrationMessage?.let { message ->
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-            eventViewModel.clearRegistrationMessage()
-        }
-    }
+
 
     // Handle error messages
     LaunchedEffect(eventListState.error) {
@@ -138,11 +119,11 @@ fun EventEntriesScreen(
     }
 
     LaunchedEffect(key1 = true) {
-        viewModel.loadAllEvents()
+        eventViewModel.loadAllEvents()
     }
 
     // Helper function to determine if an event is in the past
-    fun isEventInPast(event: EventEntry): Boolean {
+    fun isEventInPast(event: Event): Boolean {
         return try {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val currentDate = Date()
@@ -154,9 +135,6 @@ fun EventEntriesScreen(
             false
         }
     }
-
-    // Get my registered events
-    val myRegisteredEvents = viewModel.getMyRegisteredEvents()
 
     // Filtered events based on search, tab, and hockey type
     val filteredEvents = if (searchQuery.isBlank()) {
@@ -306,14 +284,9 @@ fun EventEntriesScreen(
                     items(filteredEvents) { event ->
                         EventCard(
                             event = event,
-                            onRegisterClick = { eventId ->
-                                loadingEventId = eventId
-                                viewModel.registerForEvent(eventId)
-                            },
                             onViewDetailsClick = { eventId ->
                                 onNavigateToEventDetails(eventId, event.hockeyType)
-                            },
-                            isLoading = loadingEventId == event.id
+                            }
                         )
                     }
 
@@ -329,10 +302,8 @@ fun EventEntriesScreen(
 
 @Composable
 fun EventCard(
-    event: EventEntry,
-    onRegisterClick: (String) -> Unit,
+    event: Event,
     onViewDetailsClick: (String) -> Unit,
-    isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     // Keep track of registration state locally to ensure UI updates
@@ -440,40 +411,6 @@ fun EventCard(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
 
-                if (isLoading) {
-                    // Show loading indicator
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp
-                    )
-                } else if (event.isRegistered) {
-                    // Show unregister option
-                    Button(
-                        onClick = {
-                            onRegisterClick(event.id)
-                            isRegistered = false
-                            registeredTeams = maxOf(0, registeredTeams - 1)
-                        },
-                        modifier = Modifier.height(36.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text(text = "Unregister")
-                    }
-                } else {
-                    // Show register option
-                    Button(
-                        onClick = {
-                            onRegisterClick(event.id)
-                            isRegistered = true
-                            registeredTeams = registeredTeams + 1
-                        },
-                        modifier = Modifier.height(36.dp)
-                    ) {
-                        Text(text = "Register")
-                    }
-                }
             }
         }
     }

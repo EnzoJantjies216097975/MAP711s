@@ -20,52 +20,6 @@ data class PlayerStats(
     val ownGoals: Int = 0,
     val motmAwards: Int = 0 // Man of the Match awards
 ) {
-    // Calculate shooting accuracy percentage
-    fun getShootingAccuracy(): Double {
-        return if (totalShots > 0) {
-            (shotsOnTarget.toDouble() / totalShots) * 100
-        } else 0.0
-    }
-
-    // Calculate pass accuracy percentage
-    fun getPassAccuracy(): Double {
-        return if (totalPasses > 0) {
-            (passesCompleted.toDouble() / totalPasses) * 100
-        } else 0.0
-    }
-
-    // Calculate goals per game
-    fun getGoalsPerGame(): Double {
-        return if (gamesPlayed > 0) {
-            goalsScored.toDouble() / gamesPlayed
-        } else 0.0
-    }
-
-    // Calculate assists per game
-    fun getAssistsPerGame(): Double {
-        return if (gamesPlayed > 0) {
-            assists.toDouble() / gamesPlayed
-        } else 0.0
-    }
-
-    // Calculate total contributions (goals + assists)
-    fun getTotalContributions(): Int = goalsScored + assists
-
-    // Calculate average minutes per game
-    fun getAverageMinutesPerGame(): Double {
-        return if (gamesPlayed > 0) {
-            minutesPlayed.toDouble() / gamesPlayed
-        } else 0.0
-    }
-
-    // For goalkeepers - calculate save percentage
-    fun getSavePercentage(): Double {
-        val shotsAgainst = saves + (goalsScored - ownGoals)
-        return if (shotsAgainst > 0) {
-            (saves.toDouble() / shotsAgainst) * 100
-        } else 0.0
-    }
-
     // Convert to HashMap for Firestore
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf(
